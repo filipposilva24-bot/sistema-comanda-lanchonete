@@ -3,39 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Completo - Point Derico</title>
+    <title>Point Derico | Painel de Gestão</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .tap-scale:active { transform: scale(0.97); transition: transform 0.1s ease; }
+    </style>
 </head>
-<body class="bg-gray-900 min-h-screen text-white font-sans flex flex-col">
+<body class="bg-zinc-950 min-h-screen text-zinc-100 font-sans flex flex-col select-none">
 
     <!-- Cabeçalho Principal -->
-    <header class="bg-black border-b-4 border-yellow-500 p-3 sticky top-0 z-50 shadow-lg">
+    <header class="bg-zinc-900 border-b border-zinc-800 p-3.5 sticky top-0 z-50 shadow-xl">
         <div class="flex justify-between items-center mb-3">
             <div>
-                <h1 class="text-xl font-bold text-yellow-500">🔥 Point Derico</h1>
-                <p class="text-xs text-gray-400 mt-1" id="contador">Carregando painel...</p>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-amber-400 text-lg">🔥</span>
+                    <h1 class="text-lg font-black tracking-tight text-amber-400">POINT DERICO</h1>
+                </div>
+                <p class="text-[11px] text-zinc-400 font-medium mt-0.5" id="contador">Sincronizando painel...</p>
             </div>
             <div class="flex gap-2 items-center">
-                <button onclick="abrirAdminCardapio()" class="bg-gray-800 border border-gray-600 px-3 py-2 rounded-lg text-xs font-bold text-orange-400 hover:bg-gray-700 transition">
+                <button onclick="abrirAdminCardapio()" class="tap-scale bg-zinc-800/80 hover:bg-zinc-800 border border-zinc-700 px-3 py-2 rounded-xl text-xs font-bold text-amber-400 transition shadow">
                     🍔 Cardápio
                 </button>
-                <button onclick="abrirConfigPix()" class="bg-gray-800 border border-gray-600 px-3 py-2 rounded-lg text-xs font-bold text-yellow-400 hover:bg-gray-700 transition">
+                <button onclick="abrirConfigPix()" class="tap-scale bg-zinc-800/80 hover:bg-zinc-800 border border-zinc-700 px-3 py-2 rounded-xl text-xs font-bold text-zinc-300 transition shadow">
                     ⚙️ Pix
                 </button>
-                <button id="btn-som" onclick="ativarSom()" class="bg-gray-800 border border-gray-600 px-3 py-2 rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition">
+                <button id="btn-som" onclick="ativarSom()" class="tap-scale bg-zinc-800/80 hover:bg-zinc-800 border border-zinc-700 px-3 py-2 rounded-xl text-xs font-bold text-zinc-300 transition shadow">
                     🔇 Som
                 </button>
             </div>
         </div>
         
-        <div class="flex gap-1 justify-between items-center">
-            <div class="flex gap-1 flex-grow">
-                <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner">👨‍🍳 Cozinha</button>
-                <button onclick="mudarAba('caixa')" id="tab-caixa" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">💲 Mesas A Pagar</button>
-                <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">📊 Relatórios & Vendas</button>
+        <div class="flex gap-1.5 justify-between items-center">
+            <div class="flex gap-1.5 flex-grow">
+                <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2.5 text-xs rounded-2xl transition shadow-lg">👨‍🍳 Cozinha</button>
+                <button onclick="mudarAba('caixa')" id="tab-caixa" class="tap-scale flex-1 bg-zinc-800 text-zinc-400 font-extrabold py-2.5 text-xs rounded-2xl transition">💲 Caixa (A Pagar)</button>
+                <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="tap-scale flex-1 bg-zinc-800 text-zinc-400 font-extrabold py-2.5 text-xs rounded-2xl transition">📊 Relatórios</button>
             </div>
-            <button onclick="abrirModalReset()" class="bg-red-950/80 border border-red-700 text-red-300 px-2.5 py-2 rounded-lg text-xs font-bold hover:bg-red-900 transition ml-1" title="Hard Reset">
-                🗑️ Reset
+            <button onclick="abrirModalReset()" class="tap-scale bg-red-950/40 border border-red-900/60 text-red-400 px-3 py-2.5 rounded-2xl text-xs font-extrabold hover:bg-red-950 transition ml-1" title="Hard Reset">
+                🗑️
             </button>
         </div>
     </header>
@@ -44,36 +52,36 @@
     <main class="p-4 flex-grow relative">
         
         <!-- Filtro de Relatório -->
-        <div id="painel-filtro" class="hidden mb-4 bg-gray-800 border border-gray-700 p-4 rounded-xl shadow-md">
-            <div class="flex justify-between items-center mb-2">
-                <h2 class="text-sm font-bold text-yellow-500 uppercase tracking-wide">Faturamento & Ranking</h2>
-                <button onclick="enviarRelatorioWhatsApp()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow flex items-center gap-1">
+        <div id="painel-filtro" class="hidden mb-4 bg-zinc-900 border border-zinc-800 p-4 rounded-3xl shadow-xl">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-xs font-black text-amber-400 uppercase tracking-wider">Faturamento & Ranking</h2>
+                <button onclick="enviarRelatorioWhatsApp()" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1.5">
                     💬 Enviar no WhatsApp
                 </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Selecionar Dia Específico:</label>
-                    <input type="date" id="filtro-data" onchange="mudarFiltroTipo('dia')" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white outline-none">
+                    <label class="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Dia Específico:</label>
+                    <input type="date" id="filtro-data" onchange="mudarFiltroTipo('dia')" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-200 outline-none focus:border-amber-500">
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1">Selecionar Mês Específico:</label>
-                    <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white outline-none">
+                    <label class="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Mês Específico:</label>
+                    <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-200 outline-none focus:border-amber-500">
                 </div>
             </div>
-            <div class="mt-3 bg-green-950/40 border border-green-800/60 p-3 rounded-lg flex justify-between items-center">
+            <div class="bg-emerald-950/30 border border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner">
                 <div>
-                    <span class="text-xs text-green-300 font-bold uppercase" id="titulo-total-filtro">Total do Dia:</span>
-                    <p class="text-xs text-gray-400" id="qtd-pedidos-filtro">0 comandas pagas</p>
+                    <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider" id="titulo-total-filtro">Total do Dia:</span>
+                    <p class="text-[11px] text-zinc-400 font-medium" id="qtd-pedidos-filtro">0 comandas pagas</p>
                 </div>
-                <span class="text-2xl font-bold text-green-400" id="valor-total-filtro">R$ 0,00</span>
+                <span class="text-xl font-black text-emerald-400" id="valor-total-filtro">R$ 0,00</span>
             </div>
 
-            <!-- RANKING DE MAIS VENDIDOS -->
-            <div class="mt-4 bg-gray-900 border border-gray-700 rounded-xl p-3">
-                <h3 class="text-xs font-bold text-yellow-500 uppercase tracking-wide mb-2">🏆 Ranking de Itens Mais Vendidos</h3>
-                <div id="ranking-produtos-lista" class="space-y-1.5 text-xs text-gray-300 max-h-48 overflow-y-auto">
-                    <p class="text-gray-500 italic">Nenhuma venda registrada no período.</p>
+            <!-- RANKING -->
+            <div class="mt-3 bg-zinc-950 border border-zinc-800 rounded-2xl p-3">
+                <h3 class="text-[10px] font-black text-amber-400 uppercase tracking-wider mb-2">🏆 Ranking de Itens Mais Vendidos</h3>
+                <div id="ranking-produtos-lista" class="space-y-1.5 text-xs text-zinc-300 max-h-48 overflow-y-auto">
+                    <p class="text-zinc-600 italic">Nenhuma venda registrada no período.</p>
                 </div>
             </div>
         </div>
@@ -82,84 +90,86 @@
         <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
         
         <!-- Mensagem de Vazio -->
-        <div id="mensagem-vazia" class="text-center mt-16 text-gray-500 hidden">
-            <span class="text-6xl block mb-4" id="icone-vazio">🍽️</span>
-            <h2 class="text-xl font-bold" id="texto-vazio">Cozinha Tranquila!</h2>
-            <p class="text-xs mt-1 text-gray-400">Nenhum registro encontrado nesta aba.</p>
+        <div id="mensagem-vazia" class="text-center mt-20 text-zinc-600 hidden">
+            <span class="text-5xl block mb-3" id="icone-vazio">🍽️</span>
+            <h2 class="text-base font-bold text-zinc-400" id="texto-vazio">Cozinha Tranquila!</h2>
+            <p class="text-xs mt-1 text-zinc-600">Nenhum registro encontrado nesta aba.</p>
         </div>
     </main>
 
     <!-- MODAL ADMIN CARDÁPIO -->
-    <div id="modal-admin-cardapio" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
-        <div class="bg-gray-800 border border-orange-600 rounded-2xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button onclick="fecharAdminCardapio()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
-            <h3 class="text-lg font-bold text-orange-400 mb-1">🍔 Gerenciar Cardápio</h3>
-            <p class="text-xs text-gray-400 mb-4">Altere preços ou adicione novos itens em tempo real.</p>
+    <div id="modal-admin-cardapio" class="fixed inset-0 bg-black/9of5 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="fecharAdminCardapio()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-base font-extrabold text-amber-400 mb-1">🍔 Gerenciar Cardápio</h3>
+            <p class="text-xs text-zinc-400 mb-4">Adicione, edite ou altere preços instantaneamente.</p>
             
-            <div class="bg-gray-900 p-3 rounded-xl border border-gray-700 mb-4 space-y-2">
-                <h4 class="text-xs font-bold text-yellow-500 uppercase">Adicionar Novo Item</h4>
-                <input type="text" id="admin-nome" placeholder="Nome do Lanche/Bebida" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-xs text-white outline-none">
+            <div class="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800 mb-4 space-y-2.5">
+                <h4 class="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">Novo Item</h4>
+                <input type="text" id="admin-nome" placeholder="Nome do Lanche/Bebida" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-200 outline-none focus:border-amber-500">
                 <div class="flex gap-2">
-                    <input type="number" step="0.01" id="admin-preco" placeholder="Preço (Ex: 15.00)" class="w-1/2 bg-gray-800 border border-gray-700 rounded-lg p-2 text-xs text-white outline-none">
-                    <input type="text" id="admin-categoria" placeholder="Categoria (Ex: 🍔 Hambúrgueres)" class="w-1/2 bg-gray-800 border border-gray-700 rounded-lg p-2 text-xs text-white outline-none">
+                    <input type="number" step="0.01" id="admin-preco" placeholder="Preço (Ex: 15.00)" class="w-1/2 bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-200 outline-none focus:border-amber-500">
+                    <input type="text" id="admin-categoria" placeholder="Categoria (Ex: 🍔 Hambúrgueres)" class="w-1/2 bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-200 outline-none focus:border-amber-500">
                 </div>
-                <button onclick="salvarNovoItemCardapio()" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 rounded-lg text-xs transition">➕ Adicionar ao Cardápio</button>
+                <button onclick="salvarNovoItemCardapio()" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs transition shadow">➕ Adicionar ao Cardápio</button>
             </div>
 
-            <h4 class="text-xs font-bold text-gray-300 uppercase mb-2">Itens Atuais no Sistema:</h4>
+            <h4 class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider mb-2">Itens Atuais:</h4>
             <div id="lista-admin-cardapio" class="space-y-2 max-h-48 overflow-y-auto"></div>
         </div>
     </div>
 
     <!-- MODAL SENHA CARDÁPIO -->
-    <div id="modal-senha-admin" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
-        <div class="bg-gray-800 border border-orange-600 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
-            <button onclick="document.getElementById('modal-senha-admin').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
-            <h3 class="text-lg font-bold text-orange-400 mb-1">🔒 Senha do Cardápio</h3>
-            <p class="text-xs text-gray-300 mb-4">Digite a senha de 4 dígitos:</p>
+    <div id="modal-senha-admin" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <button onclick="document.getElementById('modal-senha-admin').classList.add('hidden')" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-base font-extrabold text-amber-400 mb-1">🔒 Senha do Cardápio</h3>
+            <p class="text-xs text-zinc-400 mb-4">Digite a senha de 4 dígitos:</p>
+            <div class="mb-4">
+                <input type="password" id="input-senha-cardapio" maxlength="4" placeholder="••••" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-3 text-center tracking-widest text-xl text-zinc-100 outline-none focus:border-amber-500">
+            </div>
+            <button onclick="verificarSenhaCardapio()" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3 rounded-2xl text-xs transition">Entrar no Admin</button>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIG PIX -->
+    <div id="modal-config-pix" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
+            <button onclick="fecharConfigPix()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-base font-extrabold text-amber-400 mb-3">Configurar Chave Pix</h3>
+            <div class="mb-3 text-left">
+                <label class="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Chave Pix:</label>
+                <input type="text" id="input-chave-pix" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-200 outline-none focus:border-amber-500">
+            </div>
             <div class="mb-4 text-left">
-                <input type="password" id="input-senha-cardapio" maxlength="4" placeholder="••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-center tracking-widest text-xl text-white outline-none">
+                <label class="block text-[10px] text-zinc-400 uppercase font-bold mb-1">Nome:</label>
+                <input type="text" id="input-nome-pix" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-200 outline-none focus:border-amber-500">
             </div>
-            <button onclick="verificarSenhaCardapio()" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition">Entrar</button>
+            <button onclick="salvarConfigPix()" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3 rounded-2xl text-xs transition">Salvar Chave</button>
         </div>
     </div>
 
-    <!-- Demais Modais -->
-    <div id="modal-config-pix" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
-        <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
-            <button onclick="fecharConfigPix()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
-            <h3 class="text-lg font-bold text-yellow-500 mb-1">Configurar Chave Pix</h3>
-            <div class="mb-3 text-left mt-3">
-                <label class="block text-xs text-gray-400 mb-1">Chave Pix:</label>
-                <input type="text" id="input-chave-pix" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white outline-none">
-            </div>
-            <div class="mb-4 text-left">
-                <label class="block text-xs text-gray-400 mb-1">Nome:</label>
-                <input type="text" id="input-nome-pix" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white outline-none">
-            </div>
-            <button onclick="salvarConfigPix()" class="w-full bg-yellow-500 text-black font-bold py-3 px-4 rounded-xl text-sm">Salvar</button>
+    <!-- MODAL RESET -->
+    <div id="modal-reset" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-zinc-900 border border-red-900/50 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <button onclick="fecharModalReset()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-base font-extrabold text-red-400 mb-1">Hard Reset do Caixa</h3>
+            <p class="text-xs text-zinc-400 mb-4">Apagará todos os pedidos do sistema.</p>
+            <input type="password" id="input-senha-reset" maxlength="4" placeholder="••••" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-3 text-center tracking-widest text-xl text-zinc-100 mb-4 outline-none focus:border-red-500">
+            <button onclick="executarHardReset()" class="tap-scale w-full bg-red-600 hover:bg-red-500 text-white font-extrabold py-3 rounded-2xl text-xs transition">Confirmar Reset</button>
         </div>
     </div>
 
-    <div id="modal-reset" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
-        <div class="bg-gray-800 border border-red-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
-            <button onclick="fecharModalReset()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
-            <h3 class="text-lg font-bold text-red-400 mb-1">Hard Reset do Caixa</h3>
-            <p class="text-xs text-gray-300 mb-4">Apagará todos os pedidos.</p>
-            <input type="password" id="input-senha-reset" maxlength="4" placeholder="••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-center tracking-widest text-xl text-white mb-4 outline-none">
-            <button onclick="executarHardReset()" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-xl text-sm">Confirmar</button>
-        </div>
-    </div>
-
-    <div id="modal-pix" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
-        <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
-            <button onclick="fecharModalPix()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
-            <h3 class="text-lg font-bold text-yellow-500 mb-1" id="modal-mesa-titulo">Mesa</h3>
-            <div id="modal-extrato-lista" class="bg-gray-900 border border-gray-700 rounded-xl p-3 text-left text-xs font-mono text-gray-300 mb-3 max-h-32 overflow-y-auto"></div>
-            <p class="text-2xl font-bold text-green-400 mb-3" id="modal-valor-total">R$ 0,00</p>
-            <div class="bg-white p-3 rounded-xl inline-block mb-2 shadow-inner"><img id="qrcode-img" src="" class="w-40 h-40 mx-auto"></div>
-            <p class="text-[10px] text-gray-400 mb-4" id="aviso-chave-pix">Chave: ...</p>
-            <button onclick="confirmarPagamentoPix()" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-xl text-sm">✅ Confirmar Pagamento</button>
+    <!-- MODAL PIX CAIXA -->
+    <div id="modal-pix" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <button onclick="fecharModalPix()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-base font-extrabold text-amber-400 mb-1" id="modal-mesa-titulo">Mesa</h3>
+            <div id="modal-extrato-lista" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 text-left text-xs font-mono text-zinc-300 mb-3 max-h-32 overflow-y-auto shadow-inner"></div>
+            <p class="text-2xl font-black text-emerald-400 mb-3" id="modal-valor-total">R$ 0,00</p>
+            <div class="bg-white p-3 rounded-2xl inline-block mb-3 shadow-inner"><img id="qrcode-img" src="" class="w-40 h-40 mx-auto"></div>
+            <p class="text-[10px] text-zinc-400 mb-4 font-mono" id="aviso-chave-pix">Chave: ...</p>
+            <button onclick="confirmarPagamentoPix()" class="tap-scale w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 rounded-2xl text-xs transition shadow">✅ Confirmar Pagamento</button>
         </div>
     </div>
 
@@ -188,7 +198,7 @@
         document.getElementById('filtro-data').value = hojeISO;
         document.getElementById('filtro-mes').value = hojeISO.slice(0, 7);
 
-        // Atualizador de cronômetro ao vivo a cada 1 segundo (apenas na aba Cozinha)
+        // Cronômetro ao vivo segundo a segundo
         setInterval(() => {
             if (abaAtual === 'cozinha') {
                 document.querySelectorAll('.cronometro-card').forEach(el => {
@@ -236,12 +246,12 @@
             snapshot.forEach(docSnap => {
                 let item = { id: docSnap.id, ...docSnap.data() };
                 let div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-gray-800 p-2 rounded-lg border border-gray-700 text-xs";
+                div.className = "flex justify-between items-center bg-zinc-950 p-2.5 rounded-xl border border-zinc-800 text-xs";
                 div.innerHTML = `
-                    <div><strong>${item.nome}</strong> - R$ ${Number(item.preco).toFixed(2).replace('.', ',')} <span class="text-gray-400 text-[10px]">(${item.categoria})</span></div>
-                    <div class="flex gap-1">
-                        <button onclick="alternarStatusItem('${item.id}', ${item.ativo !== false})" class="px-2 py-1 rounded text-[10px] font-bold ${item.ativo !== false ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200'}">${item.ativo !== false ? 'Ativo' : 'Inativo'}</button>
-                        <button onclick="excluirItemCardapio('${item.id}')" class="bg-red-900 text-white px-2 py-1 rounded text-[10px]">🗑️</button>
+                    <div><strong class="text-zinc-200">${item.nome}</strong> - <span class="text-amber-400 font-bold">R$ ${Number(item.preco).toFixed(2).replace('.', ',')}</span> <span class="text-zinc-500 text-[10px]">(${item.categoria})</span></div>
+                    <div class="flex gap-1.5">
+                        <button onclick="alternarStatusItem('${item.id}', ${item.ativo !== false})" class="tap-scale px-2 py-1 rounded-lg text-[10px] font-extrabold ${item.ativo !== false ? 'bg-emerald-950 border border-emerald-800 text-emerald-300' : 'bg-red-950 border border-red-800 text-red-300'}">${item.ativo !== false ? 'Ativo' : 'Inativo'}</button>
+                        <button onclick="excluirItemCardapio('${item.id}')" class="tap-scale bg-red-900/60 text-white px-2 py-1 rounded-lg text-[10px]">🗑️</button>
                     </div>
                 `;
                 listaDiv.appendChild(div);
@@ -291,14 +301,14 @@
         window.ativarSom = function() {
             somAtivado = true; audioAlert.play().catch(()=>{});
             const btn = document.getElementById('btn-som');
-            btn.innerText = "🔊 Som ON"; btn.classList.replace('bg-gray-800', 'bg-green-600');
+            btn.innerText = "🔊 Som ON"; btn.className = "tap-scale bg-emerald-600 border border-emerald-500 px-3 py-2 rounded-xl text-xs font-bold text-white transition shadow";
         }
 
         window.mudarAba = function(aba) {
             abaAtual = aba;
-            document.getElementById('tab-cozinha').className = aba === 'cozinha' ? "flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner" : "flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition";
-            document.getElementById('tab-caixa').className = aba === 'caixa' ? "flex-1 bg-blue-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner" : "flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition";
-            document.getElementById('tab-relatorio').className = aba === 'relatorio' ? "flex-1 bg-green-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner" : "flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition";
+            document.getElementById('tab-cozinha').className = aba === 'cozinha' ? "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2.5 text-xs rounded-2xl transition shadow-lg" : "tap-scale flex-1 bg-zinc-800 text-zinc-400 font-extrabold py-2.5 text-xs rounded-2xl transition";
+            document.getElementById('tab-caixa').className = aba === 'caixa' ? "tap-scale flex-1 bg-blue-500 text-zinc-950 font-extrabold py-2.5 text-xs rounded-2xl transition shadow-lg" : "tap-scale flex-1 bg-zinc-800 text-zinc-400 font-extrabold py-2.5 text-xs rounded-2xl transition";
+            document.getElementById('tab-relatorio').className = aba === 'relatorio' ? "tap-scale flex-1 bg-emerald-500 text-zinc-950 font-extrabold py-2.5 text-xs rounded-2xl transition shadow-lg" : "tap-scale flex-1 bg-zinc-800 text-zinc-400 font-extrabold py-2.5 text-xs rounded-2xl transition";
             document.getElementById('painel-filtro').classList.toggle('hidden', aba !== 'relatorio');
             renderizarCards();
         }
@@ -334,7 +344,7 @@
             let filtrados = [];
             if (abaAtual === 'cozinha') {
                 filtrados = todosPedidos.filter(p => p.status === 'Pendente');
-                contadorTxt.innerText = `${filtrados.length} pedido(s) na cozinha`;
+                contadorTxt.innerText = `${filtrados.length} pedido(s) aguardando preparo`;
                 document.getElementById('icone-vazio').innerText = "🍽️";
                 document.getElementById('texto-vazio').innerText = "Cozinha Tranquila!";
             } else if (abaAtual === 'caixa') {
@@ -377,16 +387,16 @@
                 let arrayRanking = Object.keys(produtosContagem).map(nome => ({ nome, ...produtosContagem[nome] })).sort((a, b) => b.qtd - a.qtd);
 
                 if (arrayRanking.length === 0) {
-                    rankingLista.innerHTML = '<p class="text-gray-500 italic">Nenhuma venda registrada no período.</p>';
+                    rankingLista.innerHTML = '<p class="text-zinc-600 italic">Nenhuma venda registrada no período.</p>';
                 } else {
                     arrayRanking.forEach((prod, index) => {
                         let divRank = document.createElement('div');
-                        divRank.className = "flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-700";
-                        divRank.innerHTML = `<span><strong>#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span><span class="text-green-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>`;
+                        divRank.className = "flex justify-between items-center bg-zinc-900 p-2.5 rounded-xl border border-zinc-800";
+                        divRank.innerHTML = `<span><strong class="text-amber-400">#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span><span class="text-emerald-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>`;
                         rankingLista.appendChild(divRank);
                     });
                 }
-                contadorTxt.innerText = `Relatórios & Faturamento`;
+                contadorTxt.innerText = `Painel de Faturamento`;
                 document.getElementById('icone-vazio').innerText = "📊";
                 document.getElementById('texto-vazio').innerText = "Nenhum fechamento registrado.";
             }
@@ -405,43 +415,42 @@
                     obsTexto = partes[1].trim();
                 }
 
-                let botoesHtml = "", corFaixa = 'bg-yellow-500';
-                let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2 pl-2"><span class="bg-green-800 text-green-100 text-[10px] font-bold px-2 py-0.5 rounded uppercase">⚡ JÁ PAGO NO PIX</span></div>` : '';
-                let badgeAtendente = pedido.atendente ? `<span class="bg-gray-700 text-yellow-400 text-[10px] px-2 py-0.5 rounded font-bold uppercase">👤 ${pedido.atendente}</span>` : '';
+                let botoesHtml = "", corFaixa = 'bg-amber-500';
+                let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2"><span class="bg-emerald-950 border border-emerald-800 text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO NO PIX</span></div>` : '';
+                let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-900 border border-zinc-800 text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${pedido.atendente}</span>` : '';
 
-                // O cronômetro só aparece na Cozinha (abaAtual === 'cozinha')
                 let badgeCronometro = "";
                 if (abaAtual === 'cozinha') {
                     let ts = pedido.timestampCriacao || Date.now();
-                    badgeCronometro = `<span class="cronometro-card bg-gray-700 text-gray-200 text-xs px-2 py-1 rounded font-mono font-bold" data-timestamp="${ts}">⏱️ 0m 00s</span>`;
+                    badgeCronometro = `<span class="cronometro-card bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs px-2.5 py-1 rounded-xl font-mono font-bold shadow-inner" data-timestamp="${ts}">⏱️ 0m 00s</span>`;
                 }
 
                 if(abaAtual === 'cozinha') {
-                    corFaixa = 'bg-yellow-500';
+                    corFaixa = 'bg-amber-500';
                     botoesHtml = pedido.pagoNaHora ? 
-                        `<div class="mt-3 pt-3 border-t border-gray-700"><button onclick="marcarPagoNaHoraConcluido('${pedido.id}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-2 rounded-lg text-xs transition">✅ Concluir e Faturar (Já Pago)</button></div>` :
-                        `<div class="flex gap-2 mt-3 pt-3 border-t border-gray-700"><button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-2 rounded-lg text-xs transition">🛎️ Entregar</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 px-2 rounded-lg text-xs transition">✅ Pago na Hora</button><button onclick="excluirPedido('${pedido.id}')" class="bg-red-900/60 hover:bg-red-800 text-red-200 px-3 py-2.5 rounded-lg text-xs transition">🗑️</button></div>`;
+                        `<div class="mt-3 pt-3 border-t border-zinc-800"><button onclick="marcarPagoNaHoraConcluido('${pedido.id}')" class="tap-scale w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-2 rounded-2xl text-xs transition shadow">✅ Concluir e Faturar</button></div>` :
+                        `<div class="flex gap-2 mt-3 pt-3 border-t border-zinc-800"><button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Entregar</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">✅ Pago</button><button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-950/60 border border-red-900/60 hover:bg-red-900 text-red-300 px-3 py-2.5 rounded-2xl text-xs transition">🗑️</button></div>`;
                 } else if(abaAtual === 'caixa') {
                     corFaixa = 'bg-blue-500';
-                    botoesHtml = `<div class="mt-3 pt-3 border-t border-gray-700 flex gap-2"><button onclick="abrirModalPix('${pedido.id}', '${pedido.mesa}', '${pedido.total}', '${encodeURIComponent(pedido.pedido)}') " class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-3 rounded-lg text-xs transition shadow-lg">📱 Gerar Pix (Mesa)</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-3 rounded-lg text-xs transition shadow-lg">💲 Fechar (Dinheiro/Cartão)</button></div>`;
+                    botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-800 flex gap-2"><button onclick="abrirModalPix('${pedido.id}', '${pedido.mesa}', '${pedido.total}', '${encodeURIComponent(pedido.pedido)}') " class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3 px-3 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix (Mesa)</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-3 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">💲 Fechar</button></div>`;
                 } else {
-                    corFaixa = 'bg-green-500';
-                    botoesHtml = `<div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400 flex justify-between"><span>Status: <strong class="text-green-400">Pago</strong></span><span class="font-mono">${pedido.dataCriacao || ''}</span></div>`;
+                    corFaixa = 'bg-emerald-500';
+                    botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-800 text-xs text-zinc-500 flex justify-between"><span>Status: <strong class="text-emerald-400">Pago</strong></span><span class="font-mono">${pedido.dataCriacao || ''}</span></div>`;
                 }
 
                 const card = document.createElement('div');
-                card.className = "bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden";
+                card.className = "bg-zinc-900 border border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden";
                 card.innerHTML = `
-                    <div class="absolute left-0 top-0 bottom-0 w-1 ${corFaixa}"></div>
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 ${corFaixa}"></div>
                     <div>
-                        <div class="flex justify-between items-start mb-2 border-b border-gray-700 pb-2 pl-2">
-                            <div><h2 class="text-xl font-bold text-white">${pedido.mesa}</h2><div class="mt-1">${badgeAtendente}</div></div>
-                            <div class="flex flex-col items-end gap-1">${badgeCronometro}<span class="text-gray-400 text-[10px] font-mono">${pedido.horario || '--:--'}</span></div>
+                        <div class="flex justify-between items-start mb-3 border-b border-zinc-800 pb-2.5 pl-2">
+                            <div><h2 class="text-xl font-black text-zinc-100">${pedido.mesa}</h2><div class="mt-1">${badgeAtendente}</div></div>
+                            <div class="flex flex-col items-end gap-1.5">${badgeCronometro}<span class="text-zinc-500 text-[11px] font-mono">${pedido.horario || '--:--'}</span></div>
                         </div>
-                        ${avisoPagoNaHora}
-                        <div class="pl-2 text-gray-300 text-sm leading-relaxed mb-3 bg-gray-900 p-2.5 rounded-lg border border-gray-700 font-mono">${itensTexto.replace(/\n/g, '<br>')}</div>
-                        <div class="pl-2 flex justify-between items-center mb-2"><span class="text-gray-400 font-bold uppercase text-xs">Valor Total:</span><span class="text-green-400 font-bold text-lg">${pedido.total || 'R$ 0,00'}</span></div>
-                        ${obsTexto ? `<div class="mb-2 pl-2"><span class="bg-red-900 text-red-200 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">Atenção</span><p class="text-red-400 text-xs font-semibold mt-1 bg-red-950/30 p-1.5 rounded border border-red-900/50">"${obsTexto}"</p></div>` : ''}
+                        <div class="pl-2">${avisoPagoNaHora}</div>
+                        <div class="pl-2 text-zinc-200 text-xs leading-relaxed mb-3 bg-zinc-950 p-3 rounded-2xl border border-zinc-800/80 font-mono shadow-inner">${itensTexto.replace(/\n/g, '<br>')}</div>
+                        <div class="pl-2 flex justify-between items-center mb-2"><span class="text-zinc-400 font-bold uppercase text-[10px] tracking-wider">Valor Total:</span><span class="text-emerald-400 font-black text-lg">${pedido.total || 'R$ 0,00'}</span></div>
+                        ${obsTexto ? `<div class="mb-2 pl-2"><span class="bg-red-950/80 border border-red-900/60 text-red-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg uppercase tracking-wider">Atenção</span><p class="text-red-300 text-xs font-semibold mt-1 bg-red-950/30 p-2 rounded-xl border border-red-900/40">"${obsTexto}"</p></div>` : ''}
                     </div>
                     ${botoesHtml}
                 `;
