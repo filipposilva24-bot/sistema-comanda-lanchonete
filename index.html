@@ -23,7 +23,7 @@
             </div>
 
             <!-- Área de Cardápio Rolável -->
-            <div class="mb-4 h-[40vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50">
+            <div class="mb-4 h-[38vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50">
                 
                 <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1 mt-2">🍔 Hambúrgueres</h3>
                 <div class="grid grid-cols-2 gap-2 mb-4">
@@ -104,28 +104,56 @@
 
             <div class="mb-2">
                 <label class="block text-gray-700 text-sm font-bold mb-1">Resumo do Pedido:</label>
-                <div class="bg-white border-2 border-gray-200 rounded-xl p-2 flex flex-col min-h-[100px] max-h-[140px]">
+                <div class="bg-white border-2 border-gray-200 rounded-xl p-2 flex flex-col min-h-[90px] max-h-[120px]">
                     <div id="resumo-pedido" class="overflow-y-auto flex-grow">
                         <p class="text-gray-400 text-center italic text-sm mt-2" id="vazio-texto">Nenhum item adicionado.</p>
                     </div>
-                    <div class="border-t border-gray-200 mt-2 pt-2 flex justify-between items-center">
+                    <div class="border-t border-gray-200 mt-2 pt-1 flex justify-between items-center">
                         <span class="font-bold text-gray-700 text-sm">TOTAL:</span>
                         <span id="valor-total" class="font-bold text-green-600 text-lg">R$ 0,00</span>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-3">
                 <label class="block text-gray-700 text-sm font-bold mb-1">Observações:</label>
                 <input type="text" id="obs" placeholder="Ex: Sem cebola, Copo com gelo..." class="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm bg-gray-50">
             </div>
         </div>
 
-        <div>
-            <button onclick="enviarPedido()" class="w-full bg-black text-yellow-500 font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg text-lg border-2 border-yellow-500">
-                🚀 Enviar para Cozinha
+        <div class="flex gap-2">
+            <button onclick="enviarPedido('Pendente')" class="flex-1 bg-black text-yellow-500 font-bold py-3 px-2 rounded-xl hover:bg-gray-800 transition shadow-lg text-sm border-2 border-yellow-500">
+                🚀 Enviar (Paga Depois)
             </button>
-            <p id="status" class="text-center text-sm mt-2 text-green-600 font-semibold h-5"></p>
+            <button onclick="abrirPixAtendente()" class="flex-1 bg-green-600 text-white font-bold py-3 px-2 rounded-xl hover:bg-green-500 transition shadow-lg text-sm">
+                📱 Pagar Pix Agora
+            </button>
+        </div>
+        <p id="status" class="text-center text-sm mt-2 text-green-600 font-semibold h-4"></p>
+    </div>
+
+    <!-- MODAL DE PIX NO ATENDENTE -->
+    <div id="modal-pix-atendente" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <button onclick="fecharModalPixAtendente()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
+            
+            <h3 class="text-lg font-bold text-yellow-500 mb-1" id="modal-mesa-titulo">Pix na Hora</h3>
+            <p class="text-xs text-gray-400 mb-3">Escaneie para pagar e enviar o pedido</p>
+
+            <div class="mb-3">
+                <span class="text-xs text-gray-400 uppercase font-bold">Valor Total:</span>
+                <p class="text-2xl font-bold text-green-400" id="modal-valor-total">R$ 0,00</p>
+            </div>
+
+            <div class="bg-white p-3 rounded-xl inline-block mb-2 shadow-inner">
+                <img id="qrcode-img" src="" alt="QR Code Pix" class="w-40 h-40 mx-auto">
+            </div>
+            
+            <p class="text-[10px] text-gray-400 mb-4" id="aviso-chave-pix">Chave configurada</p>
+
+            <button onclick="confirmarPixEnivarPedido()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg">
+                ✅ Pix Pago - Enviar para Cozinha
+            </button>
         </div>
     </div>
 
@@ -141,15 +169,12 @@
         let mesasDisponiveis = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
         let mesasOcupadas = [];
 
-        // Monitora o banco para saber quais mesas estão ocupadas em tempo real
         onSnapshot(collection(db, "pedidos"), (snapshot) => {
             mesasOcupadas = [];
             snapshot.forEach((doc) => {
                 const dados = doc.data();
                 if (dados.status === "Pendente" || dados.status === "Entregue") {
-                    if (!mesasOcupadas.includes(dados.mesa)) {
-                        mesasOcupadas.push(dados.mesa);
-                    }
+                    if (!mesasOcupadas.includes(dados.mesa)) mesasOcupadas.push(dados.mesa);
                 }
             });
             renderizarMesas();
@@ -164,13 +189,9 @@
                 const isOccupied = mesasOcupadas.includes(mesa);
 
                 let estilo = "font-bold py-2 px-1 rounded-lg text-xs border-2 transition shadow-sm ";
-                if (isSelected) {
-                    estilo += "bg-black text-yellow-500 border-yellow-500 ring-2 ring-yellow-400";
-                } else if (isOccupied) {
-                    estilo += "bg-red-600 text-white border-red-700 animate-pulse"; // Fica vermelha se ocupada
-                } else {
-                    estilo += "bg-gray-200 text-gray-700 border-transparent hover:bg-gray-300";
-                }
+                if (isSelected) estilo += "bg-black text-yellow-500 border-yellow-500 ring-2 ring-yellow-400";
+                else if (isOccupied) estilo += "bg-red-600 text-white border-red-700";
+                else estilo += "bg-gray-200 text-gray-700 border-transparent hover:bg-gray-300";
 
                 btn.className = estilo;
                 btn.innerText = mesa + (isOccupied ? " 🔴" : "");
@@ -182,7 +203,7 @@
             btnAdd.className = "bg-green-100 text-green-700 font-bold py-2 px-1 rounded-lg text-xs border-2 border-green-400 border-dashed hover:bg-green-200 transition";
             btnAdd.innerText = "+ Nova";
             btnAdd.onclick = () => {
-                const novaMesa = prompt("Nome da mesa/local (Ex: Retirada):");
+                const novaMesa = prompt("Nome da mesa/local:");
                 if (novaMesa && novaMesa.trim() !== '') {
                     mesasDisponiveis.push(novaMesa.trim());
                     mesaSelecionada = novaMesa.trim();
@@ -196,7 +217,8 @@
 
         window.adicionarItem = function(nomeItem, preco) {
             const encontrado = itensCarrinho.find(i => i.nome === nomeItem);
-            if (encontrado) { encontrado.qtd++; } else { itensCarrinho.push({ nome: nomeItem, preco: preco, qtd: 1 }); }
+            if (encontrado) encontrado.qtd++;
+            else itensCarrinho.push({ nome: nomeItem, preco: preco, qtd: 1 });
             atualizarResumo();
         }
 
@@ -231,8 +253,8 @@
                         <span class="text-[10px] text-gray-500">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
                     </div>
                     <div class="space-x-1 flex-shrink-0 ml-2">
-                        <button onclick="removerItem('${item.nome}')" class="bg-red-100 text-red-600 px-3 py-1 rounded-lg font-bold text-sm shadow-sm">-</button>
-                        <button onclick="adicionarItem('${item.nome}', ${item.preco})" class="bg-green-100 text-green-600 px-3 py-1 rounded-lg font-bold text-sm shadow-sm">+</button>
+                        <button onclick="removerItem('${item.nome}')" class="bg-red-100 text-red-600 px-3 py-1 rounded-lg font-bold text-sm">-</button>
+                        <button onclick="adicionarItem('${item.nome}', ${item.preco})" class="bg-green-100 text-green-600 px-3 py-1 rounded-lg font-bold text-sm">+</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -240,9 +262,45 @@
             totalDisplay.innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
         }
 
-        window.enviarPedido = async function() {
+        // Função que abre o Modal de Pix no Atendente usando a mesma chave configurada no painel
+        window.abrirPixAtendente = function() {
+            if (!mesaSelecionada) return alert('Selecione uma Mesa!');
+            if (itensCarrinho.length === 0) return alert('Adicione pelo menos um item!');
+
+            let chavePix = localStorage.getItem('point_derico_chave_pix');
+            let nomePix = localStorage.getItem('point_derico_nome_pix') || "Point Derico";
+
+            if (!chavePix) {
+                alert("Aviso: Nenhuma chave Pix foi configurada no sistema. Vá até a tela do Caixa/Cozinha em '⚙️ Chave Pix' para cadastrar primeiro!");
+                return;
+            }
+
+            const totalStr = document.getElementById('valor-total').innerText;
+            document.getElementById('modal-mesa-titulo').innerText = `${mesaSelecionada} - Pix na Hora`;
+            document.getElementById('modal-valor-total').innerText = totalStr;
+            document.getElementById('aviso-chave-pix').innerText = `Chave: ${chavePix}`;
+
+            let valorNum = totalStr.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+            let valorFloat = parseFloat(valorNum) || 0;
+
+            let payloadPix = criarPayloadPix(chavePix, nomePix, "SAO PAULO", valorFloat.toFixed(2));
+            let urlQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
+            document.getElementById('qrcode-img').src = urlQrCode;
+            document.getElementById('modal-pix-atendente').classList.remove('hidden');
+        }
+
+        window.fecharModalPixAtendente = function() {
+            document.getElementById('modal-pix-atendente').classList.add('hidden');
+        }
+
+        window.confirmarPixEnivarPedido = function() {
+            fecharModalPixAtendente();
+            enviarPedido('Pago'); // Já envia direto com o status "Pago" para cair direto no relatório de faturamento!
+        }
+
+        window.enviarPedido = async function(statusPedido) {
             const obs = document.getElementById('obs').value.trim();
-            const status = document.getElementById('status');
+            const statusTxt = document.getElementById('status');
             const total = document.getElementById('valor-total').innerText;
 
             if (!mesaSelecionada) return alert('Selecione uma Mesa!');
@@ -252,23 +310,58 @@
             if (obs) textoPedidoFormatado += `\nObs: ${obs}`;
 
             try {
-                await addDoc(collection(db, "pedidos"), {
+                let dadosPedido = {
                     mesa: mesaSelecionada,
                     pedido: textoPedidoFormatado,
-                    status: "Pendente",
+                    status: statusPedido === 'Pago' ? 'Pago' : 'Pendente',
                     total: total,
                     dataCriacao: new Date().toISOString().split('T')[0],
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
-                });
+                };
+
+                await addDoc(collection(db, "pedidos"), dadosPedido);
 
                 mesaSelecionada = ""; renderizarMesas();
                 document.getElementById('obs').value = '';
                 itensCarrinho = []; atualizarResumo();
-                status.innerText = "Pedido enviado!"; setTimeout(() => status.innerText = "", 3000);
+                
+                statusTxt.innerText = statusPedido === 'Pago' ? "Pix confirmado e pedido enviado!" : "Pedido enviado para cozinha!";
+                setTimeout(() => statusTxt.innerText = "", 3000);
             } catch (e) {
                 alert("Erro ao enviar pedido.");
             }
         }
+
+        function criarPayloadPix(pixKey, name, city, amount) {
+            function format(id, val) {
+                return id + String(val.length).padStart(2, '0') + val;
+            }
+            let merchantAccount = format("00", "br.gov.bcb.pix") + format("01", pixKey);
+            let payload = 
+                format("00", "01") +
+                format("26", merchantAccount) +
+                format("52", "0000") +
+                format("53", "986") +
+                (amount > 0 ? format("54", amount) : "") +
+                format("58", "BR") +
+                format("59", name.substring(0, 25).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) +
+                format("60", city.substring(0, 15).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) +
+                format("62", format("05", "POINTDERICO")) +
+                "6304";
+
+            let polinomio = 0x1021;
+            let resultado = 0xFFFF;
+            for (let c = 0; c < payload.length; c++) {
+                resultado ^= (payload.charCodeAt(c) << 8);
+                for (let i = 0; i < 8; i++) {
+                    if ((resultado & 0x8000) !== 0) resultado = ((resultado << 1) ^ polinomio);
+                    else resultado = (resultado << 1);
+                }
+            }
+            let crc = (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+            return payload + crc;
+        }
+
         renderizarMesas();
     </script>
 </body>
