@@ -15,7 +15,7 @@
                 <h1 class="text-xl font-bold text-yellow-500">🔥 Point Derico</h1>
                 <p class="text-xs text-gray-400 mt-1" id="contador">Carregando painel...</p>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 items-center">
                 <button onclick="abrirConfigPix()" class="bg-gray-800 border border-gray-600 px-3 py-2 rounded-lg text-xs font-bold text-yellow-400 hover:bg-gray-700 transition">
                     ⚙️ Chave Pix
                 </button>
@@ -25,11 +25,16 @@
             </div>
         </div>
         
-        <!-- Botões das Abas -->
-        <div class="flex gap-1">
-            <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner">👨‍🍳 Cozinha</button>
-            <button onclick="mudarAba('caixa')" id="tab-caixa" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">💲 Mesas A Pagar</button>
-            <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">📊 Caixa / Fechamento</button>
+        <!-- Botões das Abas e Botão Hard Reset Discreto -->
+        <div class="flex gap-1 justify-between items-center">
+            <div class="flex gap-1 flex-grow">
+                <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner">👨‍🍳 Cozinha</button>
+                <button onclick="mudarAba('caixa')" id="tab-caixa" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">💲 Mesas A Pagar</button>
+                <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">📊 Caixa / Fechamento</button>
+            </div>
+            <button onclick="abrirModalReset()" class="bg-red-950/80 border border-red-700 text-red-300 px-2.5 py-2 rounded-lg text-xs font-bold hover:bg-red-900 transition ml-1" title="Hard Reset do Caixa">
+                🗑️ Reset
+            </button>
         </div>
     </header>
 
@@ -91,6 +96,26 @@
         </div>
     </div>
 
+    <!-- MODAL DE HARD RESET (SENHA 4 DÍGITOS) -->
+    <div id="modal-reset" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-gray-800 border border-red-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <button onclick="fecharModalReset()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
+            
+            <span class="text-4xl block mb-2">⚠️</span>
+            <h3 class="text-lg font-bold text-red-400 mb-1">Hard Reset do Caixa</h3>
+            <p class="text-xs text-gray-300 mb-4 leading-relaxed">Isso apagará <strong class="text-white">TODOS</strong> os pedidos do sistema (pendentes, entregues e faturados). <span class="text-red-400 font-bold block mt-1">Essa ação não tem como voltar atrás!</span></p>
+
+            <div class="mb-4 text-left">
+                <label class="block text-xs text-gray-400 mb-1 font-bold">Digite a senha de 4 dígitos:</label>
+                <input type="password" id="input-senha-reset" maxlength="4" placeholder="••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-center tracking-widest text-xl text-white focus:ring-2 focus:ring-red-500 outline-none">
+            </div>
+
+            <button onclick="executarHardReset()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg">
+                🔴 Confirmar Hard Reset
+            </button>
+        </div>
+    </div>
+
     <!-- MODAL DE PIX / EXTRATO -->
     <div id="modal-pix" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
@@ -120,7 +145,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, query, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, query, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
@@ -130,6 +155,8 @@
         let todosPedidos = []; 
         let tipoFiltroRelatorio = 'dia'; 
         let pedidoSelecionadoId = null;
+
+        const SENHA_HARD_RESET = "1234"; // 🔑 Altere aqui se quiser outra senha de 4 dígitos
 
         const audioAlert = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         let somAtivado = false;
@@ -168,6 +195,37 @@
             localStorage.setItem('point_derico_nome_pix', nome || "Point Derico");
             alert("Chave Pix salva com sucesso!");
             fecharConfigPix();
+        }
+
+        // Funções do Hard Reset
+        window.abrirModalReset = function() {
+            document.getElementById('input-senha-reset').value = '';
+            document.getElementById('modal-reset').classList.remove('hidden');
+        }
+
+        window.fecharModalReset = function() {
+            document.getElementById('modal-reset').classList.add('hidden');
+        }
+
+        window.executarHardReset = async function() {
+            const senhaDigitada = document.getElementById('input-senha-reset').value.trim();
+            if (senhaDigitada !== SENHA_HARD_RESET) {
+                alert("Senha incorreta!");
+                return;
+            }
+
+            try {
+                fecharModalReset();
+                const snapshot = await getDocs(collection(db, "pedidos"));
+                let promessas = [];
+                snapshot.forEach((documento) => {
+                    promessas.push(deleteDoc(doc(db, "pedidos", documento.id)));
+                });
+                await Promise.all(promessas);
+                alert("Hard Reset realizado com sucesso! O caixa e os pedidos foram zerados.");
+            } catch (e) {
+                alert("Erro ao executar o Hard Reset.");
+            }
         }
 
         window.ativarSom = function() {
@@ -264,7 +322,6 @@
                 msgVazia.classList.add('hidden');
             }
 
-            // ORDENAÇÃO CORRETA POR HORÁRIO: Do maior para o menor (ex: 01:02 vem antes de 01:01 e 00:44)
             filtrados.sort((a, b) => {
                 let horaA = a.horario || "00:00";
                 let horaB = b.horario || "00:00";
