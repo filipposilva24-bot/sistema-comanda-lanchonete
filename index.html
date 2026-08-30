@@ -14,10 +14,12 @@
                 <p class="text-sm text-gray-500 mt-1">Lançamento de Comanda</p>
             </header>
             
-            <!-- Identificação da Mesa / Balcão -->
+            <!-- Identificação da Mesa / Balcão com Botões -->
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-1">Local / Mesa:</label>
-                <input type="text" id="mesa" placeholder="Ex: Mesa 05 ou Balcão" class="w-full px-3 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 text-lg font-medium bg-gray-50">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Selecione a Mesa / Local:</label>
+                <div id="container-mesas" class="grid grid-cols-4 gap-2">
+                    <!-- Os botões das mesas serão gerados automaticamente aqui pelo JavaScript -->
+                </div>
             </div>
 
             <!-- Área de Cardápio Rolável -->
@@ -236,6 +238,48 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- SISTEMA DE MESAS ---
+        let mesaSelecionada = "";
+        let mesasDisponiveis = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
+
+        window.renderizarMesas = function() {
+            const container = document.getElementById('container-mesas');
+            container.innerHTML = '';
+            
+            mesasDisponiveis.forEach(mesa => {
+                const btn = document.createElement('button');
+                const isSelected = mesaSelecionada === mesa;
+                
+                if (isSelected) {
+                    btn.className = "bg-black text-yellow-500 font-bold py-2 px-1 rounded-lg text-xs border-2 border-yellow-500 shadow-sm";
+                } else {
+                    btn.className = "bg-gray-200 text-gray-700 font-bold py-2 px-1 rounded-lg text-xs border-2 border-transparent hover:bg-gray-300 transition";
+                }
+                
+                btn.innerText = mesa;
+                btn.onclick = () => { 
+                    mesaSelecionada = mesa; 
+                    renderizarMesas(); 
+                };
+                container.appendChild(btn);
+            });
+
+            // Botão Adicionar Mesa Especial
+            const btnAdd = document.createElement('button');
+            btnAdd.className = "bg-green-100 text-green-700 font-bold py-2 px-1 rounded-lg text-xs border-2 border-green-400 border-dashed hover:bg-green-200 transition";
+            btnAdd.innerText = "+ Nova";
+            btnAdd.onclick = () => {
+                const novaMesa = prompt("Digite o nome ou número da mesa (Ex: Mesa 10, Retirada):");
+                if (novaMesa && novaMesa.trim() !== '') {
+                    mesasDisponiveis.push(novaMesa.trim());
+                    mesaSelecionada = novaMesa.trim();
+                    renderizarMesas();
+                }
+            };
+            container.appendChild(btnAdd);
+        }
+
+        // --- SISTEMA DE CARRINHO ---
         let itensCarrinho = [];
 
         window.adicionarItem = function(nomeItem, preco) {
@@ -290,18 +334,17 @@
                 container.appendChild(div);
             });
 
-            // Atualiza o visor de valor total
             totalDisplay.innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
         }
 
+        // --- ENVIAR PARA O BANCO DE DADOS ---
         window.enviarPedido = async function() {
-            const mesa = document.getElementById('mesa').value.trim();
             const obs = document.getElementById('obs').value.trim();
             const status = document.getElementById('status');
             const total = document.getElementById('valor-total').innerText;
 
-            if (!mesa) {
-                alert('Por favor, informe a Mesa ou o Local!');
+            if (!mesaSelecionada) {
+                alert('Por favor, selecione uma Mesa ou Local lá no topo!');
                 return;
             }
 
@@ -316,16 +359,17 @@
             }
 
             try {
-                // Manda para o banco de dados incluindo o valor total
                 await addDoc(collection(db, "pedidos"), {
-                    mesa: mesa,
+                    mesa: mesaSelecionada,
                     pedido: textoPedidoFormatado,
                     status: "Pendente",
                     total: total,
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
                 });
 
-                document.getElementById('mesa').value = '';
+                // Limpa tudo depois de enviar
+                mesaSelecionada = "";
+                renderizarMesas();
                 document.getElementById('obs').value = '';
                 itensCarrinho = [];
                 atualizarResumo();
@@ -337,6 +381,9 @@
                 alert("Erro ao enviar pedido. Verifique sua internet.");
             }
         }
+
+        // Inicializa as mesas na tela assim que o site abrir
+        renderizarMesas();
     </script>
 </body>
 </html>
