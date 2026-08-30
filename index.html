@@ -34,7 +34,7 @@
     <!-- TELA PRINCIPAL DE COMANDA -->
     <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg p-4 flex flex-col justify-between">
         <div>
-            <header class="mb-4 text-center relative">
+            <header class="mb-3 text-center relative">
                 <h1 class="text-3xl font-bold text-yellow-500 bg-black py-2 rounded-xl">POINT DERICO</h1>
                 <div class="flex justify-between items-center mt-2 px-1">
                     <p class="text-xs text-gray-500" id="info-mesa-atual">Lançamento de Comanda</p>
@@ -44,47 +44,49 @@
                 </div>
             </header>
             
-            <div class="mb-4" id="bloco-selecao-mesas">
+            <div class="mb-3" id="bloco-selecao-mesas">
                 <div class="flex justify-between items-center mb-1">
-                    <label class="block text-gray-700 text-sm font-bold">Selecione a Mesa / Local:</label>
+                    <label class="block text-gray-700 text-xs font-bold">Selecione a Mesa / Local (Segure para apagar extra):</label>
                     <span class="text-[10px] text-gray-400 font-semibold">🔴 Ocupada | ⚪ Livre</span>
                 </div>
                 <div id="container-mesas" class="grid grid-cols-4 gap-2"></div>
             </div>
 
-            <!-- Área de Cardápio Dinâmico -->
-            <div class="mb-4 h-[38vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50" id="cardapio-dinamico-container">
+            <!-- BOTÕES DE ATALHO RÁPIDO PARA CATEGORIAS DO CARDÁPIO -->
+            <div id="botoes-categorias-atalho" class="flex gap-1 overflow-x-auto pb-2 mb-1 scrollbar-none"></div>
+
+            <!-- Área de Cardápio Dinâmico com Cores por Grupo -->
+            <div class="mb-3 h-[32vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50" id="cardapio-dinamico-container">
                 <p class="text-center text-xs text-gray-400 mt-10">Carregando cardápio...</p>
             </div>
 
             <div class="mb-2">
-                <label class="block text-gray-700 text-sm font-bold mb-1">Resumo do Pedido:</label>
-                <div class="bg-white border-2 border-gray-200 rounded-xl p-2 flex flex-col min-h-[90px] max-h-[120px]">
+                <label class="block text-gray-700 text-xs font-bold mb-1">Resumo do Pedido:</label>
+                <div class="bg-white border-2 border-gray-200 rounded-xl p-2 flex flex-col min-h-[70px] max-h-[100px]">
                     <div id="resumo-pedido" class="overflow-y-auto flex-grow">
-                        <p class="text-gray-400 text-center italic text-sm mt-2" id="vazio-texto">Nenhum item adicionado.</p>
+                        <p class="text-gray-400 text-center italic text-xs mt-2" id="vazio-texto">Nenhum item adicionado.</p>
                     </div>
-                    <div class="border-t border-gray-200 mt-2 pt-1 flex justify-between items-center">
-                        <span class="font-bold text-gray-700 text-sm">TOTAL:</span>
-                        <span id="valor-total" class="font-bold text-green-600 text-lg">R$ 0,00</span>
+                    <div class="border-t border-gray-200 mt-1 pt-1 flex justify-between items-center">
+                        <span class="font-bold text-gray-700 text-xs">TOTAL:</span>
+                        <span id="valor-total" class="font-bold text-green-600 text-base">R$ 0,00</span>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label class="block text-gray-700 text-sm font-bold mb-1">Observações:</label>
-                <input type="text" id="obs" placeholder="Ex: Sem cebola, Copo com gelo..." class="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm bg-gray-50">
+            <div class="mb-2">
+                <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, Copo com gelo...)" class="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 text-xs bg-gray-50">
             </div>
         </div>
 
         <div class="flex gap-2">
-            <button onclick="enviarPedido('Pendente')" class="flex-1 bg-black text-yellow-500 font-bold py-3 px-2 rounded-xl hover:bg-gray-800 transition shadow-lg text-sm border-2 border-yellow-500">
+            <button onclick="enviarPedido('Pendente')" class="flex-1 bg-black text-yellow-500 font-bold py-2.5 px-2 rounded-xl hover:bg-gray-800 transition shadow-lg text-xs border-2 border-yellow-500">
                 🚀 Enviar (Paga Depois)
             </button>
-            <button onclick="abrirPixAtendente()" class="flex-1 bg-green-600 text-white font-bold py-3 px-2 rounded-xl hover:bg-green-500 transition shadow-lg text-sm">
+            <button onclick="abrirPixAtendente()" class="flex-1 bg-green-600 text-white font-bold py-2.5 px-2 rounded-xl hover:bg-green-500 transition shadow-lg text-xs">
                 📱 Pagar Pix Agora
             </button>
         </div>
-        <p id="status" class="text-center text-sm mt-2 text-green-600 font-semibold h-4"></p>
+        <p id="status" class="text-center text-xs mt-1 text-green-600 font-semibold h-4"></p>
     </div>
 
     <!-- MODAL DE PIX NO ATENDENTE -->
@@ -107,7 +109,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
@@ -118,65 +120,10 @@
 
         let operadorAtual = localStorage.getItem('point_derico_operador') || "";
         let mesaSelecionada = "";
-        let mesasDisponiveis = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
+        let mesasFixas = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
+        let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras') || "[]");
         let mesasOcupadas = [];
         let cardapioLista = [];
-
-        // Cardápio Padrão Completo de Fábrica (Caso o banco esteja vazio)
-        const cardapioInicialPadrao = [
-            // Hambúrgueres
-            { nome: 'X-Burguer', preco: 15, categoria: '🍔 Hambúrgueres', ativo: true },
-            { nome: 'X-Salada', preco: 18, categoria: '🍔 Hambúrgueres', ativo: true },
-            { nome: 'X-Egg', preco: 20, categoria: '🍔 Hambúrgueres', ativo: true },
-            { nome: 'X-Bacon', preco: 24, categoria: '🍔 Hambúrgueres', ativo: true },
-            { nome: 'Duplo Chesse', preco: 30, categoria: '🍔 Hambúrgueres', ativo: true },
-            // Porções
-            { nome: 'Batata Frita P', preco: 20, categoria: '🍟 Porções', ativo: true },
-            { nome: 'Batata Frita G', preco: 40, categoria: '🍟 Porções', ativo: true },
-            { nome: 'Porção Mista', preco: 35, categoria: '🍟 Porções', ativo: true },
-            { nome: 'Frango c/ Batata', preco: 45, categoria: '🍟 Porções', ativo: true },
-            { nome: 'Família Frango', preco: 70, categoria: '🍟 Porções', ativo: true },
-            { nome: 'Contra c/ Batata', preco: 70, categoria: '🍟 Porções', ativo: true },
-            // Pastéis Simples
-            { nome: 'Pastel Carne', preco: 10, categoria: '🥟 Pastéis Simples', ativo: true },
-            { nome: 'Pastel Calabresa', preco: 10, categoria: '🥟 Pastéis Simples', ativo: true },
-            { nome: 'Pastel Frango', preco: 10, categoria: '🥟 Pastéis Simples', ativo: true },
-            { nome: 'Pastel Queijo', preco: 10, categoria: '🥟 Pastéis Simples', ativo: true },
-            // Pastéis Especiais
-            { nome: 'Carne c/ Queijo', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
-            { nome: 'Calabresa c/ Queijo', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
-            { nome: 'Calabresa c/ Catu', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
-            { nome: 'Frango c/ Catu', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
-            { nome: 'Pizza', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
-            { nome: '2 Queijos', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
-            { nome: 'Bauru', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
-            // Pastéis Doces
-            { nome: 'Doce de Leite', preco: 13, categoria: '🍫 Pastéis Doces', ativo: true },
-            { nome: 'Doce Leite c/ Banana', preco: 13, categoria: '🍫 Pastéis Doces', ativo: true },
-            { nome: 'Nutella c/ Morango', preco: 13, categoria: '🍫 Pastéis Doces', ativo: true },
-            // Bebidas
-            { nome: 'Refri Lata', preco: 7, categoria: '🥤 Bebidas', ativo: true },
-            { nome: 'Suco', preco: 8, categoria: '🥤 Bebidas', ativo: true },
-            { nome: 'Coca Cola 2L', preco: 18, categoria: '🥤 Bebidas', ativo: true },
-            { nome: 'Guaraná 2L', preco: 15, categoria: '🥤 Bebidas', ativo: true },
-            { nome: 'Sukita 2L', preco: 15, categoria: '🥤 Bebidas', ativo: true },
-            { nome: 'Água', preco: 3, categoria: '🥤 Bebidas', ativo: true },
-            { nome: 'Água c/ Gás', preco: 5, categoria: '🥤 Bebidas', ativo: true },
-            { nome: 'Água 1,5L', preco: 6, categoria: '🥤 Bebidas', ativo: true },
-            // Bebidas Alcoólicas
-            { nome: 'Cerveja Lata', preco: 6, categoria: '🍺 Bebidas Alcoólicas', ativo: true },
-            { nome: 'Latão', preco: 10, categoria: '🍺 Bebidas Alcoólicas', ativo: true },
-            { nome: 'Latão Heineken', preco: 11, categoria: '🍺 Bebidas Alcoólicas', ativo: true },
-            // Dose & Drinks
-            { nome: 'Gin', preco: 15, categoria: '🍹 Dose & Drinks', ativo: true },
-            { nome: 'Chanceler', preco: 15, categoria: '🍹 Dose & Drinks', ativo: true },
-            { nome: 'Vodka', preco: 15, categoria: '🍹 Dose & Drinks', ativo: true },
-            { nome: 'Xeque Mate', preco: 15, categoria: '🍹 Dose & Drinks', ativo: true },
-            { nome: 'Ice', preco: 13, categoria: '🍹 Dose & Drinks', ativo: true },
-            { nome: 'Skol Beats', preco: 13, categoria: '🍹 Dose & Drinks', ativo: true },
-            { nome: 'Caipirinha (Cachaça)', preco: 25, categoria: '🍹 Dose & Drinks', ativo: true },
-            { nome: 'Caipirinha (Vodka)', preco: 35, categoria: '🍹 Dose & Drinks', ativo: true }
-        ];
 
         const urlParams = new URLSearchParams(window.location.search);
         const mesaUrl = urlParams.get('mesa');
@@ -208,47 +155,73 @@
             document.getElementById('modal-login').classList.remove('hidden');
         }
 
-        // Carregar Cardápio (Insere padrão se estiver vazio)
-        onSnapshot(collection(db, "cardapio"), async (snapshot) => {
+        onSnapshot(collection(db, "cardapio"), (snapshot) => {
             cardapioLista = [];
             snapshot.forEach(docSnap => {
                 cardapioLista.push({ id: docSnap.id, ...docSnap.data() });
             });
-
-            if (cardapioLista.length === 0) {
-                // Se o banco estiver vazio, popula automaticamente com os itens padrão
-                for (let item of cardapioInicialPadrao) {
-                    await addDoc(collection(db, "cardapio"), item);
-                }
-            } else {
-                renderizarCardapio();
-            }
+            renderizarCardapio();
         });
+
+        // Cores e estilos por categoria para diferenciar os grupos
+        function obterEstiloCategoria(categoria) {
+            let catLower = (categoria || "").toLowerCase();
+            if (catLower.includes('hambúrguer') || catLower.includes('lanche')) return { bg: 'bg-orange-50 border-orange-200 text-orange-900', badge: 'bg-orange-500 text-white' };
+            if (catLower.includes('porção') || catLower.includes('porcao')) return { bg: 'bg-yellow-50 border-yellow-200 text-yellow-900', badge: 'bg-yellow-500 text-white' };
+            if (catLower.includes('pastel')) return { bg: 'bg-amber-50 border-amber-200 text-amber-900', badge: 'bg-amber-600 text-white' };
+            if (catLower.includes('bebida') || catLower.includes('refri') || catLower.includes('suco') || catLower.includes('água')) return { bg: 'bg-blue-50 border-blue-200 text-blue-900', badge: 'bg-blue-500 text-white' };
+            if (catLower.includes('alcoólica') || catLower.includes('dose') || catLower.includes('drink') || catLower.includes('cerveja')) return { bg: 'bg-purple-50 border-purple-200 text-purple-900', badge: 'bg-purple-500 text-white' };
+            return { bg: 'bg-gray-50 border-gray-200 text-gray-900', badge: 'bg-gray-500 text-white' };
+        }
+
+        window.rolarParaCategoria = function(catId) {
+            const elemento = document.getElementById('cat-' + catId);
+            if (elemento) {
+                elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
 
         function renderizarCardapio() {
             const container = document.getElementById('cardapio-dinamico-container');
+            const atalhosContainer = document.getElementById('botoes-categorias-atalho');
+            
             let categorias = {};
             cardapioLista.forEach(item => {
-                if (item.ativo === false) return; // Não mostra itens desativados
+                if (item.ativo === false) return;
                 let cat = item.categoria || "Geral";
                 if (!categorias[cat]) categorias[cat] = [];
                 categorias[cat].push(item);
             });
 
+            atalhosContainer.innerHTML = '';
             container.innerHTML = '';
+
             for (let cat in categorias) {
+                let catIdSafe = cat.replace(/[^a-zA-Z0-9]/g, '_');
+
+                // Botão de atalho rápido no topo
+                let btnAtalho = document.createElement('button');
+                let estiloCat = obterEstiloCategoria(cat);
+                btnAtalho.className = `${estiloCat.badge} text-[11px] font-bold px-3 py-1 rounded-lg flex-shrink-0 shadow-sm transition hover:opacity-80`;
+                btnAtalho.innerText = cat;
+                btnAtalho.onclick = () => rolarParaCategoria(catIdSafe);
+                atalhosContainer.appendChild(btnAtalho);
+
+                // Título da Categoria
                 let tituloCat = document.createElement('h3');
-                tituloCat.className = "font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1 mt-2";
+                tituloCat.id = 'cat-' + catIdSafe;
+                tituloCat.className = "font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1 mt-2 text-xs uppercase tracking-wider";
                 tituloCat.innerText = cat;
                 container.appendChild(tituloCat);
 
                 let grid = document.createElement('div');
-                grid.className = "grid grid-cols-2 gap-2 mb-4";
+                grid.className = "grid grid-cols-2 gap-2 mb-3";
 
                 categorias[cat].forEach(prod => {
                     let btn = document.createElement('button');
-                    btn.className = "bg-orange-50 border border-orange-200 text-gray-800 p-2 rounded-lg hover:bg-orange-100 text-left flex flex-col transition";
-                    btn.innerHTML = `<span class="text-xs font-bold">${prod.nome}</span><span class="text-[10px] text-gray-500 mt-1">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
+                    let estilo = obterEstiloCategoria(cat);
+                    btn.className = `${estilo.bg} border p-2 rounded-lg text-left flex flex-col transition hover:shadow-sm`;
+                    btn.innerHTML = `<span class="text-xs font-bold">${prod.nome}</span><span class="text-[10px] opacity-75 mt-1 font-semibold">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
                     btn.onclick = () => adicionarItem(prod.nome, Number(prod.preco));
                     grid.appendChild(btn);
                 });
@@ -270,12 +243,15 @@
         window.renderizarMesas = function() {
             const container = document.getElementById('container-mesas');
             container.innerHTML = '';
-            mesasDisponiveis.forEach(mesa => {
+            let todasAsMesas = [...mesasFixas, ...mesasExtras];
+
+            todasAsMesas.forEach(mesa => {
                 const btn = document.createElement('button');
                 const isSelected = mesaSelecionada === mesa;
                 const isOccupied = mesasOcupadas.includes(mesa);
+                const isExtra = mesasExtras.includes(mesa);
 
-                let estilo = "font-bold py-2 px-1 rounded-lg text-xs border-2 transition shadow-sm ";
+                let estilo = "font-bold py-2 px-1 rounded-lg text-xs border-2 transition shadow-sm relative ";
                 if (isSelected) estilo += "bg-black text-yellow-500 border-yellow-500 ring-2 ring-yellow-400";
                 else if (isOccupied) estilo += "bg-red-600 text-white border-red-700";
                 else estilo += "bg-gray-200 text-gray-700 border-transparent hover:bg-gray-300";
@@ -283,6 +259,20 @@
                 btn.className = estilo;
                 btn.innerText = mesa + (isOccupied ? " 🔴" : "");
                 btn.onclick = () => { mesaSelecionada = mesa; renderizarMesas(); };
+
+                // Se for mesa extra, permite excluir segurando ou clicando com toque longo / confirmação
+                if (isExtra && !isOccupied) {
+                    btn.title = "Toque longo para excluir mesa extra";
+                    btn.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        if (confirm(`Deseja excluir a mesa extra "${mesa}"?`)) {
+                            mesasExtras = mesasExtras.filter(m => m !== mesa);
+                            localStorage.setItem('point_derico_mesas_extras', JSON.stringify(mesasExtras));
+                            if (mesaSelecionada === mesa) mesaSelecionada = "";
+                            renderizarMesas();
+                        }
+                    };
+                }
                 container.appendChild(btn);
             });
 
@@ -290,11 +280,17 @@
             btnAdd.className = "bg-green-100 text-green-700 font-bold py-2 px-1 rounded-lg text-xs border-2 border-green-400 border-dashed hover:bg-green-200 transition";
             btnAdd.innerText = "+ Nova";
             btnAdd.onclick = () => {
-                const novaMesa = prompt("Nome da mesa/local:");
+                const novaMesa = prompt("Nome da mesa/local extra:");
                 if (novaMesa && novaMesa.trim() !== '') {
-                    mesasDisponiveis.push(novaMesa.trim());
-                    mesaSelecionada = novaMesa.trim();
-                    renderizarMesas();
+                    let nomeFormatado = novaMesa.trim();
+                    if (!mesasFixas.includes(nomeFormatado) && !mesasExtras.includes(nomeFormatado)) {
+                        mesasExtras.push(nomeFormatado);
+                        localStorage.setItem('point_derico_mesas_extras', JSON.stringify(mesasExtras));
+                        mesaSelecionada = nomeFormatado;
+                        renderizarMesas();
+                    } else {
+                        alert("Essa mesa já existe!");
+                    }
                 }
             };
             container.appendChild(btnAdd);
@@ -324,7 +320,7 @@
             container.innerHTML = '';
             
             if (itensCarrinho.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-center italic text-sm mt-2" id="vazio-texto">Nenhum item adicionado.</p>';
+                container.innerHTML = '<p class="text-gray-400 text-center italic text-xs mt-2" id="vazio-texto">Nenhum item adicionado.</p>';
                 totalDisplay.innerText = 'R$ 0,00';
                 return;
             }
@@ -336,12 +332,12 @@
                 div.className = "flex justify-between items-center py-1 border-b border-gray-100 last:border-0";
                 div.innerHTML = `
                     <div class="flex flex-col">
-                        <span class="font-bold text-gray-800 text-sm">${item.qtd}x ${item.nome}</span>
+                        <span class="font-bold text-gray-800 text-xs">${item.qtd}x ${item.nome}</span>
                         <span class="text-[10px] text-gray-500">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
                     </div>
                     <div class="space-x-1 flex-shrink-0 ml-2">
-                        <button onclick="removerItem('${item.nome}')" class="bg-red-100 text-red-600 px-3 py-1 rounded-lg font-bold text-sm">-</button>
-                        <button onclick="adicionarItem('${item.nome}', ${item.preco})" class="bg-green-100 text-green-600 px-3 py-1 rounded-lg font-bold text-sm">+</button>
+                        <button onclick="removerItem('${item.nome}')" class="bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold text-xs">-</button>
+                        <button onclick="adicionarItem('${item.nome}', ${item.preco})" class="bg-green-100 text-green-600 px-2 py-0.5 rounded font-bold text-xs">+</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -395,7 +391,7 @@
                     total: total,
                     dataCriacao: new Date().toISOString().split('T')[0],
                     timestampCriacao: Date.now(),
-                    horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+                    horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit', second:'2-digit'})
                 };
 
                 await addDoc(collection(db, "pedidos"), dadosPedido);
@@ -413,7 +409,6 @@
             function format(id, val) { return id + String(val.length).padStart(2, '0') + val; }
             let merchantAccount = format("00", "br.gov.bcb.pix") + format("01", pixKey);
             let payload = format("00", "01") + format("26", merchantAccount) + format("52", "0000") + format("53", "986") + (amount > 0 ? format("54", amount) : "") + format("58", "BR") + format("59", name.substring(0, 25).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("60", city.substring(0, 15).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("62", format("05", "POINTDERICO")) + "6304";
-
             let polinomio = 0x1021, resultado = 0xFFFF;
             for (let c = 0; c < payload.length; c++) {
                 resultado ^= (payload.charCodeAt(c) << 8);
