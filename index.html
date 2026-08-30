@@ -3,52 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comanda - Atendimento</title>
+    <title>Comanda - Point Derico</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 pb-12">
     <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg p-4 flex flex-col justify-between">
         <div>
-            <header class="mb-6 text-center">
-                <h1 class="text-2xl font-bold text-orange-600">Nova Comanda</h1>
-                <p class="text-sm text-gray-500">Selecione os itens e informe a mesa</p>
+            <header class="mb-4 text-center">
+                <h1 class="text-3xl font-bold text-yellow-500 bg-black py-2 rounded-xl">POINT DERICO</h1>
+                <p class="text-sm text-gray-500 mt-1">Lançamento de Comanda</p>
             </header>
             
-            <div class="mb-5">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Local / Mesa:</label>
-                <input type="text" id="mesa" placeholder="Ex: Mesa 05 ou Balcão" class="w-full px-3 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-medium bg-gray-50">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-1">Local / Mesa:</label>
+                <input type="text" id="mesa" placeholder="Ex: Mesa 05 ou Balcão" class="w-full px-3 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 text-lg font-medium bg-gray-50">
             </div>
 
-            <div class="mb-5">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Adicionar Itens:</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="adicionarItem('X-Salada')" class="bg-orange-50 border border-orange-200 text-orange-700 p-3 rounded-xl font-semibold hover:bg-orange-100 transition text-left">🍔 X-Salada</button>
-                    <button onclick="adicionarItem('X-Bacon')" class="bg-orange-50 border border-orange-200 text-orange-700 p-3 rounded-xl font-semibold hover:bg-orange-100 transition text-left">🥓 X-Bacon</button>
-                    <button onclick="adicionarItem('X-Tudo')" class="bg-orange-50 border border-orange-200 text-orange-700 p-3 rounded-xl font-semibold hover:bg-orange-100 transition text-left">👑 X-Tudo</button>
-                    <button onclick="adicionarItem('Batata Frita')" class="bg-orange-50 border border-orange-200 text-orange-700 p-3 rounded-xl font-semibold hover:bg-orange-100 transition text-left">🍟 Batata Frita</button>
-                    <button onclick="adicionarItem('Coca-Cola')" class="bg-orange-50 border border-orange-200 text-orange-700 p-3 rounded-xl font-semibold hover:bg-orange-100 transition text-left">🥤 Coca-Cola</button>
-                    <button onclick="adicionarItem('Guaraná')" class="bg-orange-50 border border-orange-200 text-orange-700 p-3 rounded-xl font-semibold hover:bg-orange-100 transition text-left">🥤 Guaraná</button>
+            <div class="mb-4 h-[40vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50">
+                
+                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍔 Hambúrgueres</h3>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <button onclick="adicionarItem('X-Burguer')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-sm font-semibold hover:bg-orange-200 text-left">X-Burguer</button>
+                    <button onclick="adicionarItem('X-Salada')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-sm font-semibold hover:bg-orange-200 text-left">X-Salada</button>
+                    <button onclick="adicionarItem('X-Egg')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-sm font-semibold hover:bg-orange-200 text-left">X-Egg</button>
+                    <button onclick="adicionarItem('X-Bacon')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-sm font-semibold hover:bg-orange-200 text-left">X-Bacon</button>
+                    <button onclick="adicionarItem('Duplo Chesse')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-sm font-semibold hover:bg-orange-200 text-left col-span-2 text-center">Duplo Chesse</button>
                 </div>
+
+                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍟 Porções</h3>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <button onclick="adicionarItem('Batata Frita P')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Batata Frita P</button>
+                    <button onclick="adicionarItem('Batata Frita G')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Batata Frita G</button>
+                    <button onclick="adicionarItem('Porção Mista')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Porção Mista</button>
+                    <button onclick="adicionarItem('Frango c/ Batata')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Frango c/ Batata</button>
+                    <button onclick="adicionarItem('Porção Família Frango')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Família Frango</button>
+                    <button onclick="adicionarItem('Contra c/ Batata')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Contra c/ Batata</button>
+                </div>
+
+                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🥟 Pastéis</h3>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <button onclick="adicionarItem('Pastel Carne')" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg text-xs font-semibold text-left">Carne (Simples)</button>
+                    <button onclick="adicionarItem('Pastel Queijo')" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg text-xs font-semibold text-left">Queijo (Simples)</button>
+                    <button onclick="adicionarItem('Pastel Calabresa')" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg text-xs font-semibold text-left">Calabresa (Simples)</button>
+                    <button onclick="adicionarItem('Pastel Frango')" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg text-xs font-semibold text-left">Frango (Simples)</button>
+                    
+                    <button onclick="adicionarItem('Pastel Carne c/ Queijo')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left">Carne c/ Queijo</button>
+                    <button onclick="adicionarItem('Pastel Frango c/ Catupiry')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left">Frango c/ Catupiry</button>
+                    <button onclick="adicionarItem('Pastel Pizza')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left">Pizza</button>
+                    <button onclick="adicionarItem('Pastel Bauru')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left">Bauru</button>
+                    
+                    <button onclick="adicionarItem('Pastel Doce de Leite')" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg text-xs font-semibold text-left">Doce de Leite</button>
+                    <button onclick="adicionarItem('Pastel Nutella c/ Morango')" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg text-xs font-semibold text-left">Nutella Morango</button>
+                </div>
+
+                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🥤 Bebidas sem Álcool</h3>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <button onclick="adicionarItem('Refri Lata')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Refri Lata</button>
+                    <button onclick="adicionarItem('Refri 2L')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Refri 2L</button>
+                    <button onclick="adicionarItem('Suco')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Suco</button>
+                    <button onclick="adicionarItem('Água')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Água</button>
+                </div>
+
+                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍺 Álcool / Doses</h3>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <button onclick="adicionarItem('Cerveja Lata')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold text-left">Cerveja Lata</button>
+                    <button onclick="adicionarItem('Latão')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold text-left">Latão</button>
+                    <button onclick="adicionarItem('Latão Heineken')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold text-left">Heineken Latão</button>
+                    <button onclick="adicionarItem('Skol Beats')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold text-left">Skol Beats</button>
+                    <button onclick="adicionarItem('Caipirinha Cachaça')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold text-left">Caipirinha Cachaça</button>
+                    <button onclick="adicionarItem('Caipirinha Vodka')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold text-left">Caipirinha Vodka</button>
+                    <button onclick="adicionarItem('Dose Gin')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold text-left">Dose Gin</button>
+                    <button onclick="adicionarItem('Dose Vodka')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold text-left">Dose Vodka</button>
+                </div>
+
             </div>
 
-            <div class="mb-5">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Itens do Pedido:</label>
-                <div id="resumo-pedido" class="bg-gray-50 border rounded-xl p-3 min-h-[100px] max-h-[180px] overflow-y-auto mb-3">
+            <div class="mb-3">
+                <label class="block text-gray-700 text-sm font-bold mb-1">Resumo do Pedido:</label>
+                <div id="resumo-pedido" class="bg-white border-2 border-gray-200 rounded-xl p-2 min-h-[80px] max-h-[120px] overflow-y-auto">
                     <p class="text-gray-400 text-center italic text-sm mt-4" id="vazio-texto">Nenhum item adicionado ainda.</p>
                 </div>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Observações (opcional):</label>
-                <input type="text" id="obs" placeholder="Ex: Sem cebola, caprichar no molho..." class="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-1">Observações:</label>
+                <input type="text" id="obs" placeholder="Ex: Sem cebola, Refri Coca..." class="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 text-sm bg-gray-50">
             </div>
         </div>
 
         <div>
-            <button onclick="enviarPedido()" class="w-full bg-orange-600 text-white font-bold py-4 px-4 rounded-xl hover:bg-orange-700 transition shadow-lg text-lg">
+            <button onclick="enviarPedido()" class="w-full bg-black text-yellow-500 font-bold py-4 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg text-lg border-2 border-yellow-500">
                 🚀 Enviar para Cozinha
             </button>
-            <p id="status" class="text-center text-sm mt-3 text-green-600 font-semibold h-5"></p>
+            <p id="status" class="text-center text-sm mt-2 text-green-600 font-semibold h-5"></p>
         </div>
     </div>
 
@@ -85,8 +132,6 @@
 
         function atualizarResumo() {
             const container = document.getElementById('resumo-pedido');
-            const vazioTexto = document.getElementById('vazio-texto');
-            
             container.innerHTML = '';
             
             if (itensCarrinho.length === 0) {
@@ -96,12 +141,12 @@
 
             itensCarrinho.forEach(item => {
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center py-2 border-b border-gray-200 last:border-0";
+                div.className = "flex justify-between items-center py-1 border-b border-gray-100 last:border-0";
                 div.innerHTML = `
-                    <span class="font-medium text-gray-800">${item.qtd}x ${item.nome}</span>
-                    <div class="space-x-2">
-                        <button onclick="removerItem('${item.nome}')" class="bg-red-100 text-red-600 px-2 py-1 rounded-lg font-bold text-sm">-</button>
-                        <button onclick="adicionarItem('${item.nome}')" class="bg-green-100 text-green-600 px-2 py-1 rounded-lg font-bold text-sm">+</button>
+                    <span class="font-bold text-gray-800 text-sm">${item.qtd}x ${item.nome}</span>
+                    <div class="space-x-1">
+                        <button onclick="removerItem('${item.nome}')" class="bg-red-100 text-red-600 px-3 py-1 rounded-lg font-bold text-sm shadow-sm">-</button>
+                        <button onclick="adicionarItem('${item.nome}')" class="bg-green-100 text-green-600 px-3 py-1 rounded-lg font-bold text-sm shadow-sm">+</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -123,7 +168,6 @@
                 return;
             }
 
-            // Monta o texto final do pedido
             let textoPedidoFormatado = itensCarrinho.map(i => `${i.qtd}x ${i.nome}`).join('\n');
             if (obs) {
                 textoPedidoFormatado += `\nObs: ${obs}`;
@@ -137,7 +181,6 @@
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
                 });
 
-                // Limpa o formulário
                 document.getElementById('mesa').value = '';
                 document.getElementById('obs').value = '';
                 itensCarrinho = [];
@@ -147,7 +190,7 @@
                 setTimeout(() => status.innerText = "", 3000);
             } catch (e) {
                 console.error("Erro ao enviar pedido: ", e);
-                alert("Erro ao enviar pedido.");
+                alert("Erro ao enviar pedido. Verifique sua internet.");
             }
         }
     </script>
