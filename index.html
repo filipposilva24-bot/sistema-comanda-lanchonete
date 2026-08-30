@@ -8,25 +8,25 @@
 </head>
 <body class="bg-gray-100 pb-12">
 
-    <!-- TELA DE LOGIN / ESCOLHA DO ATENDENTE -->
+    <!-- TELA DE LOGIN / ESCOLHA DO ACESSO -->
     <div id="modal-login" class="fixed inset-0 bg-black/90 z-50 flex justify-center items-center p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
             <h1 class="text-2xl font-bold text-yellow-500 bg-black py-2 rounded-xl mb-2">POINT DERICO</h1>
-            <p class="text-sm text-gray-600 mb-6">Identifique-se para começar a lançar comandas:</p>
+            <p class="text-xs text-gray-500 mb-4 font-semibold uppercase tracking-wider">Selecione quem está operando:</p>
             
-            <div class="space-y-3 mb-6">
-                <button onclick="salvarAtendente('Garçom 1')" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-4 rounded-xl text-base transition shadow-md">
-                    👤 Garçom 1
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <button onclick="salvarAtendente('Bianca')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-3 rounded-xl text-sm transition shadow-md flex flex-col items-center justify-center">
+                    <span class="text-lg mb-0.5">👩‍💼</span> Bianca
                 </button>
-                <button onclick="salvarAtendente('Garçom 2')" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-4 rounded-xl text-base transition shadow-md">
-                    👤 Garçom 2
+                <button onclick="salvarAtendente('Letícia')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-3 rounded-xl text-sm transition shadow-md flex flex-col items-center justify-center">
+                    <span class="text-lg mb-0.5">👩‍💼</span> Letícia
                 </button>
-                <div class="pt-2">
-                    <input type="text" id="nome-personalizado" placeholder="Ou digite outro nome..." class="w-full px-3 py-2 border rounded-xl text-sm mb-2 focus:ring-2 focus:ring-yellow-500 outline-none">
-                    <button onclick="salvarAtendentePersonalizado()" class="w-full bg-black text-yellow-500 font-bold py-2.5 rounded-xl text-xs hover:bg-gray-800 transition">
-                        Entrar com Outro Nome
-                    </button>
-                </div>
+                <button onclick="salvarAtendente('Guilherme')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-3 rounded-xl text-sm transition shadow-md flex flex-col items-center justify-center">
+                    <span class="text-lg mb-0.5">👨‍💼</span> Guilherme
+                </button>
+                <button onclick="salvarAtendente('Balcão')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-3 rounded-xl text-sm transition shadow-md flex flex-col items-center justify-center">
+                    <span class="text-lg mb-0.5">🏪</span> Balcão
+                </button>
             </div>
         </div>
     </div>
@@ -39,7 +39,7 @@
                 <div class="flex justify-between items-center mt-2 px-1">
                     <p class="text-xs text-gray-500">Lançamento de Comanda</p>
                     <button onclick="trocarAtendente()" class="text-[11px] bg-gray-200 hover:bg-gray-300 px-2.5 py-1 rounded-lg font-semibold text-gray-700 transition" id="badge-atendente">
-                        👤 Atendente: --
+                        👤 Operador: --
                     </button>
                 </div>
             </header>
@@ -198,35 +198,29 @@
         const CHAVE_PIX_FIXA = "thiagoderico15@gmail.com"; 
         const NOME_PIX_FIXO = "Point Derico";
 
-        let atendenteAtual = localStorage.getItem('point_derico_atendente') || "";
+        let operadorAtual = localStorage.getItem('point_derico_operador') || "";
         let mesaSelecionada = "";
         let mesasDisponiveis = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
         let mesasOcupadas = [];
 
         window.verificarLogin = function() {
-            if (atendenteAtual) {
+            if (operadorAtual) {
                 document.getElementById('modal-login').classList.add('hidden');
-                document.getElementById('badge-atendente').innerText = `👤 Atendente: ${atendenteAtual}`;
+                document.getElementById('badge-atendente').innerText = `👤 Operador: ${operadorAtual}`;
             } else {
                 document.getElementById('modal-login').classList.remove('hidden');
             }
         }
 
         window.salvarAtendente = function(nome) {
-            atendenteAtual = nome;
-            localStorage.setItem('point_derico_atendente', nome);
+            operadorAtual = nome;
+            localStorage.setItem('point_derico_operador', nome);
             verificarLogin();
         }
 
-        window.salvarAtendentePersonalizado = function() {
-            const input = document.getElementById('nome-personalizado').value.trim();
-            if (!input) return alert("Digite um nome!");
-            salvarAtendente(input);
-        }
-
         window.trocarAtendente = function() {
-            localStorage.removeItem('point_derico_atendente');
-            atendenteAtual = "";
+            localStorage.removeItem('point_derico_operador');
+            operadorAtual = "";
             document.getElementById('modal-login').classList.remove('hidden');
         }
 
@@ -367,7 +361,7 @@
                 let dadosPedido = {
                     mesa: mesaSelecionada,
                     pedido: textoPedidoFormatado,
-                    atendente: atendenteAtual || "Geral", // Registra qual atendente anotou
+                    atendente: operadorAtual || "Geral", 
                     status: 'Pendente', 
                     pagoNaHora: tipoEnvio === 'PagoNaHora', 
                     total: total,
