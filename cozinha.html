@@ -350,6 +350,7 @@
             } catch (e) { alert("Erro ao atualizar."); }
         }
 
+        // CORRIGIDO: Agora grava o status 'Pago' e a 'dataCriacao' atual do dia exato para somar no relatório do caixa
         window.marcarPagoNaHoraConcluido = async function(id) {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
