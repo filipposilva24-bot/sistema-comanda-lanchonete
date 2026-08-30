@@ -3,33 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cozinha - Point Derico</title>
+    <title>Painel - Point Derico</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 min-h-screen text-white font-sans">
+<body class="bg-gray-900 min-h-screen text-white font-sans flex flex-col">
 
-    <!-- Cabeçalho -->
-    <header class="bg-black border-b-4 border-yellow-500 p-4 sticky top-0 z-50 flex justify-between items-center shadow-lg">
-        <div>
-            <h1 class="text-2xl font-bold text-yellow-500">👨‍🍳 Cozinha - Point Derico</h1>
-            <p class="text-sm text-gray-400" id="contador">0 pedidos pendentes</p>
-        </div>
-        <button id="btn-som" onclick="ativarSom()" class="bg-gray-800 border border-gray-600 px-4 py-2 rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition">
-            🔇 Ligar Som
-        </button>
-    </header>
-
-    <!-- Grid de Pedidos -->
-    <main class="p-4">
-        <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <!-- Os cards dos pedidos aparecerão aqui -->
+    <!-- Cabeçalho Principal -->
+    <header class="bg-black border-b-4 border-yellow-500 p-4 sticky top-0 z-50 shadow-lg">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-yellow-500">🔥 Point Derico</h1>
+                <p class="text-xs text-gray-400 mt-1" id="contador">Carregando pedidos...</p>
+            </div>
+            <button id="btn-som" onclick="ativarSom()" class="bg-gray-800 border border-gray-600 px-3 py-2 rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition">
+                🔇 Ligar Som
+            </button>
         </div>
         
-        <!-- Mensagem de tela vazia -->
+        <!-- Botões das Abas -->
+        <div class="flex gap-2">
+            <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="flex-1 bg-yellow-500 text-black font-bold py-2 rounded-t-lg transition shadow-inner">
+                👨‍🍳 Cozinha (Pendentes)
+            </button>
+            <button onclick="mudarAba('caixa')" id="tab-caixa" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 rounded-t-lg transition">
+                💲 Caixa (A Pagar)
+            </button>
+        </div>
+    </header>
+
+    <!-- Área onde os cards vão aparecer -->
+    <main class="p-4 flex-grow relative">
+        <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <!-- Cards gerados via JS -->
+        </div>
+        
+        <!-- Mensagem quando não tem pedidos -->
         <div id="mensagem-vazia" class="text-center mt-20 text-gray-500 hidden">
-            <span class="text-6xl block mb-4">🍽️</span>
-            <h2 class="text-2xl font-bold">Nenhum pedido pendente!</h2>
-            <p>A cozinha está tranquila no momento.</p>
+            <span class="text-6xl block mb-4" id="icone-vazio">🍽️</span>
+            <h2 class="text-2xl font-bold" id="texto-vazio">Cozinha Tranquila!</h2>
+            <p class="text-sm mt-2">Nenhum pedido pendente no momento.</p>
         </div>
     </main>
 
@@ -41,113 +53,169 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const container = document.getElementById('pedidos-container');
-        const msgVazia = document.getElementById('mensagem-vazia');
-        const contadorTxt = document.getElementById('contador');
-        const btnSom = document.getElementById('btn-som');
+        let abaAtual = 'cozinha'; // Controla qual tela estamos vendo
+        let todosPedidos = []; // Guarda tudo que vem do banco
         
-        // Som de notificação (Beep do Google)
         const audioAlert = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         let somAtivado = false;
         let primeiroCarregamento = true;
-        let totalPedidosAtual = 0;
+        let qtdPendentesAnterior = 0;
 
-        // Função para o usuário liberar o som no navegador
+        // Função para liberar o som no navegador
         window.ativarSom = function() {
             somAtivado = true;
-            audioAlert.play().catch(() => {}); // Toca um som mudo pra destravar
-            btnSom.innerText = "🔊 Som Ativado";
-            btnSom.classList.replace('bg-gray-800', 'bg-green-600');
-            btnSom.classList.replace('border-gray-600', 'border-green-500');
+            audioAlert.play().catch(()=>{});
+            const btn = document.getElementById('btn-som');
+            btn.innerText = "🔊 Som ON";
+            btn.classList.replace('bg-gray-800', 'bg-green-600');
+            btn.classList.replace('border-gray-600', 'border-green-500');
         }
 
-        // Traz apenas os pedidos que estão "Pendentes" (ignorando os entregues/pagos)
-        const q = query(collection(db, "pedidos"), where("status", "==", "Pendente"));
+        // Função de trocar de aba
+        window.mudarAba = function(aba) {
+            abaAtual = aba;
+            
+            if (aba === 'cozinha') {
+                document.getElementById('tab-cozinha').className = "flex-1 bg-yellow-500 text-black font-bold py-2 rounded-t-lg transition shadow-inner";
+                document.getElementById('tab-caixa').className = "flex-1 bg-gray-700 text-gray-300 hover:bg-gray-600 font-bold py-2 rounded-t-lg transition";
+                document.getElementById('icone-vazio').innerText = "🍽️";
+                document.getElementById('texto-vazio').innerText = "Cozinha Tranquila!";
+            } else {
+                document.getElementById('tab-cozinha').className = "flex-1 bg-gray-700 text-gray-300 hover:bg-gray-600 font-bold py-2 rounded-t-lg transition";
+                document.getElementById('tab-caixa').className = "flex-1 bg-green-500 text-black font-bold py-2 rounded-t-lg transition shadow-inner";
+                document.getElementById('icone-vazio').innerText = "💲";
+                document.getElementById('texto-vazio').innerText = "Nenhuma conta pendente!";
+            }
+            renderizarCards();
+        }
+
+        // Ouve o banco de dados buscando tanto os Pendentes quanto os Entregues (A Pagar)
+        const q = query(collection(db, "pedidos"), where("status", "in", ["Pendente", "Entregue"]));
 
         onSnapshot(q, (snapshot) => {
-            container.innerHTML = '';
-            
-            const pedidos = [];
+            todosPedidos = [];
             snapshot.forEach((doc) => {
-                pedidos.push({ id: doc.id, ...doc.data() });
+                todosPedidos.push({ id: doc.id, ...doc.data() });
             });
 
-            // Tocar som se entrar um pedido NOVO
-            if (!primeiroCarregamento && pedidos.length > totalPedidosAtual && somAtivado) {
-                audioAlert.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+            // Lógica do Bipe: Só toca se entrar um pedido "Pendente" NOVO
+            const qtdPendentesAgora = todosPedidos.filter(p => p.status === 'Pendente').length;
+            if (!primeiroCarregamento && qtdPendentesAgora > qtdPendentesAnterior && somAtivado) {
+                audioAlert.play().catch(()=>{});
             }
-            totalPedidosAtual = pedidos.length;
+            qtdPendentesAnterior = qtdPendentesAgora;
             primeiroCarregamento = false;
 
-            // Atualizar contador e mensagem
-            contadorTxt.innerText = `${pedidos.length} pedido(s) pendente(s)`;
-            if (pedidos.length === 0) {
+            renderizarCards();
+        });
+
+        // Função que desenha os pedidos na tela
+        function renderizarCards() {
+            const container = document.getElementById('pedidos-container');
+            const msgVazia = document.getElementById('mensagem-vazia');
+            const contadorTxt = document.getElementById('contador');
+            
+            container.innerHTML = '';
+
+            // Filtra os pedidos de acordo com a aba que o usuário está vendo
+            let filtrados = todosPedidos.filter(p => {
+                if(abaAtual === 'cozinha') return p.status === 'Pendente';
+                if(abaAtual === 'caixa') return p.status === 'Entregue';
+            });
+
+            contadorTxt.innerText = `${filtrados.length} pedido(s) nesta aba`;
+
+            if (filtrados.length === 0) {
                 msgVazia.classList.remove('hidden');
+                return;
             } else {
                 msgVazia.classList.add('hidden');
             }
 
-            // Ordena os pedidos pelo horário para os mais velhos ficarem primeiro
-            pedidos.sort((a, b) => (a.horario > b.horario) ? 1 : -1);
+            // Ordena do mais antigo para o mais novo
+            filtrados.sort((a, b) => (a.horario > b.horario) ? 1 : -1);
 
-            // Gerar os Cards na tela
-            pedidos.forEach((pedido) => {
-                // Separa o texto do pedido da observação (se houver)
-                let itensTexto = pedido.pedido;
+            filtrados.forEach((pedido) => {
+                // Separa os Itens da Observação
+                let itensTexto = pedido.pedido || "";
                 let obsTexto = "";
-                if (itensTexto.includes("Obs:")) {
-                    const partes = itensTexto.split("Obs:");
+                if (itensTexto.includes("\nObs:")) {
+                    const partes = itensTexto.split("\nObs:");
                     itensTexto = partes[0].trim();
                     obsTexto = partes[1].trim();
                 }
 
-                // Formatar quebras de linha
-                itensTexto = itensTexto.replace(/\n/g, '<br>');
+                // Prepara os botões dependendo da aba
+                let botoesHtml = "";
+                if(abaAtual === 'cozinha') {
+                    botoesHtml = `
+                        <div class="flex gap-2 mt-4 pt-4 border-t border-gray-700">
+                            <button onclick="atualizarStatus('${pedido.id}', 'Entregue')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-2 rounded-lg text-sm transition">
+                                🛎️ Entregar (Paga depois)
+                            </button>
+                            <button onclick="atualizarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-2 rounded-lg text-sm transition">
+                                ✅ Entregue e PAGO
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    botoesHtml = `
+                        <div class="mt-4 pt-4 border-t border-gray-700">
+                            <button onclick="atualizarStatus('${pedido.id}', 'Pago')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 px-4 rounded-lg text-lg transition shadow-lg">
+                                💲 Receber Pagamento e Finalizar
+                            </button>
+                        </div>
+                    `;
+                }
 
                 const card = document.createElement('div');
                 card.className = "bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden";
                 
-                // Faixa amarela lateral pra dar estilo
+                const corFaixa = abaAtual === 'cozinha' ? 'bg-yellow-500' : 'bg-blue-500';
+
                 card.innerHTML = `
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500"></div>
+                    <div class="absolute left-0 top-0 bottom-0 w-1 ${corFaixa}"></div>
                     <div>
+                        <!-- Cabeçalho do Card -->
                         <div class="flex justify-between items-start mb-3 border-b border-gray-700 pb-2 pl-2">
-                            <h2 class="text-xl font-bold text-yellow-500">${pedido.mesa}</h2>
+                            <h2 class="text-2xl font-bold text-white">${pedido.mesa}</h2>
                             <span class="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded font-mono">${pedido.horario || '--:--'}</span>
                         </div>
                         
-                        <div class="pl-2 text-gray-200 text-lg leading-relaxed mb-4">
-                            ${itensTexto}
+                        <!-- Lista de Itens (agora com o preço individual vindo do index) -->
+                        <div class="pl-2 text-gray-300 text-md leading-relaxed mb-3 bg-gray-900 p-3 rounded-lg border border-gray-700 font-mono">
+                            ${itensTexto.replace(/\n/g, '<br>')}
                         </div>
 
+                        <!-- Valor Total em Destaque -->
+                        <div class="pl-2 flex justify-between items-center mb-3">
+                            <span class="text-gray-400 font-bold uppercase text-xs">Total da Comanda:</span>
+                            <span class="text-green-400 font-bold text-xl">${pedido.total || 'R$ 0,00'}</span>
+                        </div>
+
+                        <!-- Observação -->
                         ${obsTexto ? `
-                        <div class="mb-4 pl-2">
+                        <div class="mb-2 pl-2">
                             <span class="bg-red-900 text-red-200 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">Atenção</span>
                             <p class="text-red-400 font-semibold mt-1 bg-red-950/30 p-2 rounded border border-red-900/50">"${obsTexto}"</p>
                         </div>
                         ` : ''}
                     </div>
                     
-                    <button onclick="concluirPedido('${pedido.id}')" class="w-full mt-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        Pronto / Entregue
-                    </button>
+                    ${botoesHtml}
                 `;
                 container.appendChild(card);
             });
-        });
+        }
 
-        // Função que não deleta, apenas muda o status
-        window.concluirPedido = async function(id) {
+        // Função global para mudar o status do pedido
+        window.atualizarStatus = async function(id, novoStatus) {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
-                await updateDoc(pedidoRef, {
-                    status: "Entregue"
-                });
-                // Como atualizamos para "Entregue", o onSnapshot vai tirar ele da tela sozinho, pois só busca "Pendentes"!
+                await updateDoc(pedidoRef, { status: novoStatus });
             } catch (e) {
-                console.error("Erro ao concluir pedido: ", e);
-                alert("Erro ao tentar atualizar o pedido.");
+                console.error("Erro: ", e);
+                alert("Erro ao atualizar.");
             }
         }
     </script>
