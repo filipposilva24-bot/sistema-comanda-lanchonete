@@ -14,6 +14,11 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .tap-scale:active { transform: scale(0.97); transition: transform 0.1s ease; }
+        /* Garante que os inputs de data respeitem exatamente o tamanho da caixa pai */
+        input[type="date"], input[type="month"] {
+            box-sizing: border-box;
+            max-width: 100%;
+        }
     </style>
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-950 min-h-screen text-zinc-950 dark:text-zinc-100 font-sans flex flex-col select-none transition-colors duration-200">
@@ -70,19 +75,19 @@
                 </button>
             </div>
             
-            <!-- Campos empilhados com controle absoluto de largura e sem estourar -->
-            <div class="flex flex-col gap-3 mb-3">
+            <!-- Campos empilhados com largura 100% idêntica ao total do dia -->
+            <div class="flex flex-col gap-3 mb-3 w-full">
                 <div class="w-full">
                     <label class="block text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Dia Específico:</label>
-                    <input type="date" id="filtro-data" onchange="mudarFiltroTipo('dia')" class="w-full block bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 box-border max-w-full">
+                    <input type="date" id="filtro-data" onchange="mudarFiltroTipo('dia')" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500">
                 </div>
                 <div class="w-full">
                     <label class="block text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Mês Específico:</label>
-                    <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full block bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 box-border max-w-full">
+                    <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500">
                 </div>
             </div>
 
-            <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner">
+            <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full">
                 <div>
                     <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider" id="titulo-total-filtro">Total do Dia:</span>
                     <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-pedidos-filtro">0 comandas pagas</p>
@@ -91,7 +96,7 @@
             </div>
 
             <!-- RANKING -->
-            <div class="mt-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3">
+            <div class="mt-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
                 <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">🏆 Ranking de Itens Mais Vendidos</h3>
                 <div id="ranking-produtos-lista" class="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300 max-h-48 overflow-y-auto">
                     <p class="text-zinc-400 italic">Nenhuma venda registrada no período.</p>
