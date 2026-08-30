@@ -16,11 +16,14 @@
                 <p class="text-xs text-gray-400 mt-1" id="contador">Carregando painel...</p>
             </div>
             <div class="flex gap-2 items-center">
+                <button onclick="abrirAdminCardapio()" class="bg-gray-800 border border-gray-600 px-3 py-2 rounded-lg text-xs font-bold text-orange-400 hover:bg-gray-700 transition" title="Gerenciar Cardápio">
+                    🍔 Cardápio
+                </button>
                 <button onclick="abrirConfigPix()" class="bg-gray-800 border border-gray-600 px-3 py-2 rounded-lg text-xs font-bold text-yellow-400 hover:bg-gray-700 transition">
-                    ⚙️ Chave Pix
+                    ⚙️ Pix
                 </button>
                 <button id="btn-som" onclick="ativarSom()" class="bg-gray-800 border border-gray-600 px-3 py-2 rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition">
-                    🔇 Ligar Som
+                    🔇 Som
                 </button>
             </div>
         </div>
@@ -30,7 +33,7 @@
             <div class="flex gap-1 flex-grow">
                 <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner">👨‍🍳 Cozinha</button>
                 <button onclick="mudarAba('caixa')" id="tab-caixa" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">💲 Mesas A Pagar</button>
-                <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">📊 Caixa / Fechamento</button>
+                <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">📊 Relatórios & Vendas</button>
             </div>
             <button onclick="abrirModalReset()" class="bg-red-950/80 border border-red-700 text-red-300 px-2.5 py-2 rounded-lg text-xs font-bold hover:bg-red-900 transition ml-1" title="Hard Reset do Caixa">
                 🗑️ Reset
@@ -43,7 +46,12 @@
         
         <!-- Filtro de Relatório -->
         <div id="painel-filtro" class="hidden mb-4 bg-gray-800 border border-gray-700 p-4 rounded-xl shadow-md">
-            <h2 class="text-sm font-bold text-yellow-500 mb-2 uppercase tracking-wide">Filtro de Faturamento</h2>
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-sm font-bold text-yellow-500 uppercase tracking-wide">Faturamento & Ranking</h2>
+                <button onclick="enviarRelatorioWhatsApp()" class="bg-green-600 hover:bg-green-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow flex items-center gap-1">
+                    💬 Enviar no WhatsApp
+                </button>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">Selecionar Dia Específico:</label>
@@ -61,6 +69,14 @@
                 </div>
                 <span class="text-2xl font-bold text-green-400" id="valor-total-filtro">R$ 0,00</span>
             </div>
+
+            <!-- RANKING DE MAIS VENDIDOS COM FATURAMENTO -->
+            <div class="mt-4 bg-gray-900 border border-gray-700 rounded-xl p-3">
+                <h3 class="text-xs font-bold text-yellow-500 uppercase tracking-wide mb-2">🏆 Ranking de Itens Mais Vendidos</h3>
+                <div id="ranking-produtos-lista" class="space-y-1.5 text-xs text-gray-300 max-h-48 overflow-y-auto">
+                    <p class="text-gray-500 italic">Nenhuma venda registrada no período.</p>
+                </div>
+            </div>
         </div>
 
         <!-- Container de Cards -->
@@ -74,45 +90,69 @@
         </div>
     </main>
 
+    <!-- MODAL ADMIN CARDÁPIO -->
+    <div id="modal-admin-cardapio" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-gray-800 border border-orange-600 rounded-2xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="fecharAdminCardapio()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
+            <h3 class="text-lg font-bold text-orange-400 mb-1">🍔 Gerenciar Cardápio</h3>
+            <p class="text-xs text-gray-400 mb-4">Adicione, edite ou desative itens do cardápio em tempo real.</p>
+            
+            <div class="bg-gray-900 p-3 rounded-xl border border-gray-700 mb-4 space-y-2">
+                <h4 class="text-xs font-bold text-yellow-500 uppercase">Adicionar Novo Item</h4>
+                <input type="text" id="admin-nome" placeholder="Nome do Lanche/Bebida" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-xs text-white outline-none">
+                <div class="flex gap-2">
+                    <input type="number" step="0.01" id="admin-preco" placeholder="Preço (Ex: 15.00)" class="w-1/2 bg-gray-800 border border-gray-700 rounded-lg p-2 text-xs text-white outline-none">
+                    <input type="text" id="admin-categoria" placeholder="Categoria (Ex: Hambúrgueres)" class="w-1/2 bg-gray-800 border border-gray-700 rounded-lg p-2 text-xs text-white outline-none">
+                </div>
+                <button onclick="salvarNovoItemCardapio()" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 rounded-lg text-xs transition">➕ Adicionar ao Cardápio</button>
+            </div>
+
+            <h4 class="text-xs font-bold text-gray-300 uppercase mb-2">Itens Atuais Cadastrados:</h4>
+            <div id="lista-admin-cardapio" class="space-y-2 max-h-40 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE SENHA ADMIN CARDÁPIO -->
+    <div id="modal-senha-admin" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-gray-800 border border-orange-600 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <button onclick="document.getElementById('modal-senha-admin').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
+            <h3 class="text-lg font-bold text-orange-400 mb-1">🔒 Senha do Cardápio</h3>
+            <p class="text-xs text-gray-300 mb-4">Digite a senha de 4 dígitos para gerenciar o cardápio:</p>
+            <div class="mb-4 text-left">
+                <input type="password" id="input-senha-cardapio" maxlength="4" placeholder="••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-center tracking-widest text-xl text-white outline-none">
+            </div>
+            <button onclick="verificarSenhaCardapio()" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition">Entrar no Admin</button>
+        </div>
+    </div>
+
     <!-- MODAL DE CONFIGURAÇÃO DA CHAVE PIX -->
     <div id="modal-config-pix" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
             <button onclick="fecharConfigPix()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
             <h3 class="text-lg font-bold text-yellow-500 mb-1">Configurar Chave Pix</h3>
-            <p class="text-xs text-gray-400 mb-4">Insira os dados da sua conta para gerar o QR Code correto.</p>
-            
-            <div class="mb-3 text-left">
+            <div class="mb-3 text-left mt-3">
                 <label class="block text-xs text-gray-400 mb-1">Sua Chave Pix:</label>
-                <input type="text" id="input-chave-pix" placeholder="Ex: seu-email@gmail.com ou CPF/CNPJ" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-yellow-500 outline-none">
+                <input type="text" id="input-chave-pix" placeholder="Chave Pix" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white outline-none">
             </div>
             <div class="mb-4 text-left">
-                <label class="block text-xs text-gray-400 mb-1">Nome do Recebedor (Titular):</label>
-                <input type="text" id="input-nome-pix" value="Point Derico" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white focus:ring-2 focus:ring-yellow-500 outline-none">
+                <label class="block text-xs text-gray-400 mb-1">Nome do Recebedor:</label>
+                <input type="text" id="input-nome-pix" value="Point Derico" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-white outline-none">
             </div>
-
-            <button onclick="salvarConfigPix()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg">
-                Salvar Chave Pix
-            </button>
+            <button onclick="salvarConfigPix()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-xl text-sm transition">Salvar Chave Pix</button>
         </div>
     </div>
 
-    <!-- MODAL DE HARD RESET (SENHA 4 DÍGITOS) -->
+    <!-- MODAL DE HARD RESET -->
     <div id="modal-reset" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-gray-800 border border-red-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <button onclick="fecharModalReset()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
-            
             <span class="text-4xl block mb-2">⚠️</span>
             <h3 class="text-lg font-bold text-red-400 mb-1">Hard Reset do Caixa</h3>
-            <p class="text-xs text-gray-300 mb-4 leading-relaxed">Isso apagará <strong class="text-white">TODOS</strong> os pedidos do sistema (pendentes, entregues e faturados). <span class="text-red-400 font-bold block mt-1">Essa ação não tem como voltar atrás!</span></p>
-
+            <p class="text-xs text-gray-300 mb-4">Isso apagará <strong class="text-white">TODOS</strong> os pedidos. Ação sem volta!</p>
             <div class="mb-4 text-left">
-                <label class="block text-xs text-gray-400 mb-1 font-bold">Digite a senha de 4 dígitos:</label>
-                <input type="password" id="input-senha-reset" maxlength="4" placeholder="••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-center tracking-widest text-xl text-white focus:ring-2 focus:ring-red-500 outline-none">
+                <input type="password" id="input-senha-reset" maxlength="4" placeholder="••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-center tracking-widest text-xl text-white outline-none">
             </div>
-
-            <button onclick="executarHardReset()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg">
-                🔴 Confirmar Hard Reset
-            </button>
+            <button onclick="executarHardReset()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition">🔴 Confirmar Hard Reset</button>
         </div>
     </div>
 
@@ -120,32 +160,20 @@
     <div id="modal-pix" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <button onclick="fecharModalPix()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
-            
             <h3 class="text-lg font-bold text-yellow-500 mb-1" id="modal-mesa-titulo">Mesa</h3>
-            <p class="text-xs text-gray-400 mb-3">Extrato para pagamento via Pix</p>
-
             <div id="modal-extrato-lista" class="bg-gray-900 border border-gray-700 rounded-xl p-3 text-left text-xs font-mono text-gray-300 mb-3 max-h-32 overflow-y-auto"></div>
-
-            <div class="mb-3">
-                <span class="text-xs text-gray-400 uppercase font-bold">Valor a Pagar:</span>
-                <p class="text-2xl font-bold text-green-400" id="modal-valor-total">R$ 0,00</p>
-            </div>
-
+            <p class="text-2xl font-bold text-green-400 mb-3" id="modal-valor-total">R$ 0,00</p>
             <div class="bg-white p-3 rounded-xl inline-block mb-2 shadow-inner">
                 <img id="qrcode-img" src="" alt="QR Code Pix" class="w-40 h-40 mx-auto">
             </div>
-            
             <p class="text-[10px] text-gray-400 mb-4" id="aviso-chave-pix">Chave: ...</p>
-
-            <button onclick="confirmarPagamentoPix()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg">
-                ✅ Confirmar Pagamento e Fechar Mesa
-            </button>
+            <button onclick="confirmarPagamentoPix()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition">✅ Confirmar Pagamento e Fechar Mesa</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
@@ -153,10 +181,12 @@
 
         let abaAtual = 'cozinha'; 
         let todosPedidos = []; 
+        let cardapioAdmin = [];
         let tipoFiltroRelatorio = 'dia'; 
         let pedidoSelecionadoId = null;
 
         const SENHA_HARD_RESET = "1234";
+        const SENHA_CARDAPIO = "1234";
 
         const audioAlert = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         let somAtivado = false;
@@ -166,6 +196,78 @@
         const hojeISO = new Date().toISOString().split('T')[0];
         document.getElementById('filtro-data').value = hojeISO;
         document.getElementById('filtro-mes').value = hojeISO.slice(0, 7);
+
+        window.abrirAdminCardapio = function() {
+            document.getElementById('input-senha-cardapio').value = '';
+            document.getElementById('modal-senha-admin').classList.remove('hidden');
+        }
+
+        window.verificarSenhaCardapio = function() {
+            const senha = document.getElementById('input-senha-cardapio').value.trim();
+            if (senha !== SENHA_CARDAPIO) {
+                alert("Senha incorreta!");
+                return;
+            }
+            document.getElementById('modal-senha-admin').classList.add('hidden');
+            document.getElementById('modal-admin-cardapio').classList.remove('hidden');
+            carregarAdminCardapio();
+        }
+
+        window.fecharAdminCardapio = function() {
+            document.getElementById('modal-admin-cardapio').classList.add('hidden');
+        }
+
+        window.salvarNovoItemCardapio = async function() {
+            const nome = document.getElementById('admin-nome').value.trim();
+            const preco = document.getElementById('admin-preco').value.trim();
+            const categoria = document.getElementById('admin-categoria').value.trim() || "Geral";
+            if(!nome || !preco) return alert("Preencha nome e preço!");
+
+            try {
+                await addDoc(collection(db, "cardapio"), {
+                    nome, preco: parseFloat(preco), categoria, ativo: true
+                });
+                document.getElementById('admin-nome').value = '';
+                document.getElementById('admin-preco').value = '';
+                document.getElementById('admin-categoria').value = '';
+                carregarAdminCardapio();
+                alert("Item adicionado com sucesso!");
+            } catch(e) { alert("Erro ao adicionar item."); }
+        }
+
+        async function carregarAdminCardapio() {
+            const snapshot = await getDocs(collection(db, "cardapio"));
+            cardapioAdmin = [];
+            const listaDiv = document.getElementById('lista-admin-cardapio');
+            listaDiv.innerHTML = '';
+            snapshot.forEach(docSnap => {
+                let item = { id: docSnap.id, ...docSnap.data() };
+                cardapioAdmin.push(item);
+
+                let div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-gray-800 p-2 rounded-lg border border-gray-700 text-xs";
+                div.innerHTML = `
+                    <div><strong>${item.nome}</strong> - R$ ${Number(item.preco).toFixed(2).replace('.', ',')} <span class="text-gray-400 text-[10px]">(${item.categoria})</span></div>
+                    <div class="flex gap-1">
+                        <button onclick="alternarStatusItem('${item.id}', ${item.ativo !== false})" class="px-2 py-1 rounded text-[10px] font-bold ${item.ativo !== false ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200'}">${item.ativo !== false ? 'Ativo' : 'Inativo'}</button>
+                        <button onclick="excluirItemCardapio('${item.id}')" class="bg-red-900 text-white px-2 py-1 rounded text-[10px]">🗑️</button>
+                    </div>
+                `;
+                listaDiv.appendChild(div);
+            });
+        }
+
+        window.alternarStatusItem = async function(id, statusAtual) {
+            await updateDoc(doc(db, "cardapio", id), { ativo: !statusAtual });
+            carregarAdminCardapio();
+        }
+
+        window.excluirItemCardapio = async function(id) {
+            if(confirm("Deseja excluir este item do cardápio?")) {
+                await deleteDoc(doc(db, "cardapio", id));
+                carregarAdminCardapio();
+            }
+        }
 
         window.obterChaveConfigurada = function() {
             let chave = localStorage.getItem('point_derico_chave_pix') || "thiagoderico15@gmail.com";
@@ -187,13 +289,10 @@
         window.salvarConfigPix = function() {
             const chave = document.getElementById('input-chave-pix').value.trim();
             const nome = document.getElementById('input-nome-pix').value.trim();
-            if(!chave) {
-                alert("Por favor, insira a sua chave Pix!");
-                return;
-            }
+            if(!chave) return alert("Insira a chave Pix!");
             localStorage.setItem('point_derico_chave_pix', chave);
             localStorage.setItem('point_derico_nome_pix', nome || "Point Derico");
-            alert("Chave Pix salva com sucesso!");
+            alert("Salvo com sucesso!");
             fecharConfigPix();
         }
 
@@ -207,24 +306,15 @@
         }
 
         window.executarHardReset = async function() {
-            const senhaDigitada = document.getElementById('input-senha-reset').value.trim();
-            if (senhaDigitada !== SENHA_HARD_RESET) {
-                alert("Senha incorreta!");
-                return;
-            }
-
+            if (document.getElementById('input-senha-reset').value.trim() !== SENHA_HARD_RESET) return alert("Senha incorreta!");
             try {
                 fecharModalReset();
                 const snapshot = await getDocs(collection(db, "pedidos"));
                 let promessas = [];
-                snapshot.forEach((documento) => {
-                    promessas.push(deleteDoc(doc(db, "pedidos", documento.id)));
-                });
+                snapshot.forEach(docSnap => promessas.push(deleteDoc(doc(db, "pedidos", docSnap.id))));
                 await Promise.all(promessas);
-                alert("Hard Reset realizado com sucesso! O caixa e os pedidos foram zerados.");
-            } catch (e) {
-                alert("Erro ao executar o Hard Reset.");
-            }
+                alert("Hard Reset realizado com sucesso!");
+            } catch (e) { alert("Erro ao resetar."); }
         }
 
         window.ativarSom = function() {
@@ -233,7 +323,6 @@
             const btn = document.getElementById('btn-som');
             btn.innerText = "🔊 Som ON";
             btn.classList.replace('bg-gray-800', 'bg-green-600');
-            btn.classList.replace('border-gray-600', 'border-green-500');
         }
 
         window.mudarAba = function(aba) {
@@ -270,6 +359,12 @@
             renderizarCards();
         });
 
+        function calcularTempoEspera(timestamp) {
+            if (!timestamp) return "0 min";
+            let diffMin = Math.floor((Date.now() - timestamp) / 60000);
+            return `${diffMin} min`;
+        }
+
         function renderizarCards() {
             const container = document.getElementById('pedidos-container');
             const msgVazia = document.getElementById('mensagem-vazia');
@@ -299,16 +394,48 @@
                 });
 
                 let totalArrecadado = 0;
+                let produtosContagem = {}; // { nomeProduto: { qtd, faturamento } }
+
                 filtrados.forEach(p => {
                     if (p.total) {
                         let limpo = p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
                         totalArrecadado += parseFloat(limpo) || 0;
                     }
+                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) {
+                        p.itensBrutos.forEach(i => {
+                            if (!produtosContagem[i.nome]) produtosContagem[i.nome] = { qtd: 0, faturamento: 0 };
+                            produtosContagem[i.nome].qtd += i.qtd;
+                            produtosContagem[i.nome].faturamento += (i.preco * i.qtd);
+                        });
+                    }
                 });
+
                 document.getElementById('valor-total-filtro').innerText = `R$ ${totalArrecadado.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-filtro').innerText = `${filtrados.length} comanda(s) finalizada(s)`;
                 document.getElementById('titulo-total-filtro').innerText = tipoFiltroRelatorio === 'dia' ? "Total do Dia:" : "Total do Mês:";
-                contadorTxt.innerText = `Histórico de Caixa`;
+
+                // Renderizar Ranking de Mais Vendidos com Faturamento
+                const rankingLista = document.getElementById('ranking-produtos-lista');
+                rankingLista.innerHTML = '';
+                let arrayRanking = Object.keys(produtosContagem).map(nome => ({
+                    nome, ...produtosContagem[nome]
+                })).sort((a, b) => b.qtd - a.qtd);
+
+                if (arrayRanking.length === 0) {
+                    rankingLista.innerHTML = '<p class="text-gray-500 italic">Nenhuma venda registrada no período.</p>';
+                } else {
+                    arrayRanking.forEach((prod, index) => {
+                        let divRank = document.createElement('div');
+                        divRank.className = "flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-700";
+                        divRank.innerHTML = `
+                            <span><strong>#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span>
+                            <span class="text-green-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>
+                        `;
+                        rankingLista.appendChild(divRank);
+                    });
+                }
+
+                contadorTxt.innerText = `Relatórios & Faturamento`;
                 document.getElementById('icone-vazio').innerText = "📊";
                 document.getElementById('texto-vazio').innerText = "Nenhum fechamento registrado.";
             }
@@ -320,11 +447,7 @@
                 msgVazia.classList.add('hidden');
             }
 
-            filtrados.sort((a, b) => {
-                let horaA = a.horario || "00:00";
-                let horaB = b.horario || "00:00";
-                return horaB.localeCompare(horaA);
-            });
+            filtrados.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
 
             filtrados.forEach((pedido) => {
                 let itensTexto = pedido.pedido || "";
@@ -340,16 +463,17 @@
                 let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2 pl-2"><span class="bg-green-800 text-green-100 text-[10px] font-bold px-2 py-0.5 rounded uppercase">⚡ JÁ PAGO NO PIX</span></div>` : '';
                 let badgeAtendente = pedido.atendente ? `<span class="bg-gray-700 text-yellow-400 text-[10px] px-2 py-0.5 rounded font-bold uppercase">👤 ${pedido.atendente}</span>` : '';
 
+                // Cronômetro para Cozinha
+                let diffMinutos = pedido.timestampCriacao ? Math.floor((Date.now() - pedido.timestampCriacao) / 60000) : 0;
+                let corTempo = "bg-gray-700 text-gray-300";
+                if (diffMinutos >= 15 && diffMinutos < 30) corTempo = "bg-amber-600 text-white animate-pulse";
+                else if (diffMinutos >= 30) corTempo = "bg-red-600 text-white animate-pulse";
+                let badgeCronometro = `<span class="${corTempo} text-xs px-2 py-1 rounded font-mono font-bold">⏱️ ${calcularTempoEspera(pedido.timestampCriacao)}</span>`;
+
                 if(abaAtual === 'cozinha') {
                     corFaixa = 'bg-yellow-500';
                     if (pedido.pagoNaHora) {
-                        botoesHtml = `
-                            <div class="mt-3 pt-3 border-t border-gray-700">
-                                <button onclick="marcarPagoNaHoraConcluido('${pedido.id}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-2 rounded-lg text-xs transition">
-                                    ✅ Concluir e Faturar (Já Pago)
-                                </button>
-                            </div>
-                        `;
+                        botoesHtml = `<div class="mt-3 pt-3 border-t border-gray-700"><button onclick="marcarPagoNaHoraConcluido('${pedido.id}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-2 rounded-lg text-xs transition">✅ Concluir e Faturar (Já Pago)</button></div>`;
                     } else {
                         botoesHtml = `
                             <div class="flex gap-2 mt-3 pt-3 border-t border-gray-700">
@@ -363,12 +487,8 @@
                     corFaixa = 'bg-blue-500';
                     botoesHtml = `
                         <div class="mt-3 pt-3 border-t border-gray-700 flex gap-2">
-                            <button onclick="abrirModalPix('${pedido.id}', '${pedido.mesa}', '${pedido.total}', '${encodeURIComponent(pedido.pedido)}') " class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-3 rounded-lg text-xs transition flex justify-center items-center gap-1 shadow-lg">
-                                📱 Gerar Pix (Mesa)
-                            </button>
-                            <button onclick="mudarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-3 rounded-lg text-xs transition flex justify-center items-center gap-1 shadow-lg">
-                                💲 Fechar (Dinheiro/Cartão)
-                            </button>
+                            <button onclick="abrirModalPix('${pedido.id}', '${pedido.mesa}', '${pedido.total}', '${encodeURIComponent(pedido.pedido)}') " class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-3 rounded-lg text-xs transition flex justify-center items-center gap-1 shadow-lg">📱 Gerar Pix (Mesa)</button>
+                            <button onclick="mudarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-3 rounded-lg text-xs transition flex justify-center items-center gap-1 shadow-lg">💲 Fechar (Dinheiro/Cartão)</button>
                         </div>
                     `;
                 } else {
@@ -386,7 +506,10 @@
                                 <h2 class="text-xl font-bold text-white">${pedido.mesa}</h2>
                                 <div class="mt-1">${badgeAtendente}</div>
                             </div>
-                            <span class="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded font-mono">${pedido.horario || '--:--'}</span>
+                            <div class="flex flex-col items-end gap-1">
+                                ${badgeCronometro}
+                                <span class="text-gray-400 text-[10px] font-mono">${pedido.horario || '--:--'}</span>
+                            </div>
                         </div>
                         ${avisoPagoNaHora}
                         <div class="pl-2 text-gray-300 text-sm leading-relaxed mb-3 bg-gray-900 p-2.5 rounded-lg border border-gray-700 font-mono">
@@ -404,6 +527,16 @@
             });
         }
 
+        window.enviarRelatorioWhatsApp = function() {
+            let totalTxt = document.getElementById('valor-total-filtro').innerText;
+            let qtdTxt = document.getElementById('qtd-pedidos-filtro').innerText;
+            let periodo = tipoFiltroRelatorio === 'dia' ? `do dia ${document.getElementById('filtro-data').value}` : `do mês ${document.getElementById('filtro-mes').value}`;
+            
+            let mensagem = `📊 *Fechamento Point Derico* (${periodo})\n\n💰 *Faturamento Total:* ${totalTxt}\n🧾 *Comandas Finalizadas:* ${qtdTxt}\n\n🔥 Sistema Point Derico`;
+            let url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
+        }
+
         window.mudarStatus = async function(id, novoStatus) {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
@@ -417,18 +550,13 @@
         window.marcarPagoNaHoraConcluido = async function(id) {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
-                await updateDoc(pedidoRef, { 
-                    status: 'Pago',
-                    dataCriacao: new Date().toISOString().split('T')[0]
-                });
+                await updateDoc(pedidoRef, { status: 'Pago', dataCriacao: new Date().toISOString().split('T')[0] });
             } catch (e) { alert("Erro ao concluir."); }
         }
 
         window.excluirPedido = async function(id) {
             if (confirm("Tem certeza que deseja cancelar e excluir este pedido?")) {
-                try {
-                    await deleteDoc(doc(db, "pedidos", id));
-                } catch (e) { alert("Erro ao excluir."); }
+                try { await deleteDoc(doc(db, "pedidos", id)); } catch (e) { alert("Erro ao excluir."); }
             }
         }
 
@@ -437,17 +565,12 @@
             pedidoSelecionadoId = id;
             document.getElementById('modal-mesa-titulo').innerText = mesa;
             document.getElementById('modal-valor-total').innerText = totalStr;
-            
-            let textoPedido = decodeURIComponent(pedidoEncoded).replace(/\n/g, '<br>');
-            document.getElementById('modal-extrato-lista').innerHTML = textoPedido;
+            document.getElementById('modal-extrato-lista').innerHTML = decodeURIComponent(pedidoEncoded).replace(/\n/g, '<br>');
             document.getElementById('aviso-chave-pix').innerText = `Chave: ${config.chave}`;
 
             let valorNum = totalStr.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
-            let valorFloat = parseFloat(valorNum) || 0;
-
-            let payloadPix = criarPayloadPix(config.chave, config.nome, "SAO PAULO", valorFloat.toFixed(2));
-            let urlQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
-            document.getElementById('qrcode-img').src = urlQrCode;
+            let payloadPix = criarPayloadPix(config.chave, config.nome, "SAO PAULO", (parseFloat(valorNum) || 0).toFixed(2));
+            document.getElementById('qrcode-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
             document.getElementById('modal-pix').classList.remove('hidden');
         }
 
@@ -457,30 +580,15 @@
         }
 
         window.confirmarPagamentoPix = function() {
-            if (pedidoSelecionadoId) {
-                mudarStatus(pedidoSelecionadoId, 'Pago');
-            }
+            if (pedidoSelecionadoId) mudarStatus(pedidoSelecionadoId, 'Pago');
         }
 
         function criarPayloadPix(pixKey, name, city, amount) {
-            function format(id, val) {
-                return id + String(val.length).padStart(2, '0') + val;
-            }
+            function format(id, val) { return id + String(val.length).padStart(2, '0') + val; }
             let merchantAccount = format("00", "br.gov.bcb.pix") + format("01", pixKey);
-            let payload = 
-                format("00", "01") +
-                format("26", merchantAccount) +
-                format("52", "0000") +
-                format("53", "986") +
-                (amount > 0 ? format("54", amount) : "") +
-                format("58", "BR") +
-                format("59", name.substring(0, 25).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) +
-                format("60", city.substring(0, 15).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) +
-                format("62", format("05", "POINTDERICO")) +
-                "6304";
+            let payload = format("00", "01") + format("26", merchantAccount) + format("52", "0000") + format("53", "986") + (amount > 0 ? format("54", amount) : "") + format("58", "BR") + format("59", name.substring(0, 25).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("60", city.substring(0, 15).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("62", format("05", "POINTDERICO")) + "6304";
 
-            let polinomio = 0x1021;
-            let resultado = 0xFFFF;
+            let polinomio = 0x1021, resultado = 0xFFFF;
             for (let c = 0; c < payload.length; c++) {
                 resultado ^= (payload.charCodeAt(c) << 8);
                 for (let i = 0; i < 8; i++) {
@@ -488,8 +596,7 @@
                     else resultado = (resultado << 1);
                 }
             }
-            let crc = (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-            return payload + crc;
+            return payload + (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
         }
     </script>
 </body>
