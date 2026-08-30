@@ -79,10 +79,10 @@
         </div>
 
         <div class="flex gap-2">
-            <button onclick="enviarPedido('Pendente')" class="flex-1 bg-black text-yellow-500 font-bold py-2.5 px-2 rounded-xl hover:bg-gray-800 transition shadow-lg text-xs border-2 border-yellow-500">
-                🚀 Enviar (Paga Depois)
+            <button id="btn-enviar-pedido" onclick="enviarPedido('Pendente')" class="flex-1 bg-black text-yellow-500 font-bold py-2.5 px-2 rounded-xl hover:bg-gray-800 transition shadow-lg text-xs border-2 border-yellow-500">
+                🚀 Enviar Pedido para Cozinha
             </button>
-            <button onclick="abrirPixAtendente()" class="flex-1 bg-green-600 text-white font-bold py-2.5 px-2 rounded-xl hover:bg-green-500 transition shadow-lg text-sm">
+            <button id="btn-pix-atendente" onclick="abrirPixAtendente()" class="flex-1 bg-green-600 text-white font-bold py-2.5 px-2 rounded-xl hover:bg-green-500 transition shadow-lg text-sm">
                 📱 Pagar Pix Agora
             </button>
         </div>
@@ -125,25 +125,33 @@
         let mesasOcupadas = [];
         let cardapioLista = [];
 
-        // Tratamento rigoroso para pegar APENAS o nome da mesa e limpar qualquer URL ou sujeira colada
+        // Limpeza rigorosa da URL para extrair apenas o nome da mesa limpo sem parênteses ou restos
         const urlParams = new URLSearchParams(window.location.search);
         let mesaUrlBruta = urlParams.get('mesa');
         let mesaUrl = "";
 
         if (mesaUrlBruta) {
-            // Se por acaso vier com link colado dentro, limpa e extrai só o nome da mesa
             let limpo = decodeURIComponent(mesaUrlBruta);
             if (limpo.includes("http")) {
                 let partes = limpo.split("mesa=");
                 limpo = partes[partes.length - 1] || "Mesa";
             }
-            mesaUrl = limpo.replace(/\+/g, ' ').trim();
+            // Remove qualquer caractere indesejado como parênteses ou colchetes extras
+            mesaUrl = limpo.replace(/[\(\)\[\]]/g, '').replace(/\+/g, ' ').trim();
         }
 
         if (mesaUrl) {
             mesaSelecionada = mesaUrl;
             document.getElementById('bloco-selecao-mesas').style.display = 'none';
             document.getElementById('info-mesa-atual').innerText = `Autoatendimento - ${mesaUrl}`;
+            
+            // Oculta o botão de Pix no autoatendimento do cliente via QR Code
+            const btnPix = document.getElementById('btn-pix-atendente');
+            if (btnPix) btnPix.style.display = 'none';
+            
+            // Ajusta o botão de enviar para ocupar a tela toda
+            const btnEnviar = document.getElementById('btn-enviar-pedido');
+            if (btnEnviar) btnEnviar.className = "w-full bg-black text-yellow-500 font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg text-sm border-2 border-yellow-500";
         }
 
         window.verificarLogin = function() {
@@ -416,7 +424,7 @@
                 document.getElementById('obs').value = '';
                 itensCarrinho = []; atualizarResumo();
                 
-                statusTxt.innerText = tipoEnvio === 'PagoNaHora' ? "Pix confirmado! Pedido na Cozinha." : "Pedido enviado para cozinha!";
+                statusTxt.innerText = "Pedido enviado para cozinha com sucesso!";
                 setTimeout(() => statusTxt.innerText = "", 3000);
             } catch (e) { alert("Erro ao enviar pedido."); }
         }
