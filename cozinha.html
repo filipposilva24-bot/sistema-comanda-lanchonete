@@ -253,7 +253,6 @@
             renderizarCards();
         }
 
-        // ESCUTA DIRETA EM TEMPO REAL (Sem query intermediária para evitar atraso de cache)
         onSnapshot(collection(db, "pedidos"), (snapshot) => {
             todosPedidos = [];
             snapshot.forEach((docSnap) => {
@@ -339,6 +338,7 @@
                 let botoesHtml = "";
                 let corFaixa = 'bg-yellow-500';
                 let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2 pl-2"><span class="bg-green-800 text-green-100 text-[10px] font-bold px-2 py-0.5 rounded uppercase">⚡ JÁ PAGO NO PIX</span></div>` : '';
+                let badgeAtendente = pedido.atendente ? `<span class="bg-gray-700 text-yellow-400 text-[10px] px-2 py-0.5 rounded font-bold uppercase">👤 ${pedido.atendente}</span>` : '';
 
                 if(abaAtual === 'cozinha') {
                     corFaixa = 'bg-yellow-500';
@@ -382,7 +382,10 @@
                     <div class="absolute left-0 top-0 bottom-0 w-1 ${corFaixa}"></div>
                     <div>
                         <div class="flex justify-between items-start mb-2 border-b border-gray-700 pb-2 pl-2">
-                            <h2 class="text-xl font-bold text-white">${pedido.mesa}</h2>
+                            <div>
+                                <h2 class="text-xl font-bold text-white">${pedido.mesa}</h2>
+                                <div class="mt-1">${badgeAtendente}</div>
+                            </div>
                             <span class="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded font-mono">${pedido.horario || '--:--'}</span>
                         </div>
                         ${avisoPagoNaHora}
