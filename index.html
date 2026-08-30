@@ -37,14 +37,14 @@
             <header class="mb-4 text-center relative">
                 <h1 class="text-3xl font-bold text-yellow-500 bg-black py-2 rounded-xl">POINT DERICO</h1>
                 <div class="flex justify-between items-center mt-2 px-1">
-                    <p class="text-xs text-gray-500">Lançamento de Comanda</p>
+                    <p class="text-xs text-gray-500" id="info-mesa-atual">Lançamento de Comanda</p>
                     <button onclick="trocarAtendente()" class="text-[11px] bg-gray-200 hover:bg-gray-300 px-2.5 py-1 rounded-lg font-semibold text-gray-700 transition" id="badge-atendente">
                         👤 Operador: --
                     </button>
                 </div>
             </header>
             
-            <div class="mb-4">
+            <div class="mb-4" id="bloco-selecao-mesas">
                 <div class="flex justify-between items-center mb-1">
                     <label class="block text-gray-700 text-sm font-bold">Selecione a Mesa / Local:</label>
                     <span class="text-[10px] text-gray-400 font-semibold">🔴 Ocupada | ⚪ Livre</span>
@@ -52,84 +52,9 @@
                 <div id="container-mesas" class="grid grid-cols-4 gap-2"></div>
             </div>
 
-            <!-- Área de Cardápio Rolável -->
-            <div class="mb-4 h-[35vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50">
-                
-                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1 mt-2">🍔 Hambúrgueres</h3>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('X-Burguer', 15)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left flex flex-col"><span class="text-xs font-bold">X-Burguer</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span></button>
-                    <button onclick="adicionarItem('X-Salada', 18)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left flex flex-col"><span class="text-xs font-bold">X-Salada</span><span class="text-[10px] opacity-80 mt-1">R$ 18,00</span></button>
-                    <button onclick="adicionarItem('X-Egg', 20)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left flex flex-col"><span class="text-xs font-bold">X-Egg</span><span class="text-[10px] opacity-80 mt-1">R$ 20,00</span></button>
-                    <button onclick="adicionarItem('X-Bacon', 24)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left flex flex-col"><span class="text-xs font-bold">X-Bacon</span><span class="text-[10px] opacity-80 mt-1">R$ 24,00</span></button>
-                    <button onclick="adicionarItem('Duplo Chesse', 30)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left col-span-2 flex justify-between items-center"><span class="text-xs font-bold">Duplo Chesse</span><span class="text-xs opacity-80">R$ 30,00</span></button>
-                </div>
-
-                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍟 Porções</h3>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Batata Frita P', 20)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col"><span class="text-xs font-bold">Batata Frita P</span><span class="text-[10px] opacity-80 mt-1">R$ 20,00</span></button>
-                    <button onclick="adicionarItem('Batata Frita G', 40)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col"><span class="text-xs font-bold">Batata Frita G</span><span class="text-[10px] opacity-80 mt-1">R$ 40,00</span></button>
-                    <button onclick="adicionarItem('Porção Mista', 35)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col"><span class="text-xs font-bold">Porção Mista</span><span class="text-[10px] opacity-80 mt-1">R$ 35,00</span></button>
-                    <button onclick="adicionarItem('Frango c/ Batata', 45)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col"><span class="text-xs font-bold">Frango c/ Batata</span><span class="text-[10px] opacity-80 mt-1">R$ 45,00</span></button>
-                    <button onclick="adicionarItem('Porção Família Frango', 70)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col"><span class="text-xs font-bold">Família Frango</span><span class="text-[10px] opacity-80 mt-1">R$ 70,00</span></button>
-                    <button onclick="adicionarItem('Contra c/ Batata', 70)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col"><span class="text-xs font-bold">Contra c/ Batata</span><span class="text-[10px] opacity-80 mt-1">R$ 70,00</span></button>
-                </div>
-
-                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🥟 Pastéis Simples</h3>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Pastel Carne', 10)" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg hover:bg-amber-200 text-left flex flex-col"><span class="text-xs font-bold">Carne</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span></button>
-                    <button onclick="adicionarItem('Pastel Calabresa', 10)" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg hover:bg-amber-200 text-left flex flex-col"><span class="text-xs font-bold">Calabresa</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span></button>
-                    <button onclick="adicionarItem('Pastel Frango', 10)" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg hover:bg-amber-200 text-left flex flex-col"><span class="text-xs font-bold">Frango</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span></button>
-                    <button onclick="adicionarItem('Pastel Queijo', 10)" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg hover:bg-amber-200 text-left flex flex-col"><span class="text-xs font-bold">Queijo</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span></button>
-                </div>
-
-                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🥟 Pastéis (Especiais)</h3>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Pastel Carne c/ Queijo', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col"><span class="text-xs font-bold">Carne c/ Queijo</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span></button>
-                    <button onclick="adicionarItem('Pastel Calabresa c/ Queijo', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col"><span class="text-xs font-bold">Calabresa c/ Queijo</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span></button>
-                    <button onclick="adicionarItem('Pastel Calabresa c/ Catupiry', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col"><span class="text-xs font-bold">Calabresa c/ Catu</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span></button>
-                    <button onclick="adicionarItem('Pastel Frango c/ Catupiry', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col"><span class="text-xs font-bold">Frango c/ Catu</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span></button>
-                    <button onclick="adicionarItem('Pastel Pizza', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col"><span class="text-xs font-bold">Pizza</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span></button>
-                    <button onclick="adicionarItem('Pastel 2 Queijos', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col"><span class="text-xs font-bold">2 Queijos</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span></button>
-                    <button onclick="adicionarItem('Pastel Bauru', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col"><span class="text-xs font-bold">Bauru</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span></button>
-                </div>
-
-                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍫 Pastéis Doces</h3>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Pastel Doce de Leite', 13)" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg hover:bg-pink-200 text-left flex flex-col"><span class="text-xs font-bold">Doce de Leite</span><span class="text-[10px] opacity-80 mt-1">R$ 13,00</span></button>
-                    <button onclick="adicionarItem('Pastel Doce Leite c/ Banana', 13)" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg hover:bg-pink-200 text-left flex flex-col"><span class="text-xs font-bold">Doce Leite c/ Banana</span><span class="text-[10px] opacity-80 mt-1">R$ 13,00</span></button>
-                    <button onclick="adicionarItem('Pastel Nutella c/ Morango', 13)" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg hover:bg-pink-200 text-left col-span-2 flex justify-between items-center"><span class="text-xs font-bold">Nutella c/ Morango</span><span class="text-xs opacity-80">R$ 13,00</span></button>
-                </div>
-
-                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🥤 Bebidas</h3>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Refri Lata', 7)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col"><span class="text-xs font-bold">Refri Lata</span><span class="text-[10px] opacity-80 mt-1">R$ 7,00</span></button>
-                    <button onclick="adicionarItem('Suco', 8)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col"><span class="text-xs font-bold">Suco</span><span class="text-[10px] opacity-80 mt-1">R$ 8,00</span></button>
-                    <button onclick="adicionarItem('Coca Cola 2L', 18)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col"><span class="text-xs font-bold">Coca Cola 2L</span><span class="text-[10px] opacity-80 mt-1">R$ 18,00</span></button>
-                    <button onclick="adicionarItem('Guaraná 2L', 15)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col"><span class="text-xs font-bold">Guaraná 2L</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span></button>
-                    <button onclick="adicionarItem('Sukita 2L', 15)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col"><span class="text-xs font-bold">Sukita 2L</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span></button>
-                    <button onclick="adicionarItem('Água', 3)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col"><span class="text-xs font-bold">Água</span><span class="text-[10px] opacity-80 mt-1">R$ 3,00</span></button>
-                    <button onclick="adicionarItem('Água c/ Gás', 5)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col"><span class="text-xs font-bold">Água c/ Gás</span><span class="text-[10px] opacity-80 mt-1">R$ 5,00</span></button>
-                    <button onclick="adicionarItem('Água 1,5L', 6)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col"><span class="text-xs font-bold">Água 1,5L</span><span class="text-[10px] opacity-80 mt-1">R$ 6,00</span></button>
-                </div>
-
-                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍺 Bebidas Alcoólicas</h3>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Cerveja Lata', 6)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Cerveja Lata</span><span class="text-[10px] opacity-80 mt-1">R$ 6,00</span></button>
-                    <button onclick="adicionarItem('Latão', 10)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Latão</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span></button>
-                    <button onclick="adicionarItem('Latão Heineken', 11)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Latão Heineken</span><span class="text-[10px] opacity-80 mt-1">R$ 11,00</span></button>
-                </div>
-
-                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍹 Dose & Drinks</h3>
-                <div class="grid grid-cols-2 gap-2 mb-2">
-                    <button onclick="adicionarItem('Dose Gin', 15)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Gin</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span></button>
-                    <button onclick="adicionarItem('Dose Chanceler', 15)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Chanceler</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span></button>
-                    <button onclick="adicionarItem('Dose Vodka', 15)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Vodka</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span></button>
-                    <button onclick="adicionarItem('Xeque Mate', 15)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Xeque Mate</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span></button>
-                    <button onclick="adicionarItem('Ice', 13)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Ice</span><span class="text-[10px] opacity-80 mt-1">R$ 13,00</span></button>
-                    <button onclick="adicionarItem('Skol Beats', 13)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Skol Beats</span><span class="text-[10px] opacity-80 mt-1">R$ 13,00</span></button>
-                    <button onclick="adicionarItem('Caipirinha Cachaça', 25)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Caipirinha (Cachaça)</span><span class="text-[10px] opacity-80 mt-1">R$ 25,00</span></button>
-                    <button onclick="adicionarItem('Caipirinha Vodka', 35)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col"><span class="text-xs font-bold">Caipirinha (Vodka)</span><span class="text-[10px] opacity-80 mt-1">R$ 35,00</span></button>
-                </div>
+            <!-- Área de Cardápio Dinâmico (Puxado do Firebase) -->
+            <div class="mb-4 h-[38vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50" id="cardapio-dinamico-container">
+                <p class="text-center text-xs text-gray-400 mt-10">Carregando cardápio...</p>
             </div>
 
             <div class="mb-2">
@@ -189,7 +114,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
@@ -202,9 +127,20 @@
         let mesaSelecionada = "";
         let mesasDisponiveis = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
         let mesasOcupadas = [];
+        let cardapioLista = [];
+
+        // Suporte a QR Code na mesa (Ex: index.html?mesa=Mesa+3)
+        const urlParams = new URLSearchParams(window.location.search);
+        const mesaUrl = urlParams.get('mesa');
+        if (mesaUrl) {
+            mesaSelecionada = mesaUrl;
+            document.getElementById('bloco-selecao-mesas').style.display = 'none';
+            document.getElementById('info-mesa-atual').innerText = `Autoatendimento - ${mesaUrl}`;
+        }
 
         window.verificarLogin = function() {
-            if (operadorAtual) {
+            if (operadorAtual || mesaUrl) {
+                if(!operadorAtual && mesaUrl) operadorAtual = "Cliente (QR Code)";
                 document.getElementById('modal-login').classList.add('hidden');
                 document.getElementById('badge-atendente').innerText = `👤 Operador: ${operadorAtual}`;
             } else {
@@ -224,6 +160,55 @@
             document.getElementById('modal-login').classList.remove('hidden');
         }
 
+        // Buscar cardápio do Firebase em tempo real
+        onSnapshot(collection(db, "cardapio"), (snapshot) => {
+            cardapioLista = [];
+            snapshot.forEach(docSnap => {
+                cardapioLista.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            renderizarCardapio();
+        });
+
+        function renderizarCardapio() {
+            const container = document.getElementById('cardapio-dinamico-container');
+            if (cardapioLista.length === 0) {
+                container.innerHTML = '<p class="text-center text-xs text-gray-400 mt-10">Nenhum item cadastrado no cardápio admin.</p>';
+                return;
+            }
+
+            // Agrupar por categoria
+            let categorias = {};
+            cardapioLista.forEach(item => {
+                let cat = item.categoria || "Geral";
+                if (!categorias[cat]) categorias[cat] = [];
+                categorias[cat].push(item);
+            });
+
+            container.innerHTML = '';
+            for (let cat in categorias) {
+                let tituloCat = document.createElement('h3');
+                tituloCat.className = "font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1 mt-2";
+                tituloCat.innerText = cat;
+                container.appendChild(tituloCat);
+
+                let grid = document.createElement('div');
+                grid.className = "grid grid-cols-2 gap-2 mb-4";
+
+                categorias[cat].forEach(prod => {
+                    let btn = document.createElement('button');
+                    let corBg = prod.ativo === false ? "bg-gray-200 opacity-50 cursor-not-allowed" : "bg-orange-50 border border-orange-200 text-gray-800 hover:bg-orange-100";
+                    btn.className = `${corBg} p-2 rounded-lg text-left flex flex-col transition`;
+                    btn.innerHTML = `<span class="text-xs font-bold">${prod.nome}</span><span class="text-[10px] text-gray-500 mt-1">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
+                    
+                    if (prod.ativo !== false) {
+                        btn.onclick = () => adicionarItem(prod.nome, Number(prod.preco));
+                    }
+                    grid.appendChild(btn);
+                });
+                container.appendChild(grid);
+            }
+        }
+
         onSnapshot(collection(db, "pedidos"), (snapshot) => {
             mesasOcupadas = [];
             snapshot.forEach((doc) => {
@@ -234,7 +219,7 @@
                     }
                 }
             });
-            renderizarMesas();
+            if(!mesaUrl) renderizarMesas();
         });
 
         window.renderizarMesas = function() {
@@ -361,17 +346,19 @@
                 let dadosPedido = {
                     mesa: mesaSelecionada,
                     pedido: textoPedidoFormatado,
+                    itensBrutos: itensCarrinho, // Salva estruturado para o ranking de mais vendidos
                     atendente: operadorAtual || "Geral", 
                     status: 'Pendente', 
                     pagoNaHora: tipoEnvio === 'PagoNaHora', 
                     total: total,
                     dataCriacao: new Date().toISOString().split('T')[0],
+                    timestampCriacao: Date.now(), // Para o cronômetro da cozinha
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
                 };
 
                 await addDoc(collection(db, "pedidos"), dadosPedido);
 
-                mesaSelecionada = ""; renderizarMesas();
+                if(!mesaUrl) { mesaSelecionada = ""; renderizarMesas(); }
                 document.getElementById('obs').value = '';
                 itensCarrinho = []; atualizarResumo();
                 
@@ -413,7 +400,7 @@
         }
 
         verificarLogin();
-        renderizarMesas();
+        if(!mesaUrl) renderizarMesas();
     </script>
 </body>
 </html>
