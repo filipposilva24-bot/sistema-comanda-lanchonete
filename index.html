@@ -131,13 +131,36 @@
         </div>
     </div>
 
-    <!-- CARRINHO FLUTUANTE -->
-    <div id="carrinho-flutuante" onclick="rolarParaResumo()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
+    <!-- CARRINHO FLUTUANTE INTERATIVO (Agora abre o Modal do Carrinho) -->
+    <div id="carrinho-flutuante" onclick="abrirModalCarrinho()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3.5 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
         <div class="flex items-center gap-2">
             <span class="text-lg">🛒</span>
-            <span id="flutuante-qtd" class="text-xs font-black bg-zinc-950 text-amber-400 px-2 py-0.5 rounded-full">0 itens</span>
+            <span id="flutuante-qtd" class="text-xs font-black bg-zinc-950 text-amber-400 px-2.5 py-0.5 rounded-full">0 itens</span>
         </div>
         <span id="flutuante-total" class="text-sm font-black">R$ 0,00</span>
+    </div>
+
+    <!-- MODAL DO CARRINHO COMPLETO (Abre ao clicar no carrinho flutuante) -->
+    <div id="modal-carrinho" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex flex-col justify-end hidden">
+        <div class="bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 rounded-t-3xl max-w-md w-full mx-auto p-5 shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-zinc-200 dark:border-zinc-800">
+                <h3 class="text-sm font-black text-amber-500 uppercase tracking-wider">🛒 Itens no Carrinho</h3>
+                <button onclick="fecharModalCarrinho()" class="text-zinc-400 hover:text-white font-bold text-base p-1">✕</button>
+            </div>
+            
+            <div id="modal-lista-carrinho" class="overflow-y-auto flex-grow divide-y divide-zinc-100 dark:divide-zinc-800 mb-3 pr-1">
+                <!-- Itens injetados via JS -->
+            </div>
+
+            <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 mb-3">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs text-zinc-500 font-bold uppercase">Total do Pedido:</span>
+                    <span id="modal-carrinho-total" class="text-lg font-black text-emerald-600 dark:text-emerald-400">R$ 0,00</span>
+                </div>
+            </div>
+
+            <button onclick="fecharModalCarrinho()" class="tap-scale w-full bg-amber-500 text-zinc-950 font-black py-3.5 rounded-2xl text-xs shadow">Continuar Comprando / Enviar</button>
+        </div>
     </div>
 
     <!-- TECLADO NUMÉRICO GIGANTE (NUMPAD) -->
@@ -550,14 +573,21 @@
 
         function atualizarResumo() {
             const container = document.getElementById('resumo-pedido');
+            const modalContainer = document.getElementById('modal-lista-carrinho');
             const totalDisplay = document.getElementById('valor-total');
+            const modalTotalDisplay = document.getElementById('modal-carrinho-total');
             const carrinhoFlutuante = document.getElementById('carrinho-flutuante');
+            
             container.innerHTML = '';
+            modalContainer.innerHTML = '';
             
             if (itensCarrinho.length === 0) {
                 container.innerHTML = '<p class="text-zinc-400 text-center italic text-xs mt-2 font-medium" id="vazio-texto">Nenhum item adicionado.</p>';
+                modalContainer.innerHTML = '<p class="text-zinc-400 text-center text-xs py-6">Carrinho vazio.</p>';
                 totalDisplay.innerText = 'R$ 0,00';
+                modalTotalDisplay.innerText = 'R$ 0,00';
                 carrinhoFlutuante.classList.add('hidden');
+                fecharModalCarrinho();
                 return;
             }
 
@@ -568,37 +598,39 @@
                 somaTotal += (item.preco * item.qtd);
                 qtdTotalItens += item.qtd;
 
+                // Renderiza na tela principal
                 const div = document.createElement('div');
-                div.className = "swipe-item-container flex overflow-x-auto scrollbar-hide w-full mb-1 bg-transparent";
+                div.className = "flex justify-between items-center py-1.5 px-1";
                 div.innerHTML = `
-                    <div class="swipe-snap-center shrink-0 w-full flex justify-between items-center py-1.5 px-1 bg-transparent">
-                        <div class="flex items-center gap-2">
-                            <button onclick="abrirNumpad(${index})" class="tap-scale bg-zinc-200 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-zinc-300 dark:border-zinc-700">
-                                ${item.qtd}x
-                            </button>
-                            <span class="font-bold text-zinc-800 dark:text-zinc-200 text-xs">${item.nome}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[11px] text-zinc-400 font-mono">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
-                            <span class="text-[9px] text-zinc-400 uppercase tracking-widest animate-pulse">👈</span>
-                        </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="abrirNumpad(${index})" class="tap-scale bg-zinc-200 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-zinc-300 dark:border-zinc-700">
+                            ${item.qtd}x
+                        </button>
+                        <span class="font-bold text-zinc-800 dark:text-zinc-200 text-xs">${item.nome}</span>
                     </div>
-                    <div class="swipe-snap-center shrink-0 w-16 bg-red-600 text-white flex justify-center items-center font-bold text-xs rounded-xl my-1" onclick="removerItemCarrinhoIndex(${index})">
-                        🗑️
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] text-zinc-400 font-mono">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
+                        <button onclick="removerItemCarrinhoIndex(${index})" class="text-red-500 font-bold text-xs p-1">🗑️</button>
                     </div>
                 `;
-                container.appendChild(div);
+                container.appendChild(div.cloneNode(true));
+                modalContainer.appendChild(div);
             });
 
             totalDisplay.innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
+            modalTotalDisplay.innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
             
             carrinhoFlutuante.classList.remove('hidden');
             document.getElementById('flutuante-qtd').innerText = `${qtdTotalItens} itens`;
             document.getElementById('flutuante-total').innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
         }
 
-        window.rolarParaResumo = function() {
-            document.getElementById('resumo-pedido').scrollIntoView({ behavior: 'smooth' });
+        // Funções do Modal do Carrinho
+        window.abrirModalCarrinho = function() {
+            if(itensCarrinho.length > 0) document.getElementById('modal-carrinho').classList.remove('hidden');
+        }
+        window.fecharModalCarrinho = function() {
+            document.getElementById('modal-carrinho').classList.add('hidden');
         }
 
         window.abrirNumpad = function(index) {
@@ -686,6 +718,7 @@
 
                 await addDoc(collection(db, "pedidos"), dadosPedido);
 
+                fecharModalCarrinho();
                 if(!mesaUrl) { mesaSelecionada = ""; renderizarMesas(); }
                 document.getElementById('obs').value = '';
                 itensCarrinho = []; atualizarResumo();
