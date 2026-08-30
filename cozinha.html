@@ -3,56 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel da Cozinha</title>
+    <title>Cozinha - Point Derico</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white p-6">
-    <h1 class="text-3xl font-bold text-center mb-8 text-orange-500">Painel de Pedidos - Cozinha</h1>
-    
-    <div id="lista-pedidos" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Os pedidos entram aqui dinamicamente -->
-    </div>
+<body class="bg-gray-900 min-h-screen text-white font-sans">
+
+    <!-- Cabeçalho -->
+    <header class="bg-black border-b-4 border-yellow-500 p-4 sticky top-0 z-50 flex justify-between items-center shadow-lg">
+        <div>
+            <h1 class="text-2xl font-bold text-yellow-500">👨‍🍳 Cozinha - Point Derico</h1>
+            <p class="text-sm text-gray-400" id="contador">0 pedidos pendentes</p>
+        </div>
+        <button id="btn-som" onclick="ativarSom()" class="bg-gray-800 border border-gray-600 px-4 py-2 rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition">
+            🔇 Ligar Som
+        </button>
+    </header>
+
+    <!-- Grid de Pedidos -->
+    <main class="p-4">
+        <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <!-- Os cards dos pedidos aparecerão aqui -->
+        </div>
+        
+        <!-- Mensagem de tela vazia -->
+        <div id="mensagem-vazia" class="text-center mt-20 text-gray-500 hidden">
+            <span class="text-6xl block mb-4">🍽️</span>
+            <h2 class="text-2xl font-bold">Nenhum pedido pendente!</h2>
+            <p>A cozinha está tranquila no momento.</p>
+        </div>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const container = document.getElementById('lista-pedidos');
+        const container = document.getElementById('pedidos-container');
+        const msgVazia = document.getElementById('mensagem-vazia');
+        const contadorTxt = document.getElementById('contador');
+        const btnSom = document.getElementById('btn-som');
+        
+        // Som de notificação (Beep do Google)
+        const audioAlert = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+        let somAtivado = false;
+        let primeiroCarregamento = true;
+        let totalPedidosAtual = 0;
 
-        // Escuta os pedidos em tempo real
-        onSnapshot(collection(db, "pedidos"), (snapshot) => {
+        // Função para o usuário liberar o som no navegador
+        window.ativarSom = function() {
+            somAtivado = true;
+            audioAlert.play().catch(() => {}); // Toca um som mudo pra destravar
+            btnSom.innerText = "🔊 Som Ativado";
+            btnSom.classList.replace('bg-gray-800', 'bg-green-600');
+            btnSom.classList.replace('border-gray-600', 'border-green-500');
+        }
+
+        // Traz apenas os pedidos que estão "Pendentes" (ignorando os entregues/pagos)
+        const q = query(collection(db, "pedidos"), where("status", "==", "Pendente"));
+
+        onSnapshot(q, (snapshot) => {
             container.innerHTML = '';
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const id = docSnap.id;
+            
+            const pedidos = [];
+            snapshot.forEach((doc) => {
+                pedidos.push({ id: doc.id, ...doc.data() });
+            });
+
+            // Tocar som se entrar um pedido NOVO
+            if (!primeiroCarregamento && pedidos.length > totalPedidosAtual && somAtivado) {
+                audioAlert.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+            }
+            totalPedidosAtual = pedidos.length;
+            primeiroCarregamento = false;
+
+            // Atualizar contador e mensagem
+            contadorTxt.innerText = `${pedidos.length} pedido(s) pendente(s)`;
+            if (pedidos.length === 0) {
+                msgVazia.classList.remove('hidden');
+            } else {
+                msgVazia.classList.add('hidden');
+            }
+
+            // Ordena os pedidos pelo horário para os mais velhos ficarem primeiro
+            pedidos.sort((a, b) => (a.horario > b.horario) ? 1 : -1);
+
+            // Gerar os Cards na tela
+            pedidos.forEach((pedido) => {
+                // Separa o texto do pedido da observação (se houver)
+                let itensTexto = pedido.pedido;
+                let obsTexto = "";
+                if (itensTexto.includes("Obs:")) {
+                    const partes = itensTexto.split("Obs:");
+                    itensTexto = partes[0].trim();
+                    obsTexto = partes[1].trim();
+                }
+
+                // Formatar quebras de linha
+                itensTexto = itensTexto.replace(/\n/g, '<br>');
 
                 const card = document.createElement('div');
-                card.className = "bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-lg flex flex-col justify-between";
+                card.className = "bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden";
+                
+                // Faixa amarela lateral pra dar estilo
                 card.innerHTML = `
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500"></div>
                     <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-xl font-bold text-orange-400">${data.mesa}</span>
-                            <span class="text-xs text-gray-400">${data.horario}</span>
+                        <div class="flex justify-between items-start mb-3 border-b border-gray-700 pb-2 pl-2">
+                            <h2 class="text-xl font-bold text-yellow-500">${pedido.mesa}</h2>
+                            <span class="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded font-mono">${pedido.horario || '--:--'}</span>
                         </div>
-                        <p class="text-gray-200 whitespace-pre-line mb-6 text-lg">${data.pedido}</p>
+                        
+                        <div class="pl-2 text-gray-200 text-lg leading-relaxed mb-4">
+                            ${itensTexto}
+                        </div>
+
+                        ${obsTexto ? `
+                        <div class="mb-4 pl-2">
+                            <span class="bg-red-900 text-red-200 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">Atenção</span>
+                            <p class="text-red-400 font-semibold mt-1 bg-red-950/30 p-2 rounded border border-red-900/50">"${obsTexto}"</p>
+                        </div>
+                        ` : ''}
                     </div>
-                    <button onclick="concluirPedido('${id}')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                        Concluir / Entregar
+                    
+                    <button onclick="concluirPedido('${pedido.id}')" class="w-full mt-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Pronto / Entregue
                     </button>
                 `;
                 container.appendChild(card);
             });
         });
 
+        // Função que não deleta, apenas muda o status
         window.concluirPedido = async function(id) {
             try {
-                await deleteDoc(doc(db, "pedidos", id));
+                const pedidoRef = doc(db, "pedidos", id);
+                await updateDoc(pedidoRef, {
+                    status: "Entregue"
+                });
+                // Como atualizamos para "Entregue", o onSnapshot vai tirar ele da tela sozinho, pois só busca "Pendentes"!
             } catch (e) {
                 console.error("Erro ao concluir pedido: ", e);
+                alert("Erro ao tentar atualizar o pedido.");
             }
         }
     </script>
