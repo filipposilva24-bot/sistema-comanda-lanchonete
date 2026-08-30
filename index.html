@@ -10,26 +10,26 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         .tap-scale:active { transform: scale(0.96); transition: transform 0.1s; }
-        /* Esconde barra de rolagem mas permite o swipe */
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Suavidade no deslize do Swipe to Delete */
         .swipe-item-container { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
         .swipe-snap-center { scroll-snap-align: center; }
     </style>
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 h-screen flex flex-col overflow-hidden transition-colors duration-300">
 
-    <!-- HEADER / TOPO INTEILGENTE -->
+    <!-- HEADER / TOPO INTELIGENTE -->
     <header class="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-3 flex justify-between items-center z-40 shadow-sm shrink-0">
         <div class="flex items-center gap-2">
             <span class="text-amber-500 text-xl">🔥</span>
             <div>
                 <h1 class="text-sm font-black tracking-tight text-amber-600 dark:text-amber-400 leading-tight">POINT DERICO</h1>
-                <div class="flex items-center gap-1 mt-0.5">
+                <div class="flex items-center gap-1.5 mt-0.5">
                     <!-- 9. Indicador de Conexão -->
                     <span id="status-conexao" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <p class="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase" id="texto-conexao">Online</p>
+                    <span class="text-zinc-300 dark:text-zinc-700">•</span>
+                    <input type="text" id="nome-atendente" placeholder="Garçom" onchange="salvarAtendente(this.value)" class="bg-transparent text-[10px] font-bold text-amber-600 dark:text-amber-400 outline-none w-20">
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
     </div>
 
     <!-- ÁREA PRINCIPAL -->
-    <main class="flex-grow overflow-y-auto relative scrollbar-hide pb-24">
+    <main class="flex-grow overflow-y-auto relative scrollbar-hide pb-28">
         
         <!-- VISÃO MESAS (23. Mapa Visual do Salão) -->
         <div id="view-mesas" class="p-4 grid grid-cols-3 gap-3">
@@ -56,10 +56,21 @@
 
         <!-- VISÃO CARDÁPIO -->
         <div id="view-cardapio" class="p-4 hidden">
-            <div class="mb-4 bg-zinc-200/50 dark:bg-zinc-800/50 rounded-2xl p-3 flex justify-between items-center shadow-inner">
+            <div class="mb-3 bg-zinc-200/50 dark:bg-zinc-800/50 rounded-2xl p-3 flex justify-between items-center shadow-inner">
                 <span class="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase">Atendendo:</span>
                 <span class="text-sm font-black text-amber-600 dark:text-amber-400 bg-white dark:bg-zinc-900 px-3 py-1 rounded-xl shadow-sm" id="mesa-atual-badge">Nenhuma</span>
             </div>
+
+            <!-- BARRA DE PESQUISA RÁPIDA -->
+            <div class="mb-3">
+                <input type="text" id="filtro-busca" placeholder="🔍 Pesquisar no cardápio..." oninput="filtrarCardapio()" class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 shadow-sm">
+            </div>
+
+            <!-- FILTRO DE CATEGORIAS RÁPIDO -->
+            <div class="flex gap-1.5 overflow-x-auto scrollbar-hide mb-4 pb-1" id="barra-categorias">
+                <button onclick="filtrarCategoria('Todas')" class="tap-scale cat-btn bg-amber-500 text-zinc-950 font-extrabold px-3 py-1.5 rounded-xl text-xs shrink-0 shadow-sm">Todas</button>
+            </div>
+
             <div id="lista-cardapio" class="space-y-3">
                 <!-- Gerado via JS -->
             </div>
@@ -176,19 +187,26 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ESTADOS GERAIS
         let abaAtiva = 'mesas';
         let cardapio = [];
         let carrinho = [];
         let mesaAtual = null;
         let todosPedidos = [];
-        let mesasStatus = {}; // { 'Mesa 1': { status, total, pagoParcial, id, pedidoStr } }
+        let mesasStatus = {};
         let numpadCallback = null;
         let pedidosAlertados = new Set();
         let pedidoInfoAtualId = null;
+        let categoriaSelecionada = 'Todas';
 
-        // LISTA DE MESAS PADRÃO (Pode personalizar)
         const listaMesas = Array.from({length: 15}, (_, i) => `Mesa ${i+1}`).concat(['Balcão 1', 'Balcão 2', 'Balcão 3']);
+
+        // Recuperar Atendente Salvo
+        const garcomSalvo = localStorage.getItem('point_derico_garcom') || '';
+        document.getElementById('nome-atendente').value = garcomSalvo;
+
+        window.salvarAtendente = function(nome) {
+            localStorage.setItem('point_derico_garcom', nome.trim());
+        }
 
         // 9. INDICADOR DE CONEXÃO
         function atualizarConexao() {
@@ -219,11 +237,44 @@
         // FIREBASE: OUVIR CARDÁPIO (24. Trava de Esgotado)
         onSnapshot(collection(db, "cardapio"), (snapshot) => {
             cardapio = [];
-            snapshot.forEach(docSnap => cardapio.push({ id: docSnap.id, ...docSnap.data() }));
+            let categoriasSet = new Set(['Todas']);
+            
+            snapshot.forEach(docSnap => {
+                let item = { id: docSnap.id, ...docSnap.data() };
+                cardapio.push(item);
+                if(item.categoria) categoriasSet.add(item.categoria);
+            });
+
+            atualizarBotoesCategorias(categoriasSet);
             renderizarCardapio();
         });
 
-        // FIREBASE: OUVIR PEDIDOS (Cálculo de Tempo, Status das Mesas e Alertas)
+        function atualizarBotoesCategorias(categoriasSet) {
+            const barra = document.getElementById('barra-categorias');
+            barra.innerHTML = '';
+            categoriasSet.forEach(cat => {
+                let btn = document.createElement('button');
+                btn.className = `tap-scale cat-btn px-3 py-1.5 rounded-xl text-xs shrink-0 font-extrabold shadow-sm transition ${cat === categoriaSelecionada ? 'bg-amber-500 text-zinc-950' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'}`;
+                btn.innerText = cat;
+                btn.onclick = () => filtrarCategoria(cat);
+                barra.appendChild(btn);
+            });
+        }
+
+        window.filtrarCategoria = function(cat) {
+            categoriaSelecionada = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                if(b.innerText === cat) { b.className = "tap-scale cat-btn px-3 py-1.5 rounded-xl text-xs shrink-0 font-extrabold shadow-sm transition bg-amber-500 text-zinc-950"; }
+                else { b.className = "tap-scale cat-btn px-3 py-1.5 rounded-xl text-xs shrink-0 font-extrabold shadow-sm transition bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"; }
+            });
+            renderizarCardapio();
+        }
+
+        window.filtrarCardapio = function() {
+            renderizarCardapio();
+        }
+
+        // FIREBASE: OUVIR PEDIDOS
         onSnapshot(collection(db, "pedidos"), (snapshot) => {
             todosPedidos = [];
             mesasStatus = {};
@@ -239,30 +290,25 @@
                 if(p.status === 'Entregue' && !pedidosAlertados.has(p.id)) {
                     pedidosAlertados.add(p.id);
                     mostrarToast(`Pronto: ${p.mesa}!`);
-                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]); // Choquinho
+                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
 
-                // Calcula tempo médio (39)
                 if(p.status === 'Pendente' && p.timestampCriacao) {
                     qtdPendentes++;
-                    somaTempo += Math.floor((agora - p.timestampCriacao) / 60000); // Em minutos
+                    somaTempo += Math.floor((agora - p.timestampCriacao) / 60000);
                 }
 
-                // Mapear status das mesas
                 if(p.status === 'Pendente' || p.status === 'Entregue') {
                     if(!mesasStatus[p.mesa]) mesasStatus[p.mesa] = { id: p.id, status: p.status, pedido: p.pedido, total: 0, pagoParcial: p.valorPagoParcial || 0 };
                     
-                    // Prioriza cor vermelha (Pendente) sobre amarelo (Entregue)
                     if(p.status === 'Pendente') mesasStatus[p.mesa].status = 'Pendente';
                     
                     let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.'));
                     mesasStatus[p.mesa].total += (val || 0);
-                    // Agrupa texto do pedido para a Info
                     mesasStatus[p.mesa].pedido += `<br>--<br>${p.pedido}`; 
                 }
             });
 
-            // Atualiza Tempo Médio (39)
             let media = qtdPendentes > 0 ? Math.floor(somaTempo / qtdPendentes) : 0;
             document.getElementById('tempo-medio').innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
 
@@ -349,43 +395,43 @@
             } catch(e) { alert("Erro ao abater."); }
         }
 
-        // RENDERIZAR CARDÁPIO COM TRAVA (24)
+        // RENDERIZAR CARDÁPIO COM FILTROS E TRAVA DE ESGOTADO (24)
         function renderizarCardapio() {
             const lista = document.getElementById('lista-cardapio');
             lista.innerHTML = '';
             
-            // Agrupar por categoria
-            let categorias = {};
-            cardapio.forEach(item => {
-                if(!categorias[item.categoria]) categorias[item.categoria] = [];
-                categorias[item.categoria].push(item);
+            const termoBusca = document.getElementById('filtro-busca').value.toLowerCase();
+
+            let filtrados = cardapio.filter(item => {
+                let bateCategoria = (categoriaSelecionada === 'Todas' || item.categoria === categoriaSelecionada);
+                let bateBusca = item.nome.toLowerCase().includes(termoBusca);
+                return bateCategoria && bateBusca;
             });
 
-            for(let cat in categorias) {
-                let divCat = document.createElement('div');
-                divCat.innerHTML = `<h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 mt-4 ml-1">${cat}</h3>`;
-                
-                categorias[cat].forEach(item => {
-                    let divItem = document.createElement('div');
-                    
-                    if(item.ativo === false) { // 24. Bloqueio de Esgotado
-                        divItem.className = "bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center mb-2 opacity-60 grayscale";
-                        divItem.innerHTML = `
-                            <div><p class="font-bold text-zinc-600 line-through">${item.nome}</p><span class="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">ESGOTADO</span></div>
-                            <span class="text-zinc-400 font-black">R$ ${item.preco.toFixed(2).replace('.',',')}</span>
-                        `;
-                    } else {
-                        divItem.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center mb-2 shadow-sm relative overflow-hidden";
-                        divItem.innerHTML = `
-                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>
-                            <div class="pl-2"><p class="font-bold text-zinc-800 dark:text-zinc-200">${item.nome}</p><p class="text-xs font-black text-amber-600 dark:text-amber-400">R$ ${item.preco.toFixed(2).replace('.',',')}</p></div>
-                            <button onclick="adicionarCarrinho('${item.id}', '${item.nome}', ${item.preco})" class="tap-scale bg-amber-500 text-zinc-950 w-10 h-10 rounded-xl font-black text-xl flex justify-center items-center shadow-md">+</button>
-                        `;
-                    }
-                    divCat.appendChild(divItem);
-                });
-                lista.appendChild(divCat);
+            if(filtrados.length === 0) {
+                lista.innerHTML = `<p class="text-center text-zinc-400 text-xs py-8">Nenhum item encontrado.</p>`;
+                return;
             }
+
+            filtrados.forEach(item => {
+                let divItem = document.createElement('div');
+                
+                if(item.ativo === false) { // 24. Bloqueio de Esgotado
+                    divItem.className = "bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center mb-2 opacity-60 grayscale";
+                    divItem.innerHTML = `
+                        <div><p class="font-bold text-zinc-600 line-through text-xs">${item.nome}</p><span class="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">ESGOTADO</span></div>
+                        <span class="text-zinc-400 font-black text-xs">R$ ${item.preco.toFixed(2).replace('.',',')}</span>
+                    `;
+                } else {
+                    divItem.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 flex justify-between items-center mb-2 shadow-sm relative overflow-hidden";
+                    divItem.innerHTML = `
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>
+                        <div class="pl-2"><p class="font-bold text-zinc-800 dark:text-zinc-200 text-xs">${item.nome}</p><p class="text-[11px] font-black text-amber-600 dark:text-amber-400">R$ ${item.preco.toFixed(2).replace('.',',')}</p></div>
+                        <button onclick="adicionarCarrinho('${item.id}', '${item.nome}', ${item.preco})" class="tap-scale bg-amber-500 text-zinc-950 w-9 h-9 rounded-xl font-black text-lg flex justify-center items-center shadow-md">+</button>
+                    `;
+                }
+                lista.appendChild(divItem);
+            });
         }
 
         // FUNÇÕES DO CARRINHO
@@ -395,7 +441,7 @@
             if(index > -1) carrinho[index].qtd++;
             else carrinho.push({ id, nome, preco, qtd: 1 });
             
-            if(navigator.vibrate) navigator.vibrate(50); // Choquinho suave
+            if(navigator.vibrate) navigator.vibrate(50);
             atualizarCarrinhoFlutuante();
         }
 
@@ -417,7 +463,7 @@
         }
         window.fecharCarrinho = function() { document.getElementById('modal-carrinho').classList.add('hidden'); }
         
-        // 17. RENDERIZAR CARRINHO (SWIPE TO DELETE COM CSS NATIVO)
+        // 17. RENDERIZAR CARRINHO (SWIPE TO DELETE)
         function renderizarCarrinhoModal() {
             const lista = document.getElementById('lista-carrinho');
             lista.innerHTML = '';
@@ -426,14 +472,12 @@
             carrinho.forEach((item, index) => {
                 total += (item.preco * item.qtd);
                 let div = document.createElement('div');
-                // Container com Scroll Snap para o Swipe!
                 div.className = "swipe-item-container flex overflow-x-auto scrollbar-hide w-full mb-2 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800";
                 
                 div.innerHTML = `
-                    <!-- Visão Frontal (Ocupa 100% da largura) -->
                     <div class="swipe-snap-center shrink-0 w-full flex justify-between items-center p-3 relative bg-white dark:bg-zinc-900">
                         <div class="flex items-center gap-3">
-                            <button onclick="abrirNumpad(${index})" class="tap-scale bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-black text-sm px-3 py-2 rounded-xl shadow-inner border border-zinc-200 dark:border-zinc-700">
+                            <button onclick="abrirNumpad(${index})" class="tap-scale bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-black text-xs px-3 py-2 rounded-xl shadow-inner border border-zinc-200 dark:border-zinc-700">
                                 ${item.qtd}x
                             </button>
                             <div>
@@ -441,12 +485,11 @@
                                 <p class="text-[10px] font-black text-amber-600 dark:text-amber-500">R$ ${(item.preco * item.qtd).toFixed(2).replace('.',',')}</p>
                             </div>
                         </div>
-                        <span class="text-[10px] text-zinc-400 font-bold tracking-widest uppercase ml-2 select-none animate-pulse">👈 Deslize</span>
+                        <span class="text-[9px] text-zinc-400 font-bold tracking-widest uppercase ml-2 select-none animate-pulse">👈 Deslize</span>
                     </div>
                     
-                    <!-- Botão de Excluir Escondido (Revelado no Swipe) -->
                     <div class="swipe-snap-center shrink-0 w-24 bg-red-500 text-white flex justify-center items-center font-black tap-scale rounded-r-2xl" onclick="removerItemCarrinho(${index})">
-                        <span class="text-2xl">🗑️</span>
+                        <span class="text-xl">🗑️</span>
                     </div>
                 `;
                 lista.appendChild(div);
@@ -507,6 +550,7 @@
             
             let txtObs = document.getElementById('obs-pedido').value.trim();
             let totalVal = carrinho.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+            let garcomNome = document.getElementById('nome-atendente').value.trim() || "Garçom";
             
             let strItens = carrinho.map(i => `${i.qtd}x ${i.nome}`).join('\n');
             if(txtObs) strItens += `\nObs: ${txtObs}`;
@@ -521,7 +565,7 @@
                 dataCriacao: new Date().toISOString().split('T')[0],
                 horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
                 pagoNaHora: false,
-                atendente: "Garçom App",
+                atendente: garcomNome,
                 valorPagoParcial: 0
             };
 
