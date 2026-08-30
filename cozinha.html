@@ -264,7 +264,8 @@
                 msgVazia.classList.add('hidden');
             }
 
-            filtrados.sort((a, b) => (a.horario > b.horario) ? 1 : -1);
+            // ORDENAÇÃO INVERTIDA: O horário mais recente (maior) fica primeiro no topo da lista
+            filtrados.sort((a, b) => (a.horario < b.horario) ? 1 : -1);
 
             filtrados.forEach((pedido) => {
                 let itensTexto = pedido.pedido || "";
@@ -350,7 +351,6 @@
             } catch (e) { alert("Erro ao atualizar."); }
         }
 
-        // CORRIGIDO: Agora grava o status 'Pago' e a 'dataCriacao' atual do dia exato para somar no relatório do caixa
         window.marcarPagoNaHoraConcluido = async function(id) {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
