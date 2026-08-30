@@ -14,10 +14,22 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .tap-scale:active { transform: scale(0.97); transition: transform 0.1s ease; }
-        /* Garante que os inputs de data respeitem exatamente o tamanho da caixa pai */
+        /* Esconde o ícone de calendário nativo que causa overflow no iOS */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
         input[type="date"], input[type="month"] {
-            box-sizing: border-box;
-            max-width: 100%;
+            position: relative;
         }
     </style>
 </head>
@@ -43,7 +55,6 @@
                 <button id="btn-som" onclick="ativarSom()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2 py-1.5 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-zinc-300 transition shadow-sm">
                     🔇 Som
                 </button>
-                <!-- Botão de Alternar Tema -->
                 <button onclick="alternarTema()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2 py-1.5 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-zinc-300 transition shadow-sm" title="Mudar Tema">
                     <span id="icone-tema">🌙</span>
                 </button>
@@ -75,18 +86,23 @@
                 </button>
             </div>
             
-            <!-- Campos empilhados com largura 100% idêntica ao total do dia -->
+            <!-- CAIXA BLINDADA CONTRA OVERFLOW DO NAVEGADOR -->
             <div class="flex flex-col gap-3 mb-3 w-full">
                 <div class="w-full">
                     <label class="block text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Dia Específico:</label>
-                    <input type="date" id="filtro-data" onchange="mudarFiltroTipo('dia')" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500">
+                    <div class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500 transition-colors block">
+                        <input type="date" id="filtro-data" onchange="mudarFiltroTipo('dia')" class="w-full bg-transparent px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none border-none m-0 appearance-none min-w-0">
+                    </div>
                 </div>
                 <div class="w-full">
                     <label class="block text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Mês Específico:</label>
-                    <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500">
+                    <div class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500 transition-colors block">
+                        <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full bg-transparent px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none border-none m-0 appearance-none min-w-0">
+                    </div>
                 </div>
             </div>
 
+            <!-- TOTAL DO DIA -->
             <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full">
                 <div>
                     <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider" id="titulo-total-filtro">Total do Dia:</span>
