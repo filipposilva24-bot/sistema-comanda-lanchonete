@@ -165,12 +165,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // =====================================================================
-        // ⚠️ INSIRA SUA CHAVE PIX E NOME ABAIXO PARA FUNCIONAR DIRETO NO CELULAR DO GARÇOM:
-        // =====================================================================
-        const CHAVE_PIX_FIXA = "thiagoderico15@gmail.com"; // Ex: "seu-email@gmail.com" ou seu CPF/CNPJ
+        const CHAVE_PIX_FIXA = "SUA_CHAVE_PIX_AQUI"; 
         const NOME_PIX_FIXO = "Point Derico";
-        // =====================================================================
 
         let mesaSelecionada = "";
         let mesasDisponiveis = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
@@ -180,7 +176,8 @@
             mesasOcupadas = [];
             snapshot.forEach((doc) => {
                 const dados = doc.data();
-                if (dados.status === "Pendente" || dados.status === "Entregue") {
+                // ATUALIZADO: Considera a mesa ocupada se o pedido estiver Pendente, Entregue OU se foi Pago mas ainda está em andamento na cozinha
+                if (dados.status === "Pendente" || dados.status === "Entregue" || dados.status === "Pago") {
                     if (!mesasOcupadas.includes(dados.mesa)) mesasOcupadas.push(dados.mesa);
                 }
             });
@@ -316,7 +313,8 @@
                 let dadosPedido = {
                     mesa: mesaSelecionada,
                     pedido: textoPedidoFormatado,
-                    status: statusPedido === 'Pago' ? 'Pago' : 'Pendente',
+                    status: 'Pendente', // ATUALIZADO: Salva como 'Pendente' para OBRIGATORIAMENTE ir para a cozinha preparar!
+                    pagoNaHora: statusPedido === 'Pago', // Marca se já foi pago para o cozinheiro/caixa saber
                     total: total,
                     dataCriacao: new Date().toISOString().split('T')[0],
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
@@ -328,7 +326,7 @@
                 document.getElementById('obs').value = '';
                 itensCarrinho = []; atualizarResumo();
                 
-                statusTxt.innerText = statusPedido === 'Pago' ? "Pix confirmado e pedido enviado!" : "Pedido enviado para cozinha!";
+                statusTxt.innerText = statusPedido === 'Pago' ? "Pix pago! Pedido enviado para a cozinha." : "Pedido enviado para cozinha!";
                 setTimeout(() => statusTxt.innerText = "", 3000);
             } catch (e) {
                 alert("Erro ao enviar pedido.");
