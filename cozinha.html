@@ -202,7 +202,6 @@
             snapshot.forEach((docSnap) => {
                 const dados = docSnap.data();
                 if(!dados.dataCriacao) dados.dataCriacao = new Date().toISOString().split('T')[0];
-                // Salvamos o ID do documento também para garantir a ordenação exata de chegada
                 todosPedidos.push({ id: docSnap.id, ...dados });
             });
 
@@ -265,8 +264,12 @@
                 msgVazia.classList.add('hidden');
             }
 
-            // ORDENAÇÃO POR ID DO FIREBASE: Garante que os registros mais novos gerados por último fiquem sempre no topo absoluto
-            filtrados.sort((a, b) => (a.id < b.id) ? 1 : -1);
+            // ORDENAÇÃO CORRETA POR HORÁRIO: Do maior para o menor (ex: 01:02 vem antes de 01:01 e 00:44)
+            filtrados.sort((a, b) => {
+                let horaA = a.horario || "00:00";
+                let horaB = b.horario || "00:00";
+                return horaB.localeCompare(horaA);
+            });
 
             filtrados.forEach((pedido) => {
                 let itensTexto = pedido.pedido || "";
