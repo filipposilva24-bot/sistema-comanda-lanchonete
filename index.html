@@ -52,7 +52,7 @@
                 <div id="container-mesas" class="grid grid-cols-4 gap-2"></div>
             </div>
 
-            <!-- Área de Cardápio Dinâmico (Puxado do Firebase) -->
+            <!-- Área de Cardápio Dinâmico -->
             <div class="mb-4 h-[38vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50" id="cardapio-dinamico-container">
                 <p class="text-center text-xs text-gray-400 mt-10">Carregando cardápio...</p>
             </div>
@@ -91,24 +91,17 @@
     <div id="modal-pix-atendente" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <button onclick="fecharModalPixAtendente()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
-            
             <h3 class="text-lg font-bold text-yellow-500 mb-1" id="modal-mesa-titulo">Pix na Hora</h3>
             <p class="text-xs text-gray-400 mb-3">Escaneie para pagar e enviar o pedido</p>
-
             <div class="mb-3">
                 <span class="text-xs text-gray-400 uppercase font-bold">Valor Total:</span>
                 <p class="text-2xl font-bold text-green-400" id="modal-valor-total">R$ 0,00</p>
             </div>
-
             <div class="bg-white p-3 rounded-xl inline-block mb-2 shadow-inner">
                 <img id="qrcode-img" src="" alt="QR Code Pix" class="w-40 h-40 mx-auto">
             </div>
-            
             <p class="text-[10px] text-gray-400 mb-4" id="aviso-chave-pix">Chave configurada</p>
-
-            <button onclick="confirmarPixEnivarPedido()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg">
-                ✅ Pix Pago - Enviar para Cozinha
-            </button>
+            <button onclick="confirmarPixEnivarPedido()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg">✅ Pix Pago - Enviar para Cozinha</button>
         </div>
     </div>
 
@@ -129,7 +122,62 @@
         let mesasOcupadas = [];
         let cardapioLista = [];
 
-        // Suporte a QR Code na mesa (Ex: index.html?mesa=Mesa+3)
+        // Cardápio Padrão Completo de Fábrica (Caso o banco esteja vazio)
+        const cardapioInicialPadrao = [
+            // Hambúrgueres
+            { nome: 'X-Burguer', preco: 15, categoria: '🍔 Hambúrgueres', ativo: true },
+            { nome: 'X-Salada', preco: 18, categoria: '🍔 Hambúrgueres', ativo: true },
+            { nome: 'X-Egg', preco: 20, categoria: '🍔 Hambúrgueres', ativo: true },
+            { nome: 'X-Bacon', preco: 24, categoria: '🍔 Hambúrgueres', ativo: true },
+            { nome: 'Duplo Chesse', preco: 30, categoria: '🍔 Hambúrgueres', ativo: true },
+            // Porções
+            { nome: 'Batata Frita P', preco: 20, categoria: '🍟 Porções', ativo: true },
+            { nome: 'Batata Frita G', preco: 40, categoria: '🍟 Porções', ativo: true },
+            { nome: 'Porção Mista', preco: 35, categoria: '🍟 Porções', ativo: true },
+            { nome: 'Frango c/ Batata', preco: 45, categoria: '🍟 Porções', ativo: true },
+            { nome: 'Família Frango', preco: 70, categoria: '🍟 Porções', ativo: true },
+            { nome: 'Contra c/ Batata', preco: 70, categoria: '🍟 Porções', ativo: true },
+            // Pastéis Simples
+            { nome: 'Pastel Carne', preco: 10, categoria: '🥟 Pastéis Simples', ativo: true },
+            { nome: 'Pastel Calabresa', preco: 10, categoria: '🥟 Pastéis Simples', ativo: true },
+            { nome: 'Pastel Frango', preco: 10, categoria: '🥟 Pastéis Simples', ativo: true },
+            { nome: 'Pastel Queijo', preco: 10, categoria: '🥟 Pastéis Simples', ativo: true },
+            // Pastéis Especiais
+            { nome: 'Carne c/ Queijo', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
+            { nome: 'Calabresa c/ Queijo', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
+            { nome: 'Calabresa c/ Catu', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
+            { nome: 'Frango c/ Catu', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
+            { nome: 'Pizza', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
+            { nome: '2 Queijos', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
+            { nome: 'Bauru', preco: 12, categoria: '🥟 Pastéis (Especiais)', ativo: true },
+            // Pastéis Doces
+            { nome: 'Doce de Leite', preco: 13, categoria: '🍫 Pastéis Doces', ativo: true },
+            { nome: 'Doce Leite c/ Banana', preco: 13, categoria: '🍫 Pastéis Doces', ativo: true },
+            { nome: 'Nutella c/ Morango', preco: 13, categoria: '🍫 Pastéis Doces', ativo: true },
+            // Bebidas
+            { nome: 'Refri Lata', preco: 7, categoria: '🥤 Bebidas', ativo: true },
+            { nome: 'Suco', preco: 8, categoria: '🥤 Bebidas', ativo: true },
+            { nome: 'Coca Cola 2L', preco: 18, categoria: '🥤 Bebidas', ativo: true },
+            { nome: 'Guaraná 2L', preco: 15, categoria: '🥤 Bebidas', ativo: true },
+            { nome: 'Sukita 2L', preco: 15, categoria: '🥤 Bebidas', ativo: true },
+            { nome: 'Água', preco: 3, categoria: '🥤 Bebidas', ativo: true },
+            { nome: 'Água c/ Gás', preco: 5, categoria: '🥤 Bebidas', ativo: true },
+            { nome: 'Água 1,5L', preco: 6, categoria: '🥤 Bebidas', ativo: true },
+            // Bebidas Alcoólicas
+            { nome: 'Cerveja Lata', preco: 6, categoria: '🍺 Bebidas Alcoólicas', ativo: true },
+            { nome: 'Latão', preco: 10, categoria: '🍺 Bebidas Alcoólicas', ativo: true },
+            { nome: 'Latão Heineken', preco: 11, categoria: '🍺 Bebidas Alcoólicas', ativo: true },
+            // Dose & Drinks
+            { nome: 'Gin', preco: 15, categoria: '🍹 Dose & Drinks', ativo: true },
+            { nome: 'Chanceler', preco: 15, categoria: '🍹 Dose & Drinks', ativo: true },
+            { nome: 'Vodka', preco: 15, categoria: '🍹 Dose & Drinks', ativo: true },
+            { nome: 'Xeque Mate', preco: 15, categoria: '🍹 Dose & Drinks', ativo: true },
+            { nome: 'Ice', preco: 13, categoria: '🍹 Dose & Drinks', ativo: true },
+            { nome: 'Skol Beats', preco: 13, categoria: '🍹 Dose & Drinks', ativo: true },
+            { nome: 'Caipirinha (Cachaça)', preco: 25, categoria: '🍹 Dose & Drinks', ativo: true },
+            { nome: 'Caipirinha (Vodka)', preco: 35, categoria: '🍹 Dose & Drinks', ativo: true }
+        ];
+
         const urlParams = new URLSearchParams(window.location.search);
         const mesaUrl = urlParams.get('mesa');
         if (mesaUrl) {
@@ -160,25 +208,28 @@
             document.getElementById('modal-login').classList.remove('hidden');
         }
 
-        // Buscar cardápio do Firebase em tempo real
-        onSnapshot(collection(db, "cardapio"), (snapshot) => {
+        // Carregar Cardápio (Insere padrão se estiver vazio)
+        onSnapshot(collection(db, "cardapio"), async (snapshot) => {
             cardapioLista = [];
             snapshot.forEach(docSnap => {
                 cardapioLista.push({ id: docSnap.id, ...docSnap.data() });
             });
-            renderizarCardapio();
+
+            if (cardapioLista.length === 0) {
+                // Se o banco estiver vazio, popula automaticamente com os itens padrão
+                for (let item of cardapioInicialPadrao) {
+                    await addDoc(collection(db, "cardapio"), item);
+                }
+            } else {
+                renderizarCardapio();
+            }
         });
 
         function renderizarCardapio() {
             const container = document.getElementById('cardapio-dinamico-container');
-            if (cardapioLista.length === 0) {
-                container.innerHTML = '<p class="text-center text-xs text-gray-400 mt-10">Nenhum item cadastrado no cardápio admin.</p>';
-                return;
-            }
-
-            // Agrupar por categoria
             let categorias = {};
             cardapioLista.forEach(item => {
+                if (item.ativo === false) return; // Não mostra itens desativados
                 let cat = item.categoria || "Geral";
                 if (!categorias[cat]) categorias[cat] = [];
                 categorias[cat].push(item);
@@ -196,13 +247,9 @@
 
                 categorias[cat].forEach(prod => {
                     let btn = document.createElement('button');
-                    let corBg = prod.ativo === false ? "bg-gray-200 opacity-50 cursor-not-allowed" : "bg-orange-50 border border-orange-200 text-gray-800 hover:bg-orange-100";
-                    btn.className = `${corBg} p-2 rounded-lg text-left flex flex-col transition`;
+                    btn.className = "bg-orange-50 border border-orange-200 text-gray-800 p-2 rounded-lg hover:bg-orange-100 text-left flex flex-col transition";
                     btn.innerHTML = `<span class="text-xs font-bold">${prod.nome}</span><span class="text-[10px] text-gray-500 mt-1">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
-                    
-                    if (prod.ativo !== false) {
-                        btn.onclick = () => adicionarItem(prod.nome, Number(prod.preco));
-                    }
+                    btn.onclick = () => adicionarItem(prod.nome, Number(prod.preco));
                     grid.appendChild(btn);
                 });
                 container.appendChild(grid);
@@ -214,9 +261,7 @@
             snapshot.forEach((doc) => {
                 const dados = doc.data();
                 if (dados.status === "Pendente" || dados.status === "Entregue") {
-                    if (dados.mesa && !mesasOcupadas.includes(dados.mesa)) {
-                        mesasOcupadas.push(dados.mesa);
-                    }
+                    if (dados.mesa && !mesasOcupadas.includes(dados.mesa)) mesasOcupadas.push(dados.mesa);
                 }
             });
             if(!mesaUrl) renderizarMesas();
@@ -314,11 +359,8 @@
             document.getElementById('aviso-chave-pix').innerText = `Chave: ${CHAVE_PIX_FIXA}`;
 
             let valorNum = totalStr.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
-            let valorFloat = parseFloat(valorNum) || 0;
-
-            let payloadPix = criarPayloadPix(CHAVE_PIX_FIXA, NOME_PIX_FIXO, "SAO PAULO", valorFloat.toFixed(2));
-            let urlQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
-            document.getElementById('qrcode-img').src = urlQrCode;
+            let payloadPix = criarPayloadPix(CHAVE_PIX_FIXA, NOME_PIX_FIXO, "SAO PAULO", (parseFloat(valorNum) || 0).toFixed(2));
+            document.getElementById('qrcode-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
             document.getElementById('modal-pix-atendente').classList.remove('hidden');
         }
 
@@ -346,13 +388,13 @@
                 let dadosPedido = {
                     mesa: mesaSelecionada,
                     pedido: textoPedidoFormatado,
-                    itensBrutos: itensCarrinho, // Salva estruturado para o ranking de mais vendidos
+                    itensBrutos: itensCarrinho,
                     atendente: operadorAtual || "Geral", 
                     status: 'Pendente', 
                     pagoNaHora: tipoEnvio === 'PagoNaHora', 
                     total: total,
                     dataCriacao: new Date().toISOString().split('T')[0],
-                    timestampCriacao: Date.now(), // Para o cronômetro da cozinha
+                    timestampCriacao: Date.now(),
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
                 };
 
@@ -364,30 +406,15 @@
                 
                 statusTxt.innerText = tipoEnvio === 'PagoNaHora' ? "Pix confirmado! Pedido na Cozinha." : "Pedido enviado para cozinha!";
                 setTimeout(() => statusTxt.innerText = "", 3000);
-            } catch (e) {
-                alert("Erro ao enviar pedido.");
-            }
+            } catch (e) { alert("Erro ao enviar pedido."); }
         }
 
         function criarPayloadPix(pixKey, name, city, amount) {
-            function format(id, val) {
-                return id + String(val.length).padStart(2, '0') + val;
-            }
+            function format(id, val) { return id + String(val.length).padStart(2, '0') + val; }
             let merchantAccount = format("00", "br.gov.bcb.pix") + format("01", pixKey);
-            let payload = 
-                format("00", "01") +
-                format("26", merchantAccount) +
-                format("52", "0000") +
-                format("53", "986") +
-                (amount > 0 ? format("54", amount) : "") +
-                format("58", "BR") +
-                format("59", name.substring(0, 25).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) +
-                format("60", city.substring(0, 15).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) +
-                format("62", format("05", "POINTDERICO")) +
-                "6304";
+            let payload = format("00", "01") + format("26", merchantAccount) + format("52", "0000") + format("53", "986") + (amount > 0 ? format("54", amount) : "") + format("58", "BR") + format("59", name.substring(0, 25).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("60", city.substring(0, 15).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("62", format("05", "POINTDERICO")) + "6304";
 
-            let polinomio = 0x1021;
-            let resultado = 0xFFFF;
+            let polinomio = 0x1021, resultado = 0xFFFF;
             for (let c = 0; c < payload.length; c++) {
                 resultado ^= (payload.charCodeAt(c) << 8);
                 for (let i = 0; i < 8; i++) {
@@ -395,8 +422,7 @@
                     else resultado = (resultado << 1);
                 }
             }
-            let crc = (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-            return payload + crc;
+            return payload + (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
         }
 
         verificarLogin();
