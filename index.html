@@ -46,7 +46,7 @@
             
             <div class="mb-3" id="bloco-selecao-mesas">
                 <div class="flex justify-between items-center mb-1">
-                    <label class="block text-gray-700 text-xs font-bold">Selecione a Mesa / Local (Segure para apagar extra):</label>
+                    <label class="block text-gray-700 text-xs font-bold">Selecione a Mesa / Local:</label>
                     <span class="text-[10px] text-gray-400 font-semibold">🔴 Ocupada | ⚪ Livre</span>
                 </div>
                 <div id="container-mesas" class="grid grid-cols-4 gap-2"></div>
@@ -82,7 +82,7 @@
             <button onclick="enviarPedido('Pendente')" class="flex-1 bg-black text-yellow-500 font-bold py-2.5 px-2 rounded-xl hover:bg-gray-800 transition shadow-lg text-xs border-2 border-yellow-500">
                 🚀 Enviar (Paga Depois)
             </button>
-            <button onclick="abrirPixAtendente()" class="flex-1 bg-green-600 text-white font-bold py-2.5 px-2 rounded-xl hover:bg-green-500 transition shadow-lg text-xs">
+            <button onclick="abrirPixAtendente()" class="flex-1 bg-green-600 text-white font-bold py-2.5 px-2 rounded-xl hover:bg-green-500 transition shadow-lg text-sm">
                 📱 Pagar Pix Agora
             </button>
         </div>
@@ -163,7 +163,6 @@
             renderizarCardapio();
         });
 
-        // Cores e estilos por categoria para diferenciar os grupos
         function obterEstiloCategoria(categoria) {
             let catLower = (categoria || "").toLowerCase();
             if (catLower.includes('hambúrguer') || catLower.includes('lanche')) return { bg: 'bg-orange-50 border-orange-200 text-orange-900', badge: 'bg-orange-500 text-white' };
@@ -176,9 +175,7 @@
 
         window.rolarParaCategoria = function(catId) {
             const elemento = document.getElementById('cat-' + catId);
-            if (elemento) {
-                elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (elemento) elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function renderizarCardapio() {
@@ -199,7 +196,6 @@
             for (let cat in categorias) {
                 let catIdSafe = cat.replace(/[^a-zA-Z0-9]/g, '_');
 
-                // Botão de atalho rápido no topo
                 let btnAtalho = document.createElement('button');
                 let estiloCat = obterEstiloCategoria(cat);
                 btnAtalho.className = `${estiloCat.badge} text-[11px] font-bold px-3 py-1 rounded-lg flex-shrink-0 shadow-sm transition hover:opacity-80`;
@@ -207,7 +203,6 @@
                 btnAtalho.onclick = () => rolarParaCategoria(catIdSafe);
                 atalhosContainer.appendChild(btnAtalho);
 
-                // Título da Categoria
                 let tituloCat = document.createElement('h3');
                 tituloCat.id = 'cat-' + catIdSafe;
                 tituloCat.className = "font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1 mt-2 text-xs uppercase tracking-wider";
@@ -246,12 +241,15 @@
             let todasAsMesas = [...mesasFixas, ...mesasExtras];
 
             todasAsMesas.forEach(mesa => {
-                const btn = document.createElement('button');
                 const isSelected = mesaSelecionada === mesa;
                 const isOccupied = mesasOcupadas.includes(mesa);
                 const isExtra = mesasExtras.includes(mesa);
 
-                let estilo = "font-bold py-2 px-1 rounded-lg text-xs border-2 transition shadow-sm relative ";
+                const wrapper = document.createElement('div');
+                wrapper.className = "relative flex";
+
+                const btn = document.createElement('button');
+                let estilo = "w-full font-bold py-2 px-1 rounded-lg text-xs border-2 transition shadow-sm ";
                 if (isSelected) estilo += "bg-black text-yellow-500 border-yellow-500 ring-2 ring-yellow-400";
                 else if (isOccupied) estilo += "bg-red-600 text-white border-red-700";
                 else estilo += "bg-gray-200 text-gray-700 border-transparent hover:bg-gray-300";
@@ -259,12 +257,16 @@
                 btn.className = estilo;
                 btn.innerText = mesa + (isOccupied ? " 🔴" : "");
                 btn.onclick = () => { mesaSelecionada = mesa; renderizarMesas(); };
+                wrapper.appendChild(btn);
 
-                // Se for mesa extra, permite excluir segurando ou clicando com toque longo / confirmação
+                // Se for mesa extra livre, adiciona um pequeno botão "X" de exclusão no canto superior direito
                 if (isExtra && !isOccupied) {
-                    btn.title = "Toque longo para excluir mesa extra";
-                    btn.oncontextmenu = (e) => {
-                        e.preventDefault();
+                    const btnX = document.createElement('button');
+                    btnX.innerHTML = "×";
+                    btnX.className = "absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow hover:bg-red-900";
+                    btnX.title = "Excluir mesa extra";
+                    btnX.onclick = (e) => {
+                        e.stopPropagation();
                         if (confirm(`Deseja excluir a mesa extra "${mesa}"?`)) {
                             mesasExtras = mesasExtras.filter(m => m !== mesa);
                             localStorage.setItem('point_derico_mesas_extras', JSON.stringify(mesasExtras));
@@ -272,8 +274,10 @@
                             renderizarMesas();
                         }
                     };
+                    wrapper.appendChild(btnX);
                 }
-                container.appendChild(btn);
+
+                container.appendChild(wrapper);
             });
 
             const btnAdd = document.createElement('button');
