@@ -49,7 +49,6 @@
     <!-- TELA PRINCIPAL DE COMANDA -->
     <div class="max-w-md mx-auto bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 flex flex-col justify-between rounded-b-3xl transition-colors duration-200">
         <div>
-            <!-- TOPO / ALTERNAR ABAS (Salão / Caixa) -->
             <header class="mb-3 text-center relative border-b border-zinc-200 dark:border-zinc-800 pb-3">
                 <div class="absolute left-0 top-0 flex items-center gap-1.5">
                     <span id="status-conexao" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -65,7 +64,6 @@
                 </div>
                 <h1 class="text-2xl font-black tracking-tight text-amber-500 dark:text-amber-400">POINT DERICO</h1>
                 
-                <!-- ABAS DE NAVEGAÇÃO -->
                 <div class="flex gap-2 mt-3">
                     <button onclick="mudarAba('salao')" id="aba-salao" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 rounded-xl text-xs shadow">🏠 Salão / Cardápio</button>
                     <button onclick="mudarAba('caixa')" id="aba-caixa" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2 rounded-xl text-xs shadow">💰 Caixa / Mesas</button>
@@ -121,19 +119,16 @@
                 </div>
             </div>
 
-            <!-- VIEW CAIXA (Painel de Mesas com Pagamento Parcial e Fechamento) -->
+            <!-- VIEW CAIXA -->
             <div id="view-caixa" class="hidden">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xs font-black text-amber-500 uppercase tracking-wider">Mesas Aguardando Fechamento</h2>
                     <span class="text-[10px] text-zinc-400" id="caixa-contador">0 mesas</span>
                 </div>
-                <div id="lista-caixa-mesas" class="space-y-3 max-h-[55vh] overflow-y-auto pr-1">
-                    <!-- Gerado via JS -->
-                </div>
+                <div id="lista-caixa-mesas" class="space-y-3 max-h-[55vh] overflow-y-auto pr-1"></div>
             </div>
         </div>
 
-        <!-- BOTÕES DE AÇÃO DO SALÃO -->
         <div id="painel-botoes-acao">
             <div class="flex gap-2">
                 <button id="btn-enviar-pedido" onclick="enviarPedido('Pendente')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3 px-2 rounded-2xl transition shadow-lg text-xs flex items-center justify-center gap-1">
@@ -147,7 +142,7 @@
         </div>
     </div>
 
-    <!-- CARRINHO FLUTUANTE -->
+    <!-- MODAL CARRINHO -->
     <div id="carrinho-flutuante" onclick="abrirModalCarrinho()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
         <div class="flex items-center gap-2">
             <span class="text-base">🛒</span>
@@ -156,7 +151,6 @@
         <span id="flutuante-total" class="text-sm font-black">R$ 0,00</span>
     </div>
 
-    <!-- MODAL DO CARRINHO COMPLETO -->
     <div id="modal-carrinho" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex flex-col justify-end hidden">
         <div class="bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 rounded-t-3xl max-w-md w-full mx-auto p-5 shadow-2xl max-h-[80vh] flex flex-col">
             <div class="flex justify-between items-center mb-3 pb-2 border-b border-zinc-200 dark:border-zinc-800">
@@ -174,7 +168,7 @@
         </div>
     </div>
 
-    <!-- TECLADO NUMÉRICO GIGANTE (NUMPAD) -->
+    <!-- TECLADO NUMÉRICO -->
     <div id="modal-numpad" class="fixed inset-0 bg-black/95 z-[60] flex flex-col justify-center items-center hidden p-4">
         <div class="w-full max-w-xs p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl">
             <p class="text-amber-500 text-center font-bold text-xs uppercase tracking-widest mb-2">Alterar Quantidade</p>
@@ -196,7 +190,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE PIX -->
+    <!-- MODAL PIX -->
     <div id="modal-pix-atendente" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <button onclick="fecharModalPixAtendente()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -214,7 +208,7 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHES DA MESA & PAGAMENTO PARCIAL (Com as linhas separadas corretas) -->
+    <!-- MODAL DETALHES DA MESA -->
     <div id="modal-mesa-detalhes" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-5 shadow-2xl relative">
             <button onclick="fecharModalMesaDetalhes()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold">✕</button>
@@ -243,7 +237,6 @@
         </div>
     </div>
 
-    <!-- NOTIFICAÇÃO TOAST -->
     <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-5 py-3 rounded-full shadow-2xl font-bold text-xs flex items-center gap-2 z-[100] transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
         <span class="text-lg">🛎️</span> <span id="toast-msg">Mensagem</span>
     </div>
@@ -359,9 +352,6 @@
                 renderizarCaixaMesas();
             }
         }
-
-        window.addEventListener('online', () => document.getElementById('status-conexao').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse");
-        window.addEventListener('offline', () => document.getElementById('status-conexao').className = "w-2 h-2 rounded-full bg-red-500");
 
         onSnapshot(collection(db, "cardapio"), (snapshot) => {
             cardapioLista = [];
@@ -559,7 +549,6 @@
             container.appendChild(btnAdd);
         }
 
-        // RENDERIZAR CAIXA COM AS OPÇÕES COMPLETAS (Pix, Fechar e Abater Parcial)
         window.renderizarCaixaMesas = function() {
             const container = document.getElementById('lista-caixa-mesas');
             const contador = document.getElementById('caixa-contador');
