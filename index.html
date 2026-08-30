@@ -21,100 +21,194 @@
             </div>
 
             <!-- Área de Cardápio Rolável -->
-            <div class="mb-4 h-[45vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50">
+            <div class="mb-4 h-[40vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50">
                 
                 <!-- HAMBÚRGUERS -->
                 <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1 mt-2">🍔 Hambúrgueres</h3>
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('X-Burguer')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-xs font-semibold hover:bg-orange-200 text-left">X-Burguer</button>
-                    <button onclick="adicionarItem('X-Salada')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-xs font-semibold hover:bg-orange-200 text-left">X-Salada</button>
-                    <button onclick="adicionarItem('X-Egg')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-xs font-semibold hover:bg-orange-200 text-left">X-Egg</button>
-                    <button onclick="adicionarItem('X-Bacon')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-xs font-semibold hover:bg-orange-200 text-left">X-Bacon</button>
-                    <button onclick="adicionarItem('Duplo Chesse')" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg text-xs font-semibold hover:bg-orange-200 text-left col-span-2 text-center">Duplo Chesse</button>
+                    <button onclick="adicionarItem('X-Burguer', 15)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">X-Burguer</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span>
+                    </button>
+                    <button onclick="adicionarItem('X-Salada', 18)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">X-Salada</span><span class="text-[10px] opacity-80 mt-1">R$ 18,00</span>
+                    </button>
+                    <button onclick="adicionarItem('X-Egg', 20)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">X-Egg</span><span class="text-[10px] opacity-80 mt-1">R$ 20,00</span>
+                    </button>
+                    <button onclick="adicionarItem('X-Bacon', 24)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">X-Bacon</span><span class="text-[10px] opacity-80 mt-1">R$ 24,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Duplo Chesse', 30)" class="bg-orange-100 border border-orange-300 text-orange-800 p-2 rounded-lg hover:bg-orange-200 text-left col-span-2 flex justify-between items-center">
+                        <span class="text-xs font-bold">Duplo Chesse</span><span class="text-xs opacity-80">R$ 30,00</span>
+                    </button>
                 </div>
 
                 <!-- PORÇÕES -->
                 <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍟 Porções</h3>
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Batata Frita P')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Batata Frita P</button>
-                    <button onclick="adicionarItem('Batata Frita G')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Batata Frita G</button>
-                    <button onclick="adicionarItem('Porção Mista')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Porção Mista</button>
-                    <button onclick="adicionarItem('Frango c/ Batata')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Frango c/ Batata</button>
-                    <button onclick="adicionarItem('Porção Família Frango')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Porção Família Frango</button>
-                    <button onclick="adicionarItem('Porção de Contra c/ Batata')" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg text-xs font-semibold hover:bg-yellow-200 text-left">Contra c/ Batata</button>
+                    <button onclick="adicionarItem('Batata Frita P', 20)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Batata Frita P</span><span class="text-[10px] opacity-80 mt-1">R$ 20,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Batata Frita G', 40)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Batata Frita G</span><span class="text-[10px] opacity-80 mt-1">R$ 40,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Porção Mista', 35)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Porção Mista</span><span class="text-[10px] opacity-80 mt-1">R$ 35,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Frango c/ Batata', 45)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Frango c/ Batata</span><span class="text-[10px] opacity-80 mt-1">R$ 45,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Porção Família Frango', 70)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Família Frango</span><span class="text-[10px] opacity-80 mt-1">R$ 70,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Contra c/ Batata', 70)" class="bg-yellow-100 border border-yellow-300 text-yellow-800 p-2 rounded-lg hover:bg-yellow-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Contra c/ Batata</span><span class="text-[10px] opacity-80 mt-1">R$ 70,00</span>
+                    </button>
                 </div>
 
                 <!-- PASTÉIS SIMPLES -->
                 <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🥟 Pastéis Simples</h3>
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Pastel Carne')" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-200">Carne</button>
-                    <button onclick="adicionarItem('Pastel Calabresa')" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-200">Calabresa</button>
-                    <button onclick="adicionarItem('Pastel Frango')" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-200">Frango</button>
-                    <button onclick="adicionarItem('Pastel Queijo')" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-200">Queijo</button>
+                    <button onclick="adicionarItem('Pastel Carne', 10)" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg hover:bg-amber-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Carne</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Calabresa', 10)" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg hover:bg-amber-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Calabresa</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Frango', 10)" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg hover:bg-amber-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Frango</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Queijo', 10)" class="bg-amber-100 border border-amber-300 text-amber-800 p-2 rounded-lg hover:bg-amber-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Queijo</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span>
+                    </button>
                 </div>
 
                 <!-- PASTÉIS ESPECIAIS -->
                 <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🥟 Pastéis (Especiais)</h3>
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Pastel Carne c/ Queijo')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-300">Carne c/ Queijo</button>
-                    <button onclick="adicionarItem('Pastel Calabresa c/ Queijo')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-300">Calabresa c/ Queijo</button>
-                    <button onclick="adicionarItem('Pastel Calabresa c/ Catupiry')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-300">Calabresa c/ Catupiry</button>
-                    <button onclick="adicionarItem('Pastel Frango c/ Catupiry')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-300">Frango c/ Catupiry</button>
-                    <button onclick="adicionarItem('Pastel Pizza')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-300">Pizza</button>
-                    <button onclick="adicionarItem('Pastel 2 Queijos')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-300">2 Queijos</button>
-                    <button onclick="adicionarItem('Pastel Bauru')" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg text-xs font-semibold text-left hover:bg-amber-300">Bauru</button>
+                    <button onclick="adicionarItem('Pastel Carne c/ Queijo', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col">
+                        <span class="text-xs font-bold">Carne c/ Queijo</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Calabresa c/ Queijo', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col">
+                        <span class="text-xs font-bold">Calabresa c/ Queijo</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Calabresa c/ Catupiry', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col">
+                        <span class="text-xs font-bold">Calabresa c/ Catu</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Frango c/ Catupiry', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col">
+                        <span class="text-xs font-bold">Frango c/ Catu</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Pizza', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col">
+                        <span class="text-xs font-bold">Pizza</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel 2 Queijos', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col">
+                        <span class="text-xs font-bold">2 Queijos</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Bauru', 12)" class="bg-amber-200 border border-amber-400 text-amber-900 p-2 rounded-lg hover:bg-amber-300 text-left flex flex-col">
+                        <span class="text-xs font-bold">Bauru</span><span class="text-[10px] opacity-80 mt-1">R$ 12,00</span>
+                    </button>
                 </div>
 
                 <!-- PASTÉIS DOCES -->
                 <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍫 Pastéis Doces</h3>
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Pastel Doce de Leite')" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg text-xs font-semibold text-left hover:bg-pink-200">Doce de Leite</button>
-                    <button onclick="adicionarItem('Pastel Doce Leite c/ Banana')" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg text-xs font-semibold text-left hover:bg-pink-200">Doce Leite c/ Banana</button>
-                    <button onclick="adicionarItem('Pastel Nutella c/ Morango')" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg text-xs font-semibold text-left hover:bg-pink-200 col-span-2 text-center">Nutella c/ Morango</button>
+                    <button onclick="adicionarItem('Pastel Doce de Leite', 13)" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg hover:bg-pink-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Doce de Leite</span><span class="text-[10px] opacity-80 mt-1">R$ 13,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Doce Leite c/ Banana', 13)" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg hover:bg-pink-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Doce Leite c/ Banana</span><span class="text-[10px] opacity-80 mt-1">R$ 13,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Pastel Nutella c/ Morango', 13)" class="bg-pink-100 border border-pink-300 text-pink-800 p-2 rounded-lg hover:bg-pink-200 text-left col-span-2 flex justify-between items-center">
+                        <span class="text-xs font-bold">Nutella c/ Morango</span><span class="text-xs opacity-80">R$ 13,00</span>
+                    </button>
                 </div>
 
                 <!-- BEBIDAS -->
                 <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🥤 Bebidas</h3>
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Refrigerante Lata')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Refri Lata</button>
-                    <button onclick="adicionarItem('Coca Cola')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Coca Cola</button>
-                    <button onclick="adicionarItem('Guaraná')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Guaraná</button>
-                    <button onclick="adicionarItem('Sukita')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Sukita</button>
-                    <button onclick="adicionarItem('Suco')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Suco</button>
-                    <button onclick="adicionarItem('Água')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Água</button>
-                    <button onclick="adicionarItem('Água c/ Gás')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Água c/ Gás</button>
-                    <button onclick="adicionarItem('Água 1,5L')" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg text-xs font-semibold hover:bg-blue-200 text-left">Água 1,5L</button>
+                    <button onclick="adicionarItem('Refri Lata', 7)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Refri Lata</span><span class="text-[10px] opacity-80 mt-1">R$ 7,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Suco', 8)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Suco</span><span class="text-[10px] opacity-80 mt-1">R$ 8,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Coca Cola 2L', 18)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Coca Cola 2L</span><span class="text-[10px] opacity-80 mt-1">R$ 18,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Guaraná 2L', 15)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Guaraná 2L</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Sukita 2L', 15)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Sukita 2L</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Água', 3)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Água</span><span class="text-[10px] opacity-80 mt-1">R$ 3,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Água c/ Gás', 5)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Água c/ Gás</span><span class="text-[10px] opacity-80 mt-1">R$ 5,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Água 1,5L', 6)" class="bg-blue-100 border border-blue-300 text-blue-800 p-2 rounded-lg hover:bg-blue-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Água 1,5L</span><span class="text-[10px] opacity-80 mt-1">R$ 6,00</span>
+                    </button>
                 </div>
 
                 <!-- BEBIDAS ALCOÓLICAS -->
                 <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍺 Bebidas Alcoólicas</h3>
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button onclick="adicionarItem('Cerveja Lata')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Cerveja Lata</button>
-                    <button onclick="adicionarItem('Latão')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Latão</button>
-                    <button onclick="adicionarItem('Latão Heineken')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Latão Heineken</button>
+                    <button onclick="adicionarItem('Cerveja Lata', 6)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Cerveja Lata</span><span class="text-[10px] opacity-80 mt-1">R$ 6,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Latão', 10)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Latão</span><span class="text-[10px] opacity-80 mt-1">R$ 10,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Latão Heineken', 11)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Latão Heineken</span><span class="text-[10px] opacity-80 mt-1">R$ 11,00</span>
+                    </button>
                 </div>
 
                 <!-- DOSES -->
                 <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1">🍹 Dose & Drinks</h3>
                 <div class="grid grid-cols-2 gap-2 mb-2">
-                    <button onclick="adicionarItem('Dose Gin')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Gin</button>
-                    <button onclick="adicionarItem('Dose Chanceler')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Chanceler</button>
-                    <button onclick="adicionarItem('Dose Vodka')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Vodka</button>
-                    <button onclick="adicionarItem('Xeque Mate')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Xeque Mate</button>
-                    <button onclick="adicionarItem('Ice')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Ice</button>
-                    <button onclick="adicionarItem('Skol Beats')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Skol Beats</button>
-                    <button onclick="adicionarItem('Caipirinha')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Caipirinha</button>
-                    <button onclick="adicionarItem('Caipirinha de Cachaça')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left">Caipirinha (Cachaça)</button>
-                    <button onclick="adicionarItem('Caipirinha de Vodka')" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg text-xs font-semibold hover:bg-purple-200 text-left col-span-2 text-center">Caipirinha (Vodka)</button>
+                    <button onclick="adicionarItem('Dose Gin', 15)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Gin</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Dose Chanceler', 15)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Chanceler</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Dose Vodka', 15)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Vodka</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Xeque Mate', 15)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Xeque Mate</span><span class="text-[10px] opacity-80 mt-1">R$ 15,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Ice', 13)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Ice</span><span class="text-[10px] opacity-80 mt-1">R$ 13,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Skol Beats', 13)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Skol Beats</span><span class="text-[10px] opacity-80 mt-1">R$ 13,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Caipirinha de Cachaça', 25)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Caipirinha (Cachaça)</span><span class="text-[10px] opacity-80 mt-1">R$ 25,00</span>
+                    </button>
+                    <button onclick="adicionarItem('Caipirinha de Vodka', 35)" class="bg-purple-100 border border-purple-300 text-purple-800 p-2 rounded-lg hover:bg-purple-200 text-left flex flex-col">
+                        <span class="text-xs font-bold">Caipirinha (Vodka)</span><span class="text-[10px] opacity-80 mt-1">R$ 35,00</span>
+                    </button>
                 </div>
 
             </div>
 
-            <!-- Lista de itens selecionados -->
+            <!-- Lista de itens selecionados e Valor Total -->
             <div class="mb-2">
                 <label class="block text-gray-700 text-sm font-bold mb-1">Resumo do Pedido:</label>
-                <div id="resumo-pedido" class="bg-white border-2 border-gray-200 rounded-xl p-2 min-h-[80px] max-h-[120px] overflow-y-auto">
-                    <p class="text-gray-400 text-center italic text-sm mt-4" id="vazio-texto">Nenhum item adicionado ainda.</p>
+                <div class="bg-white border-2 border-gray-200 rounded-xl p-2 flex flex-col min-h-[100px] max-h-[140px]">
+                    <div id="resumo-pedido" class="overflow-y-auto flex-grow">
+                        <p class="text-gray-400 text-center italic text-sm mt-2" id="vazio-texto">Nenhum item adicionado.</p>
+                    </div>
+                    <!-- ÁREA DO TOTAL -->
+                    <div class="border-t border-gray-200 mt-2 pt-2 flex justify-between items-center">
+                        <span class="font-bold text-gray-700 text-sm">TOTAL:</span>
+                        <span id="valor-total" class="font-bold text-green-600 text-lg">R$ 0,00</span>
+                    </div>
                 </div>
             </div>
 
@@ -126,7 +220,7 @@
         </div>
 
         <div>
-            <button onclick="enviarPedido()" class="w-full bg-black text-yellow-500 font-bold py-4 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg text-lg border-2 border-yellow-500">
+            <button onclick="enviarPedido()" class="w-full bg-black text-yellow-500 font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg text-lg border-2 border-yellow-500">
                 🚀 Enviar para Cozinha
             </button>
             <p id="status" class="text-center text-sm mt-2 text-green-600 font-semibold h-5"></p>
@@ -144,12 +238,12 @@
 
         let itensCarrinho = [];
 
-        window.adicionarItem = function(nomeItem) {
+        window.adicionarItem = function(nomeItem, preco) {
             const encontrado = itensCarrinho.find(i => i.nome === nomeItem);
             if (encontrado) {
                 encontrado.qtd++;
             } else {
-                itensCarrinho.push({ nome: nomeItem, qtd: 1 });
+                itensCarrinho.push({ nome: nomeItem, preco: preco, qtd: 1 });
             }
             atualizarResumo();
         }
@@ -167,31 +261,44 @@
 
         function atualizarResumo() {
             const container = document.getElementById('resumo-pedido');
+            const totalDisplay = document.getElementById('valor-total');
             container.innerHTML = '';
             
             if (itensCarrinho.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-center italic text-sm mt-4" id="vazio-texto">Nenhum item adicionado ainda.</p>';
+                container.innerHTML = '<p class="text-gray-400 text-center italic text-sm mt-2" id="vazio-texto">Nenhum item adicionado.</p>';
+                totalDisplay.innerText = 'R$ 0,00';
                 return;
             }
 
+            let somaTotal = 0;
+
             itensCarrinho.forEach(item => {
+                somaTotal += (item.preco * item.qtd);
+                
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center py-1 border-b border-gray-100 last:border-0";
                 div.innerHTML = `
-                    <span class="font-bold text-gray-800 text-sm">${item.qtd}x ${item.nome}</span>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-gray-800 text-sm">${item.qtd}x ${item.nome}</span>
+                        <span class="text-[10px] text-gray-500">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
+                    </div>
                     <div class="space-x-1 flex-shrink-0 ml-2">
                         <button onclick="removerItem('${item.nome}')" class="bg-red-100 text-red-600 px-3 py-1 rounded-lg font-bold text-sm shadow-sm">-</button>
-                        <button onclick="adicionarItem('${item.nome}')" class="bg-green-100 text-green-600 px-3 py-1 rounded-lg font-bold text-sm shadow-sm">+</button>
+                        <button onclick="adicionarItem('${item.nome}', ${item.preco})" class="bg-green-100 text-green-600 px-3 py-1 rounded-lg font-bold text-sm shadow-sm">+</button>
                     </div>
                 `;
                 container.appendChild(div);
             });
+
+            // Atualiza o visor de valor total
+            totalDisplay.innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
         }
 
         window.enviarPedido = async function() {
             const mesa = document.getElementById('mesa').value.trim();
             const obs = document.getElementById('obs').value.trim();
             const status = document.getElementById('status');
+            const total = document.getElementById('valor-total').innerText;
 
             if (!mesa) {
                 alert('Por favor, informe a Mesa ou o Local!');
@@ -209,10 +316,12 @@
             }
 
             try {
+                // Manda para o banco de dados incluindo o valor total
                 await addDoc(collection(db, "pedidos"), {
                     mesa: mesa,
                     pedido: textoPedidoFormatado,
                     status: "Pendente",
+                    total: total,
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
                 });
 
