@@ -15,7 +15,10 @@
             </header>
             
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Selecione a Mesa / Local:</label>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-gray-700 text-sm font-bold">Selecione a Mesa / Local:</label>
+                    <span class="text-[10px] text-gray-400 font-semibold">🔴 Ocupada | ⚪ Livre</span>
+                </div>
                 <div id="container-mesas" class="grid grid-cols-4 gap-2"></div>
             </div>
 
@@ -128,7 +131,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
@@ -136,17 +139,45 @@
 
         let mesaSelecionada = "";
         let mesasDisponiveis = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
+        let mesasOcupadas = [];
+
+        // Monitora o banco para saber quais mesas estão ocupadas em tempo real
+        onSnapshot(collection(db, "pedidos"), (snapshot) => {
+            mesasOcupadas = [];
+            snapshot.forEach((doc) => {
+                const dados = doc.data();
+                if (dados.status === "Pendente" || dados.status === "Entregue") {
+                    if (!mesasOcupadas.includes(dados.mesa)) {
+                        mesasOcupadas.push(dados.mesa);
+                    }
+                }
+            });
+            renderizarMesas();
+        });
 
         window.renderizarMesas = function() {
             const container = document.getElementById('container-mesas');
             container.innerHTML = '';
             mesasDisponiveis.forEach(mesa => {
                 const btn = document.createElement('button');
-                btn.className = mesaSelecionada === mesa ? "bg-black text-yellow-500 font-bold py-2 px-1 rounded-lg text-xs border-2 border-yellow-500 shadow-sm" : "bg-gray-200 text-gray-700 font-bold py-2 px-1 rounded-lg text-xs border-2 border-transparent hover:bg-gray-300 transition";
-                btn.innerText = mesa;
+                const isSelected = mesaSelecionada === mesa;
+                const isOccupied = mesasOcupadas.includes(mesa);
+
+                let estilo = "font-bold py-2 px-1 rounded-lg text-xs border-2 transition shadow-sm ";
+                if (isSelected) {
+                    estilo += "bg-black text-yellow-500 border-yellow-500 ring-2 ring-yellow-400";
+                } else if (isOccupied) {
+                    estilo += "bg-red-600 text-white border-red-700 animate-pulse"; // Fica vermelha se ocupada
+                } else {
+                    estilo += "bg-gray-200 text-gray-700 border-transparent hover:bg-gray-300";
+                }
+
+                btn.className = estilo;
+                btn.innerText = mesa + (isOccupied ? " 🔴" : "");
                 btn.onclick = () => { mesaSelecionada = mesa; renderizarMesas(); };
                 container.appendChild(btn);
             });
+
             const btnAdd = document.createElement('button');
             btnAdd.className = "bg-green-100 text-green-700 font-bold py-2 px-1 rounded-lg text-xs border-2 border-green-400 border-dashed hover:bg-green-200 transition";
             btnAdd.innerText = "+ Nova";
@@ -217,7 +248,6 @@
             if (!mesaSelecionada) return alert('Selecione uma Mesa!');
             if (itensCarrinho.length === 0) return alert('Adicione pelo menos um item!');
 
-            // AQUI ESTÁ A MÁGICA: Agora o texto que vai pro banco inclui os preços individuais!
             let textoPedidoFormatado = itensCarrinho.map(i => `${i.qtd}x ${i.nome} (R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')})`).join('\n');
             if (obs) textoPedidoFormatado += `\nObs: ${obs}`;
 
@@ -227,6 +257,7 @@
                     pedido: textoPedidoFormatado,
                     status: "Pendente",
                     total: total,
+                    dataCriacao: new Date().toISOString().split('T')[0],
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
                 });
 
