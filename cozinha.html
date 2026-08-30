@@ -141,12 +141,9 @@
         document.getElementById('filtro-mes').value = hojeISO.slice(0, 7);
 
         window.obterChaveConfigurada = function() {
-            let chave = localStorage.getItem('point_derico_chave_pix');
-            let nome = localStorage.getItem('point_derico_nome_pix');
-            return {
-                chave: chave || "",
-                nome: nome || "Point Derico"
-            };
+            let chave = localStorage.getItem('point_derico_chave_pix') || "thiagoderico15@gmail.com";
+            let nome = localStorage.getItem('point_derico_nome_pix') || "Point Derico";
+            return { chave, nome };
         }
 
         window.abrirConfigPix = function() {
@@ -225,17 +222,15 @@
 
             let filtrados = [];
             if (abaAtual === 'cozinha') {
-                // Cozinha mostra todos os 'Pendente' (quer tenham pago na hora ou não)
                 filtrados = todosPedidos.filter(p => p.status === 'Pendente');
                 contadorTxt.innerText = `${filtrados.length} pedido(s) na cozinha`;
                 document.getElementById('icone-vazio').innerText = "🍽️";
                 document.getElementById('texto-vazio').innerText = "Cozinha Tranquila!";
             } else if (abaAtual === 'caixa') {
-                // Caixa mostra os que foram entregues mas faltam pagar, OU os que já foram pagos na hora mas o cozinheiro ainda não concluiu a entrega física
                 filtrados = todosPedidos.filter(p => p.status === 'Entregue');
-                contadorTxt.innerText = `${filtrados.length} mesa(s) aguardando liberação/pagamento`;
+                contadorTxt.innerText = `${filtrados.length} mesa(s) aguardando pagamento`;
                 document.getElementById('icone-vazio').innerText = "💲";
-                document.getElementById('texto-vazio').innerText = "Nenhuma comanda pendente!";
+                document.getElementById('texto-vazio').innerText = "Nenhuma comanda pendente de pagamento!";
             } else if (abaAtual === 'relatorio') {
                 const valData = document.getElementById('filtro-data').value;
                 const valMes = document.getElementById('filtro-mes').value;
@@ -282,18 +277,15 @@
 
                 let botoesHtml = "";
                 let corFaixa = 'bg-yellow-500';
-
-                // Se o pedido já foi pago na hora, mostra um selo verde de aviso para a cozinha
                 let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2 pl-2"><span class="bg-green-800 text-green-100 text-[10px] font-bold px-2 py-0.5 rounded uppercase">⚡ JÁ PAGO NO PIX</span></div>` : '';
 
                 if(abaAtual === 'cozinha') {
                     corFaixa = 'bg-yellow-500';
-                    // Se já foi pago na hora, o botão dele na cozinha apenas "Entrega" e joga direto pro faturamento (Pago), pois não precisa cobrar de novo!
                     if (pedido.pagoNaHora) {
                         botoesHtml = `
                             <div class="mt-3 pt-3 border-t border-gray-700">
                                 <button onclick="marcarPagoNaHoraConcluido('${pedido.id}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-2 rounded-lg text-xs transition">
-                                    ✅ Pronto e Entregue (Já Pago)
+                                    ✅ Concluir e Faturar (Já Pago)
                                 </button>
                             </div>
                         `;
@@ -358,7 +350,6 @@
             } catch (e) { alert("Erro ao atualizar."); }
         }
 
-        // Função específica para concluir pedidos que já foram pagos na hora (vão direto pra faturados/pagos)
         window.marcarPagoNaHoraConcluido = async function(id) {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
@@ -379,12 +370,6 @@
 
         window.abrirModalPix = function(id, mesa, totalStr, pedidoEncoded) {
             const config = obterChaveConfigurada();
-            if (!config.chave) {
-                alert("Por favor, clique no botão superior '⚙️ Chave Pix' e configure sua chave antes de gerar o QR Code!");
-                abrirConfigPix();
-                return;
-            }
-
             pedidoSelecionadoId = id;
             document.getElementById('modal-mesa-titulo').innerText = mesa;
             document.getElementById('modal-valor-total').innerText = totalStr;
@@ -397,7 +382,6 @@
             let valorFloat = parseFloat(valorNum) || 0;
 
             let payloadPix = criarPayloadPix(config.chave, config.nome, "SAO PAULO", valorFloat.toFixed(2));
-            
             let urlQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
             document.getElementById('qrcode-img').src = urlQrCode;
             document.getElementById('modal-pix').classList.remove('hidden');
