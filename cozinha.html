@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel da Cozinha</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-6">
+    <h1 class="text-3xl font-bold text-center mb-8 text-orange-500">Painel de Pedidos - Cozinha</h1>
+    
+    <div id="lista-pedidos" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Os pedidos entram aqui dinamicamente -->
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { firebaseConfig } from "./firebase-config.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const container = document.getElementById('lista-pedidos');
+
+        // Escuta os pedidos em tempo real
+        onSnapshot(collection(db, "pedidos"), (snapshot) => {
+            container.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const id = docSnap.id;
+
+                const card = document.createElement('div');
+                card.className = "bg-gray-800 border border-gray-700 rounded-xl p-5 shadow-lg flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xl font-bold text-orange-400">${data.mesa}</span>
+                            <span class="text-xs text-gray-400">${data.horario}</span>
+                        </div>
+                        <p class="text-gray-200 whitespace-pre-line mb-6 text-lg">${data.pedido}</p>
+                    </div>
+                    <button onclick="concluirPedido('${id}')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                        Concluir / Entregar
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        });
+
+        window.concluirPedido = async function(id) {
+            try {
+                await deleteDoc(doc(db, "pedidos", id));
+            } catch (e) {
+                console.error("Erro ao concluir pedido: ", e);
+            }
+        }
+    </script>
+</body>
+</html>
