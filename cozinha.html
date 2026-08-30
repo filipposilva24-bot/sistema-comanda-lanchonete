@@ -496,10 +496,20 @@
                 } else if(abaAtual === 'caixa') {
                     corFaixa = 'bg-blue-500';
                     botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2"><button onclick="abrirModalPix('${pedido.id}', '${pedido.mesa}', 'R$ ${restante.toFixed(2).replace('.',',')}', '${encodeURIComponent(pedido.pedido)}') " class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">💲 Fechar</button></div>`;
-                } else {
+                                } else {
                     corFaixa = 'bg-emerald-500';
-                    botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 flex justify-between"><span>Status: <strong class="text-emerald-600 dark:text-emerald-400">Pago</strong></span><span class="font-mono">${pedido.dataCriacao || ''}</span></div>`;
+                    // Garante que o card concluído no relatório mostre o valor total original completo da comanda
+                    let blocoAbatimentoRelatorio = `
+                        <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                            <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100">
+                                <span>VALOR TOTAL PAGO:</span>
+                                <span class="text-emerald-500">${pedido.total || 'R$ 0,00'}</span>
+                            </div>
+                        </div>
+                    `;
+                    botoesHtml = `${blocoAbatimentoRelatorio}<div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 flex justify-between"><span>Status: <strong class="text-emerald-600 dark:text-emerald-400">Pago</strong></span><span class="font-mono">${pedido.dataCriacao || ''}</span></div>`;
                 }
+
 
                 const card = document.createElement('div');
                 card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
