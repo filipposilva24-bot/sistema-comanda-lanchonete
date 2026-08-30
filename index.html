@@ -125,8 +125,21 @@
         let mesasOcupadas = [];
         let cardapioLista = [];
 
+        // Tratamento rigoroso para pegar APENAS o nome da mesa e limpar qualquer URL ou sujeira colada
         const urlParams = new URLSearchParams(window.location.search);
-        const mesaUrl = urlParams.get('mesa');
+        let mesaUrlBruta = urlParams.get('mesa');
+        let mesaUrl = "";
+
+        if (mesaUrlBruta) {
+            // Se por acaso vier com link colado dentro, limpa e extrai só o nome da mesa
+            let limpo = decodeURIComponent(mesaUrlBruta);
+            if (limpo.includes("http")) {
+                let partes = limpo.split("mesa=");
+                limpo = partes[partes.length - 1] || "Mesa";
+            }
+            mesaUrl = limpo.replace(/\+/g, ' ').trim();
+        }
+
         if (mesaUrl) {
             mesaSelecionada = mesaUrl;
             document.getElementById('bloco-selecao-mesas').style.display = 'none';
@@ -259,7 +272,6 @@
                 btn.onclick = () => { mesaSelecionada = mesa; renderizarMesas(); };
                 wrapper.appendChild(btn);
 
-                // Se for mesa extra livre, adiciona um pequeno botão "X" de exclusão no canto superior direito
                 if (isExtra && !isOccupied) {
                     const btnX = document.createElement('button');
                     btnX.innerHTML = "×";
