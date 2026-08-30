@@ -145,7 +145,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, query, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
@@ -156,7 +156,7 @@
         let tipoFiltroRelatorio = 'dia'; 
         let pedidoSelecionadoId = null;
 
-        const SENHA_HARD_RESET = "1234"; // 🔑 Altere aqui se quiser outra senha de 4 dígitos
+        const SENHA_HARD_RESET = "1234";
 
         const audioAlert = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         let somAtivado = false;
@@ -197,7 +197,6 @@
             fecharConfigPix();
         }
 
-        // Funções do Hard Reset
         window.abrirModalReset = function() {
             document.getElementById('input-senha-reset').value = '';
             document.getElementById('modal-reset').classList.remove('hidden');
@@ -254,8 +253,8 @@
             renderizarCards();
         }
 
-        const q = query(collection(db, "pedidos"));
-        onSnapshot(q, (snapshot) => {
+        // ESCUTA DIRETA EM TEMPO REAL (Sem query intermediária para evitar atraso de cache)
+        onSnapshot(collection(db, "pedidos"), (snapshot) => {
             todosPedidos = [];
             snapshot.forEach((docSnap) => {
                 const dados = docSnap.data();
