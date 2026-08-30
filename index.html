@@ -3,107 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comanda - Point Derico</title>
+    <title>Point Derico | Comanda Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .tap-scale:active { transform: scale(0.97); transition: transform 0.1s ease; }
+    </style>
 </head>
-<body class="bg-gray-100 pb-12">
+<body class="bg-zinc-950 text-zinc-100 pb-12 select-none">
 
     <!-- TELA DE LOGIN / ESCOLHA DO ACESSO -->
-    <div id="modal-login" class="fixed inset-0 bg-black/90 z-50 flex justify-center items-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
-            <h1 class="text-2xl font-bold text-yellow-500 bg-black py-2 rounded-xl mb-2">POINT DERICO</h1>
-            <p class="text-xs text-gray-500 mb-4 font-semibold uppercase tracking-wider">Selecione quem está operando:</p>
+    <div id="modal-login" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex justify-center items-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl">
+            <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <span class="text-2xl">🔥</span>
+            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-amber-400 mb-1">POINT DERICO</h1>
+            <p class="text-xs text-zinc-400 mb-6 font-medium uppercase tracking-wider">Selecione o operador:</p>
             
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <button onclick="salvarAtendente('Bianca')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-3 rounded-xl text-sm transition shadow-md flex flex-col items-center justify-center">
-                    <span class="text-lg mb-0.5">👩‍💼</span> Bianca
+            <div class="grid grid-cols-2 gap-3 mb-2">
+                <button onclick="salvarAtendente('Bianca')" class="tap-scale bg-zinc-800/80 hover:bg-amber-500/10 border border-zinc-700/60 hover:border-amber-500/50 text-zinc-200 hover:text-amber-400 font-bold py-4 px-3 rounded-2xl text-xs transition shadow-lg flex flex-col items-center justify-center gap-1">
+                    <span class="text-xl">👩‍💼</span> Bianca
                 </button>
-                <button onclick="salvarAtendente('Letícia')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-3 rounded-xl text-sm transition shadow-md flex flex-col items-center justify-center">
-                    <span class="text-lg mb-0.5">👩‍💼</span> Letícia
+                <button onclick="salvarAtendente('Letícia')" class="tap-scale bg-zinc-800/80 hover:bg-amber-500/10 border border-zinc-700/60 hover:border-amber-500/50 text-zinc-200 hover:text-amber-400 font-bold py-4 px-3 rounded-2xl text-xs transition shadow-lg flex flex-col items-center justify-center gap-1">
+                    <span class="text-xl">👩‍💼</span> Letícia
                 </button>
-                <button onclick="salvarAtendente('Guilherme')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-3 rounded-xl text-sm transition shadow-md flex flex-col items-center justify-center">
-                    <span class="text-lg mb-0.5">👨‍💼</span> Guilherme
+                <button onclick="salvarAtendente('Guilherme')" class="tap-scale bg-zinc-800/80 hover:bg-amber-500/10 border border-zinc-700/60 hover:border-amber-500/50 text-zinc-200 hover:text-amber-400 font-bold py-4 px-3 rounded-2xl text-xs transition shadow-lg flex flex-col items-center justify-center gap-1">
+                    <span class="text-xl">👨‍💼</span> Guilherme
                 </button>
-                <button onclick="salvarAtendente('Balcão')" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3.5 px-3 rounded-xl text-sm transition shadow-md flex flex-col items-center justify-center">
-                    <span class="text-lg mb-0.5">🏪</span> Balcão
+                <button onclick="salvarAtendente('Balcão')" class="tap-scale bg-zinc-800/80 hover:bg-amber-500/10 border border-zinc-700/60 hover:border-amber-500/50 text-zinc-200 hover:text-amber-400 font-bold py-4 px-3 rounded-2xl text-xs transition shadow-lg flex flex-col items-center justify-center gap-1">
+                    <span class="text-xl">🏪</span> Balcão
                 </button>
             </div>
         </div>
     </div>
 
     <!-- TELA PRINCIPAL DE COMANDA -->
-    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg p-4 flex flex-col justify-between">
+    <div class="max-w-md mx-auto bg-zinc-900/90 border border-zinc-800/80 min-h-screen shadow-2xl p-4 flex flex-col justify-between rounded-b-3xl">
         <div>
-            <header class="mb-3 text-center relative">
-                <h1 class="text-3xl font-bold text-yellow-500 bg-black py-2 rounded-xl">POINT DERICO</h1>
+            <header class="mb-3 text-center relative border-b border-zinc-800 pb-3">
+                <div class="inline-block bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-1">
+                    Gastronomia & Sabor
+                </div>
+                <h1 class="text-2xl font-black tracking-tight text-amber-400">POINT DERICO</h1>
                 <div class="flex justify-between items-center mt-2 px-1">
-                    <p class="text-xs text-gray-500" id="info-mesa-atual">Lançamento de Comanda</p>
-                    <button onclick="trocarAtendente()" class="text-[11px] bg-gray-200 hover:bg-gray-300 px-2.5 py-1 rounded-lg font-semibold text-gray-700 transition" id="badge-atendente">
-                        👤 Operador: --
+                    <p class="text-xs text-zinc-400 font-medium" id="info-mesa-atual">Painel de Lançamento</p>
+                    <button onclick="trocarAtendente()" class="tap-scale text-[10px] bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 px-3 py-1 rounded-xl font-semibold text-zinc-300 transition">
+                        👤 <span id="badge-atendente">--</span>
                     </button>
                 </div>
             </header>
             
             <div class="mb-3" id="bloco-selecao-mesas">
-                <div class="flex justify-between items-center mb-1">
-                    <label class="block text-gray-700 text-xs font-bold">Selecione a Mesa / Local:</label>
-                    <span class="text-[10px] text-gray-400 font-semibold">🔴 Ocupada | ⚪ Livre</span>
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="block text-zinc-300 text-xs font-bold uppercase tracking-wider">Mesa / Local:</label>
+                    <span class="text-[10px] text-zinc-500 font-medium">🔴 Ocupada | ⚪ Livre</span>
                 </div>
                 <div id="container-mesas" class="grid grid-cols-4 gap-2"></div>
             </div>
 
-            <!-- BOTÕES DE ATALHO RÁPIDO PARA CATEGORIAS DO CARDÁPIO -->
-            <div id="botoes-categorias-atalho" class="flex gap-1 overflow-x-auto pb-2 mb-1 scrollbar-none"></div>
+            <!-- BOTÕES DE ATALHO RÁPIDO PARA CATEGORIAS -->
+            <div id="botoes-categorias-atalho" class="flex gap-1.5 overflow-x-auto pb-2 mb-1 scrollbar-none"></div>
 
-            <!-- Área de Cardápio Dinâmico com Cores por Grupo -->
-            <div class="mb-3 h-[32vh] overflow-y-auto pr-1 border rounded-xl p-2 bg-gray-50" id="cardapio-dinamico-container">
-                <p class="text-center text-xs text-gray-400 mt-10">Carregando cardápio...</p>
+            <!-- CARDÁPIO DINÂMICO -->
+            <div class="mb-3 h-[30vh] overflow-y-auto pr-1 border border-zinc-800 rounded-2xl p-2 bg-zinc-950/60 shadow-inner" id="cardapio-dinamico-container">
+                <p class="text-center text-xs text-zinc-500 mt-10 font-medium">Carregando cardápio...</p>
             </div>
 
+            <!-- RESUMO DO PEDIDO -->
             <div class="mb-2">
-                <label class="block text-gray-700 text-xs font-bold mb-1">Resumo do Pedido:</label>
-                <div class="bg-white border-2 border-gray-200 rounded-xl p-2 flex flex-col min-h-[70px] max-h-[100px]">
+                <label class="block text-zinc-300 text-xs font-bold uppercase tracking-wider mb-1">Resumo do Pedido:</label>
+                <div class="bg-zinc-950/80 border border-zinc-800 rounded-2xl p-3 flex flex-col min-h-[70px] max-h-[100px] shadow-inner">
                     <div id="resumo-pedido" class="overflow-y-auto flex-grow">
-                        <p class="text-gray-400 text-center italic text-xs mt-2" id="vazio-texto">Nenhum item adicionado.</p>
+                        <p class="text-zinc-600 text-center italic text-xs mt-2 font-medium" id="vazio-texto">Nenhum item adicionado.</p>
                     </div>
-                    <div class="border-t border-gray-200 mt-1 pt-1 flex justify-between items-center">
-                        <span class="font-bold text-gray-700 text-xs">TOTAL:</span>
-                        <span id="valor-total" class="font-bold text-green-600 text-base">R$ 0,00</span>
+                    <div class="border-t border-zinc-800/80 mt-1.5 pt-1.5 flex justify-between items-center">
+                        <span class="font-bold text-zinc-400 text-xs uppercase">TOTAL:</span>
+                        <span id="valor-total" class="font-black text-emerald-400 text-base">R$ 0,00</span>
                     </div>
                 </div>
             </div>
 
             <div class="mb-2">
-                <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, Copo com gelo...)" class="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 text-xs bg-gray-50">
+                <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, gelo e limão...)" class="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-2xl focus:outline-none focus:border-amber-500 text-xs text-zinc-200 placeholder-zinc-600 shadow-inner">
             </div>
         </div>
 
-        <div class="flex gap-2">
-            <button id="btn-enviar-pedido" onclick="enviarPedido('Pendente')" class="flex-1 bg-black text-yellow-500 font-bold py-2.5 px-2 rounded-xl hover:bg-gray-800 transition shadow-lg text-xs border-2 border-yellow-500">
-                🚀 Enviar Pedido para Cozinha
-            </button>
-            <button id="btn-pix-atendente" onclick="abrirPixAtendente()" class="flex-1 bg-green-600 text-white font-bold py-2.5 px-2 rounded-xl hover:bg-green-500 transition shadow-lg text-sm">
-                📱 Pagar Pix Agora
-            </button>
+        <div>
+            <div class="flex gap-2">
+                <button id="btn-enviar-pedido" onclick="enviarPedido('Pendente')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3 px-2 rounded-2xl transition shadow-lg text-xs flex items-center justify-center gap-1">
+                    🚀 Enviar para Cozinha
+                </button>
+                <button id="btn-pix-atendente" onclick="abrirPixAtendente()" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-2 rounded-2xl transition shadow-lg text-xs flex items-center justify-center gap-1">
+                    📱 Pagar Pix Agora
+                </button>
+            </div>
+            <p id="status" class="text-center text-xs mt-2 text-emerald-400 font-bold h-4"></p>
         </div>
-        <p id="status" class="text-center text-xs mt-1 text-green-600 font-semibold h-4"></p>
     </div>
 
-    <!-- MODAL DE PIX NO ATENDENTE -->
-    <div id="modal-pix-atendente" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
-        <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
-            <button onclick="fecharModalPixAtendente()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
-            <h3 class="text-lg font-bold text-yellow-500 mb-1" id="modal-mesa-titulo">Pix na Hora</h3>
-            <p class="text-xs text-gray-400 mb-3">Escaneie para pagar e enviar o pedido</p>
-            <div class="mb-3">
-                <span class="text-xs text-gray-400 uppercase font-bold">Valor Total:</span>
-                <p class="text-2xl font-bold text-green-400" id="modal-valor-total">R$ 0,00</p>
+    <!-- MODAL DE PIX -->
+    <div id="modal-pix-atendente" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <button onclick="fecharModalPixAtendente()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-base font-extrabold text-amber-400 mb-1" id="modal-mesa-titulo">Pix na Hora</h3>
+            <p class="text-xs text-zinc-400 mb-3">Escaneie para pagar e registrar</p>
+            <div class="mb-3 bg-zinc-950 py-2 rounded-2xl border border-zinc-800">
+                <span class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Valor Total:</span>
+                <p class="text-2xl font-black text-emerald-400" id="modal-valor-total">R$ 0,00</p>
             </div>
-            <div class="bg-white p-3 rounded-xl inline-block mb-2 shadow-inner">
+            <div class="bg-white p-3 rounded-2xl inline-block mb-3 shadow-inner">
                 <img id="qrcode-img" src="" alt="QR Code Pix" class="w-40 h-40 mx-auto">
             </div>
-            <p class="text-[10px] text-gray-400 mb-4" id="aviso-chave-pix">Chave configurada</p>
-            <button onclick="confirmarPixEnivarPedido()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg">✅ Pix Pago - Enviar para Cozinha</button>
+            <p class="text-[10px] text-zinc-400 mb-4 font-mono" id="aviso-chave-pix">Chave configurada</p>
+            <button onclick="confirmarPixEnivarPedido()" class="tap-scale w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-2xl text-xs transition shadow-lg">✅ Pix Pago - Enviar Pedido</button>
         </div>
     </div>
 
@@ -125,7 +139,6 @@
         let mesasOcupadas = [];
         let cardapioLista = [];
 
-        // Limpeza rigorosa da URL para extrair apenas o nome da mesa limpo sem parênteses ou restos
         const urlParams = new URLSearchParams(window.location.search);
         let mesaUrlBruta = urlParams.get('mesa');
         let mesaUrl = "";
@@ -136,7 +149,6 @@
                 let partes = limpo.split("mesa=");
                 limpo = partes[partes.length - 1] || "Mesa";
             }
-            // Remove qualquer caractere indesejado como parênteses ou colchetes extras
             mesaUrl = limpo.replace(/[\(\)\[\]]/g, '').replace(/\+/g, ' ').trim();
         }
 
@@ -145,20 +157,18 @@
             document.getElementById('bloco-selecao-mesas').style.display = 'none';
             document.getElementById('info-mesa-atual').innerText = `Autoatendimento - ${mesaUrl}`;
             
-            // Oculta o botão de Pix no autoatendimento do cliente via QR Code
             const btnPix = document.getElementById('btn-pix-atendente');
             if (btnPix) btnPix.style.display = 'none';
             
-            // Ajusta o botão de enviar para ocupar a tela toda
             const btnEnviar = document.getElementById('btn-enviar-pedido');
-            if (btnEnviar) btnEnviar.className = "w-full bg-black text-yellow-500 font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg text-sm border-2 border-yellow-500";
+            if (btnEnviar) btnEnviar.className = "tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3.5 px-4 rounded-2xl transition shadow-lg text-sm flex items-center justify-center gap-1";
         }
 
         window.verificarLogin = function() {
             if (operadorAtual || mesaUrl) {
-                if(!operadorAtual && mesaUrl) operadorAtual = "Cliente (QR Code)";
+                if(!operadorAtual && mesaUrl) operadorAtual = "Cliente (QR)";
                 document.getElementById('modal-login').classList.add('hidden');
-                document.getElementById('badge-atendente').innerText = `👤 Operador: ${operadorAtual}`;
+                document.getElementById('badge-atendente').innerText = operadorAtual;
             } else {
                 document.getElementById('modal-login').classList.remove('hidden');
             }
@@ -186,12 +196,12 @@
 
         function obterEstiloCategoria(categoria) {
             let catLower = (categoria || "").toLowerCase();
-            if (catLower.includes('hambúrguer') || catLower.includes('lanche')) return { bg: 'bg-orange-50 border-orange-200 text-orange-900', badge: 'bg-orange-500 text-white' };
-            if (catLower.includes('porção') || catLower.includes('porcao')) return { bg: 'bg-yellow-50 border-yellow-200 text-yellow-900', badge: 'bg-yellow-500 text-white' };
-            if (catLower.includes('pastel')) return { bg: 'bg-amber-50 border-amber-200 text-amber-900', badge: 'bg-amber-600 text-white' };
-            if (catLower.includes('bebida') || catLower.includes('refri') || catLower.includes('suco') || catLower.includes('água')) return { bg: 'bg-blue-50 border-blue-200 text-blue-900', badge: 'bg-blue-500 text-white' };
-            if (catLower.includes('alcoólica') || catLower.includes('dose') || catLower.includes('drink') || catLower.includes('cerveja')) return { bg: 'bg-purple-50 border-purple-200 text-purple-900', badge: 'bg-purple-500 text-white' };
-            return { bg: 'bg-gray-50 border-gray-200 text-gray-900', badge: 'bg-gray-500 text-white' };
+            if (catLower.includes('hambúrguer') || catLower.includes('lanche')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-amber-500/50', badge: 'bg-amber-500 text-zinc-950 font-extrabold' };
+            if (catLower.includes('porção') || catLower.includes('porcao')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-amber-500/50', badge: 'bg-amber-600 text-white font-extrabold' };
+            if (catLower.includes('pastel')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-amber-500/50', badge: 'bg-amber-700 text-white font-extrabold' };
+            if (catLower.includes('bebida') || catLower.includes('refri') || catLower.includes('suco') || catLower.includes('água')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-blue-500/50', badge: 'bg-blue-600 text-white font-extrabold' };
+            if (catLower.includes('alcoólica') || catLower.includes('dose') || catLower.includes('drink') || catLower.includes('cerveja')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-purple-500/50', badge: 'bg-purple-600 text-white font-extrabold' };
+            return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200', badge: 'bg-zinc-700 text-white font-extrabold' };
         }
 
         window.rolarParaCategoria = function(catId) {
@@ -219,14 +229,14 @@
 
                 let btnAtalho = document.createElement('button');
                 let estiloCat = obterEstiloCategoria(cat);
-                btnAtalho.className = `${estiloCat.badge} text-[11px] font-bold px-3 py-1 rounded-lg flex-shrink-0 shadow-sm transition hover:opacity-80`;
+                btnAtalho.className = `tap-scale ${estiloCat.badge} text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-xl flex-shrink-0 shadow transition`;
                 btnAtalho.innerText = cat;
                 btnAtalho.onclick = () => rolarParaCategoria(catIdSafe);
                 atalhosContainer.appendChild(btnAtalho);
 
                 let tituloCat = document.createElement('h3');
                 tituloCat.id = 'cat-' + catIdSafe;
-                tituloCat.className = "font-bold text-gray-800 border-b border-gray-300 mb-2 pb-1 mt-2 text-xs uppercase tracking-wider";
+                tituloCat.className = "font-extrabold text-amber-400 border-b border-zinc-800 mb-2 pb-1 mt-3 text-xs uppercase tracking-wider";
                 tituloCat.innerText = cat;
                 container.appendChild(tituloCat);
 
@@ -236,8 +246,8 @@
                 categorias[cat].forEach(prod => {
                     let btn = document.createElement('button');
                     let estilo = obterEstiloCategoria(cat);
-                    btn.className = `${estilo.bg} border p-2 rounded-lg text-left flex flex-col transition hover:shadow-sm`;
-                    btn.innerHTML = `<span class="text-xs font-bold">${prod.nome}</span><span class="text-[10px] opacity-75 mt-1 font-semibold">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
+                    btn.className = `tap-scale ${estilo.bg} border p-2.5 rounded-2xl text-left flex flex-col transition shadow-sm`;
+                    btn.innerHTML = `<span class="text-xs font-bold text-zinc-100">${prod.nome}</span><span class="text-[10px] text-amber-400/90 mt-1 font-extrabold">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
                     btn.onclick = () => adicionarItem(prod.nome, Number(prod.preco));
                     grid.appendChild(btn);
                 });
@@ -270,10 +280,10 @@
                 wrapper.className = "relative flex";
 
                 const btn = document.createElement('button');
-                let estilo = "w-full font-bold py-2 px-1 rounded-lg text-xs border-2 transition shadow-sm ";
-                if (isSelected) estilo += "bg-black text-yellow-500 border-yellow-500 ring-2 ring-yellow-400";
-                else if (isOccupied) estilo += "bg-red-600 text-white border-red-700";
-                else estilo += "bg-gray-200 text-gray-700 border-transparent hover:bg-gray-300";
+                let estilo = "tap-scale w-full font-extrabold py-2.5 px-1 rounded-2xl text-xs border transition shadow-sm ";
+                if (isSelected) estilo += "bg-amber-500 text-zinc-950 border-amber-400 shadow-amber-500/20";
+                else if (isOccupied) estilo += "bg-red-500/20 border-red-500/60 text-red-400";
+                else estilo += "bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700";
 
                 btn.className = estilo;
                 btn.innerText = mesa + (isOccupied ? " 🔴" : "");
@@ -283,8 +293,7 @@
                 if (isExtra && !isOccupied) {
                     const btnX = document.createElement('button');
                     btnX.innerHTML = "×";
-                    btnX.className = "absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow hover:bg-red-900";
-                    btnX.title = "Excluir mesa extra";
+                    btnX.className = "absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow hover:bg-red-700";
                     btnX.onclick = (e) => {
                         e.stopPropagation();
                         if (confirm(`Deseja excluir a mesa extra "${mesa}"?`)) {
@@ -301,7 +310,7 @@
             });
 
             const btnAdd = document.createElement('button');
-            btnAdd.className = "bg-green-100 text-green-700 font-bold py-2 px-1 rounded-lg text-xs border-2 border-green-400 border-dashed hover:bg-green-200 transition";
+            btnAdd.className = "tap-scale bg-zinc-900 text-emerald-400 font-extrabold py-2 px-1 rounded-2xl text-xs border border-dashed border-emerald-500/50 hover:bg-emerald-500/10 transition";
             btnAdd.innerText = "+ Nova";
             btnAdd.onclick = () => {
                 const novaMesa = prompt("Nome da mesa/local extra:");
@@ -344,7 +353,7 @@
             container.innerHTML = '';
             
             if (itensCarrinho.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-center italic text-xs mt-2" id="vazio-texto">Nenhum item adicionado.</p>';
+                container.innerHTML = '<p class="text-zinc-600 text-center italic text-xs mt-2 font-medium" id="vazio-texto">Nenhum item adicionado.</p>';
                 totalDisplay.innerText = 'R$ 0,00';
                 return;
             }
@@ -353,15 +362,15 @@
             itensCarrinho.forEach(item => {
                 somaTotal += (item.preco * item.qtd);
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center py-1 border-b border-gray-100 last:border-0";
+                div.className = "flex justify-between items-center py-1.5 border-b border-zinc-900 last:border-0";
                 div.innerHTML = `
                     <div class="flex flex-col">
-                        <span class="font-bold text-gray-800 text-xs">${item.qtd}x ${item.nome}</span>
-                        <span class="text-[10px] text-gray-500">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
+                        <span class="font-bold text-zinc-200 text-xs">${item.qtd}x ${item.nome}</span>
+                        <span class="text-[10px] text-zinc-500 font-mono">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
                     </div>
-                    <div class="space-x-1 flex-shrink-0 ml-2">
-                        <button onclick="removerItem('${item.nome}')" class="bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold text-xs">-</button>
-                        <button onclick="adicionarItem('${item.nome}', ${item.preco})" class="bg-green-100 text-green-600 px-2 py-0.5 rounded font-bold text-xs">+</button>
+                    <div class="space-x-1 flex-shrink-0 ml-2 flex items-center">
+                        <button onclick="removerItem('${item.nome}')" class="tap-scale bg-zinc-800 text-red-400 w-6 h-6 rounded-lg font-bold text-xs flex items-center justify-center">-</button>
+                        <button onclick="adicionarItem('${item.nome}', ${item.preco})" class="tap-scale bg-zinc-800 text-emerald-400 w-6 h-6 rounded-lg font-bold text-xs flex items-center justify-center">+</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -424,7 +433,7 @@
                 document.getElementById('obs').value = '';
                 itensCarrinho = []; atualizarResumo();
                 
-                statusTxt.innerText = "Pedido enviado para cozinha com sucesso!";
+                statusTxt.innerText = "🚀 Pedido enviado com sucesso!";
                 setTimeout(() => statusTxt.innerText = "", 3000);
             } catch (e) { alert("Erro ao enviar pedido."); }
         }
