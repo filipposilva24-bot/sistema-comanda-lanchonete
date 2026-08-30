@@ -165,6 +165,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // =====================================================================
+        // ⚠️ INSIRA SUA CHAVE PIX E NOME ABAIXO PARA FUNCIONAR DIRETO NO CELULAR DO GARÇOM:
+        // =====================================================================
+        const CHAVE_PIX_FIXA = "thiagoderico15@gmail.com"; // Ex: "seu-email@gmail.com" ou seu CPF/CNPJ
+        const NOME_PIX_FIXO = "Point Derico";
+        // =====================================================================
+
         let mesaSelecionada = "";
         let mesasDisponiveis = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
         let mesasOcupadas = [];
@@ -262,28 +269,24 @@
             totalDisplay.innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
         }
 
-        // Função que abre o Modal de Pix no Atendente usando a mesma chave configurada no painel
         window.abrirPixAtendente = function() {
             if (!mesaSelecionada) return alert('Selecione uma Mesa!');
             if (itensCarrinho.length === 0) return alert('Adicione pelo menos um item!');
 
-            let chavePix = localStorage.getItem('point_derico_chave_pix');
-            let nomePix = localStorage.getItem('point_derico_nome_pix') || "Point Derico";
-
-            if (!chavePix) {
-                alert("Aviso: Nenhuma chave Pix foi configurada no sistema. Vá até a tela do Caixa/Cozinha em '⚙️ Chave Pix' para cadastrar primeiro!");
+            if (CHAVE_PIX_FIXA === "SUA_CHAVE_PIX_AQUI") {
+                alert("Por favor, abra o código do arquivo index.html e substitua 'SUA_CHAVE_PIX_AQUI' pela sua chave real!");
                 return;
             }
 
             const totalStr = document.getElementById('valor-total').innerText;
             document.getElementById('modal-mesa-titulo').innerText = `${mesaSelecionada} - Pix na Hora`;
             document.getElementById('modal-valor-total').innerText = totalStr;
-            document.getElementById('aviso-chave-pix').innerText = `Chave: ${chavePix}`;
+            document.getElementById('aviso-chave-pix').innerText = `Chave: ${CHAVE_PIX_FIXA}`;
 
             let valorNum = totalStr.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
             let valorFloat = parseFloat(valorNum) || 0;
 
-            let payloadPix = criarPayloadPix(chavePix, nomePix, "SAO PAULO", valorFloat.toFixed(2));
+            let payloadPix = criarPayloadPix(CHAVE_PIX_FIXA, NOME_PIX_FIXO, "SAO PAULO", valorFloat.toFixed(2));
             let urlQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
             document.getElementById('qrcode-img').src = urlQrCode;
             document.getElementById('modal-pix-atendente').classList.remove('hidden');
@@ -295,7 +298,7 @@
 
         window.confirmarPixEnivarPedido = function() {
             fecharModalPixAtendente();
-            enviarPedido('Pago'); // Já envia direto com o status "Pago" para cair direto no relatório de faturamento!
+            enviarPedido('Pago'); 
         }
 
         window.enviarPedido = async function(statusPedido) {
