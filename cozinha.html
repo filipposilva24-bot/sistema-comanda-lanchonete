@@ -9,11 +9,11 @@
 <body class="bg-gray-900 min-h-screen text-white font-sans flex flex-col">
 
     <!-- Cabeçalho Principal -->
-    <header class="bg-black border-b-4 border-yellow-500 p-4 sticky top-0 z-50 shadow-lg">
-        <div class="flex justify-between items-center mb-4">
+    <header class="bg-black border-b-4 border-yellow-500 p-3 sticky top-0 z-50 shadow-lg">
+        <div class="flex justify-between items-center mb-3">
             <div>
-                <h1 class="text-2xl font-bold text-yellow-500">🔥 Point Derico</h1>
-                <p class="text-xs text-gray-400 mt-1" id="contador">Carregando pedidos...</p>
+                <h1 class="text-xl font-bold text-yellow-500">🔥 Point Derico</h1>
+                <p class="text-xs text-gray-400 mt-1" id="contador">Carregando painel...</p>
             </div>
             <button id="btn-som" onclick="ativarSom()" class="bg-gray-800 border border-gray-600 px-3 py-2 rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition">
                 🔇 Ligar Som
@@ -21,47 +21,80 @@
         </div>
         
         <!-- Botões das Abas -->
-        <div class="flex gap-2">
-            <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="flex-1 bg-yellow-500 text-black font-bold py-2 rounded-t-lg transition shadow-inner">
-                👨‍🍳 Cozinha (Pendentes)
+        <div class="flex gap-1">
+            <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner">
+                👨‍🍳 Cozinha
             </button>
-            <button onclick="mudarAba('caixa')" id="tab-caixa" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 rounded-t-lg transition">
-                💲 Caixa (A Pagar)
+            <button onclick="mudarAba('caixa')" id="tab-caixa" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">
+                💲 Mesas A Pagar
+            </button>
+            <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">
+                📊 Fechamento / Caixa
             </button>
         </div>
     </header>
 
-    <!-- Área onde os cards vão aparecer -->
+    <!-- Área Principal de Conteúdo -->
     <main class="p-4 flex-grow relative">
+        
+        <!-- FILTRO DE RELATÓRIO (Aparece apenas na aba de Fechamento) -->
+        <div id="painel-filtro" class="hidden mb-4 bg-gray-800 border border-gray-700 p-4 rounded-xl shadow-md">
+            <h2 class="text-sm font-bold text-yellow-500 mb-2 uppercase tracking-wide">Filtro de Faturamento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Selecionar Dia Específico:</label>
+                    <input type="date" id="filtro-data" onchange="mudarFiltroTipo('dia')" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:ring-2 focus:ring-yellow-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Selecionar Mês Específico:</label>
+                    <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:ring-2 focus:ring-yellow-500 outline-none">
+                </div>
+            </div>
+            <!-- Card de Total Arrecadado no Filtro -->
+            <div class="mt-3 bg-green-950/40 border border-green-800/60 p-3 rounded-lg flex justify-between items-center">
+                <div>
+                    <span class="text-xs text-green-300 font-bold uppercase" id="titulo-total-filtro">Total do Dia:</span>
+                    <p class="text-xs text-gray-400" id="qtd-pedidos-filtro">0 comandas pagas</p>
+                </div>
+                <span class="text-2xl font-bold text-green-400" id="valor-total-filtro">R$ 0,00</span>
+            </div>
+        </div>
+
+        <!-- Container de Cards -->
         <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <!-- Cards gerados via JS -->
+            <!-- Os cards dos pedidos entram aqui dinamicamente -->
         </div>
         
-        <!-- Mensagem quando não tem pedidos -->
-        <div id="mensagem-vazia" class="text-center mt-20 text-gray-500 hidden">
+        <!-- Mensagem de Vazio -->
+        <div id="mensagem-vazia" class="text-center mt-16 text-gray-500 hidden">
             <span class="text-6xl block mb-4" id="icone-vazio">🍽️</span>
-            <h2 class="text-2xl font-bold" id="texto-vazio">Cozinha Tranquila!</h2>
-            <p class="text-sm mt-2">Nenhum pedido pendente no momento.</p>
+            <h2 class="text-xl font-bold" id="texto-vazio">Cozinha Tranquila!</h2>
+            <p class="text-xs mt-1 text-gray-400">Nenhum registro encontrado nesta aba.</p>
         </div>
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, query, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let abaAtual = 'cozinha'; // Controla qual tela estamos vendo
-        let todosPedidos = []; // Guarda tudo que vem do banco
-        
+        let abaAtual = 'cozinha'; 
+        let todosPedidos = []; 
+        let tipoFiltroRelatorio = 'dia'; // 'dia' ou 'mes'
+
         const audioAlert = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         let somAtivado = false;
         let primeiroCarregamento = true;
         let qtdPendentesAnterior = 0;
 
-        // Função para liberar o som no navegador
+        // Configura datas iniciais do filtro para o dia de hoje
+        const hojeISO = new Date().toISOString().split('T')[0];
+        document.getElementById('filtro-data').value = hojeISO;
+        document.getElementById('filtro-mes').value = hojeISO.slice(0, 7);
+
         window.ativarSom = function() {
             somAtivado = true;
             audioAlert.play().catch(()=>{});
@@ -71,34 +104,47 @@
             btn.classList.replace('border-gray-600', 'border-green-500');
         }
 
-        // Função de trocar de aba
         window.mudarAba = function(aba) {
             abaAtual = aba;
             
-            if (aba === 'cozinha') {
-                document.getElementById('tab-cozinha').className = "flex-1 bg-yellow-500 text-black font-bold py-2 rounded-t-lg transition shadow-inner";
-                document.getElementById('tab-caixa').className = "flex-1 bg-gray-700 text-gray-300 hover:bg-gray-600 font-bold py-2 rounded-t-lg transition";
-                document.getElementById('icone-vazio').innerText = "🍽️";
-                document.getElementById('texto-vazio').innerText = "Cozinha Tranquila!";
+            document.getElementById('tab-cozinha').className = aba === 'cozinha' ? "flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner" : "flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition";
+            document.getElementById('tab-caixa').className = aba === 'caixa' ? "flex-1 bg-blue-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner" : "flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition";
+            document.getElementById('tab-relatorio').className = aba === 'relatorio' ? "flex-1 bg-green-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner" : "flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition";
+
+            const painelFiltro = document.getElementById('painel-filtro');
+            if(aba === 'relatorio') {
+                painelFiltro.classList.remove('hidden');
             } else {
-                document.getElementById('tab-cozinha').className = "flex-1 bg-gray-700 text-gray-300 hover:bg-gray-600 font-bold py-2 rounded-t-lg transition";
-                document.getElementById('tab-caixa').className = "flex-1 bg-green-500 text-black font-bold py-2 rounded-t-lg transition shadow-inner";
-                document.getElementById('icone-vazio').innerText = "💲";
-                document.getElementById('texto-vazio').innerText = "Nenhuma conta pendente!";
+                painelFiltro.classList.add('hidden');
+            }
+
+            renderizarCards();
+        }
+
+        window.mudarFiltroTipo = function(tipo) {
+            tipoFiltroRelatorio = tipo;
+            if(tipo === 'dia') {
+                document.getElementById('filtro-mes').value = '';
+            } else {
+                document.getElementById('filtro-data').value = '';
             }
             renderizarCards();
         }
 
-        // Ouve o banco de dados buscando tanto os Pendentes quanto os Entregues (A Pagar)
-        const q = query(collection(db, "pedidos"), where("status", "in", ["Pendente", "Entregue"]));
+        // Pega todos os pedidos do banco de dados em tempo real
+        const q = query(collection(db, "pedidos"));
 
         onSnapshot(q, (snapshot) => {
             todosPedidos = [];
-            snapshot.forEach((doc) => {
-                todosPedidos.push({ id: doc.id, ...doc.data() });
+            snapshot.forEach((docSnap) => {
+                const dados = docSnap.data();
+                // Se o pedido não tiver data salva, assume a data de hoje para não quebrar relatórios antigos
+                if(!dados.dataCriacao) {
+                    dados.dataCriacao = new Date().toISOString().split('T')[0];
+                }
+                todosPedidos.push({ id: docSnap.id, ...dados });
             });
 
-            // Lógica do Bipe: Só toca se entrar um pedido "Pendente" NOVO
             const qtdPendentesAgora = todosPedidos.filter(p => p.status === 'Pendente').length;
             if (!primeiroCarregamento && qtdPendentesAgora > qtdPendentesAnterior && somAtivado) {
                 audioAlert.play().catch(()=>{});
@@ -109,7 +155,6 @@
             renderizarCards();
         });
 
-        // Função que desenha os pedidos na tela
         function renderizarCards() {
             const container = document.getElementById('pedidos-container');
             const msgVazia = document.getElementById('mensagem-vazia');
@@ -117,13 +162,52 @@
             
             container.innerHTML = '';
 
-            // Filtra os pedidos de acordo com a aba que o usuário está vendo
-            let filtrados = todosPedidos.filter(p => {
-                if(abaAtual === 'cozinha') return p.status === 'Pendente';
-                if(abaAtual === 'caixa') return p.status === 'Entregue';
-            });
+            let filtrados = [];
 
-            contadorTxt.innerText = `${filtrados.length} pedido(s) nesta aba`;
+            if (abaAtual === 'cozinha') {
+                filtrados = todosPedidos.filter(p => p.status === 'Pendente');
+                contadorTxt.innerText = `${filtrados.length} pedido(s) na cozinha`;
+                document.getElementById('icone-vazio').innerText = "🍽️";
+                document.getElementById('texto-vazio').innerText = "Cozinha Tranquila!";
+            } 
+            else if (abaAtual === 'caixa') {
+                filtrados = todosPedidos.filter(p => p.status === 'Entregue');
+                contadorTxt.innerText = `${filtrados.length} mesa(s) aguardando pagamento`;
+                document.getElementById('icone-vazio').innerText = "💲";
+                document.getElementById('texto-vazio').innerText = "Nenhuma comanda pendente de pagamento!";
+            } 
+            else if (abaAtual === 'relatorio') {
+                const valData = document.getElementById('filtro-data').value;
+                const valMes = document.getElementById('filtro-mes').value;
+
+                filtrados = todosPedidos.filter(p => {
+                    if (p.status !== 'Pago') return false;
+                    if (tipoFiltroRelatorio === 'dia' && valData) {
+                        return p.dataCriacao === valData;
+                    } else if (tipoFiltroRelatorio === 'mes' && valMes) {
+                        return p.dataCriacao && p.dataCriacao.startsWith(valMes);
+                    }
+                    return true;
+                });
+
+                // Calcula o somatório do dinheiro arrecadado no filtro selecionado
+                let totalArrecadado = 0;
+                filtrados.forEach(p => {
+                    if (p.total) {
+                        // Converte string "R$ 45,00" para número matemático 45.00
+                        let limpo = p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+                        totalArrecadado += parseFloat(limpo) || 0;
+                    }
+                });
+
+                document.getElementById('valor-total-filtro').innerText = `R$ ${totalArrecadado.toFixed(2).replace('.', ',')}`;
+                document.getElementById('qtd-pedidos-filtro').innerText = `${filtrados.length} comanda(s) finalizada(s)`;
+                document.getElementById('titulo-total-filtro').innerText = tipoFiltroRelatorio === 'dia' ? "Total do Dia Selecionado:" : "Total do Mês Selecionado:";
+                
+                contadorTxt.innerText = `Histórico de Caixa`;
+                document.getElementById('icone-vazio').innerText = "📊";
+                document.getElementById('texto-vazio').innerText = "Nenhum fechamento registrado para este período.";
+            }
 
             if (filtrados.length === 0) {
                 msgVazia.classList.remove('hidden');
@@ -132,11 +216,9 @@
                 msgVazia.classList.add('hidden');
             }
 
-            // Ordena do mais antigo para o mais novo
             filtrados.sort((a, b) => (a.horario > b.horario) ? 1 : -1);
 
             filtrados.forEach((pedido) => {
-                // Separa os Itens da Observação
                 let itensTexto = pedido.pedido || "";
                 let obsTexto = "";
                 if (itensTexto.includes("\nObs:")) {
@@ -145,25 +227,36 @@
                     obsTexto = partes[1].trim();
                 }
 
-                // Prepara os botões dependendo da aba
                 let botoesHtml = "";
+                let corFaixa = 'bg-yellow-500';
+
                 if(abaAtual === 'cozinha') {
+                    corFaixa = 'bg-yellow-500';
                     botoesHtml = `
-                        <div class="flex gap-2 mt-4 pt-4 border-t border-gray-700">
-                            <button onclick="atualizarStatus('${pedido.id}', 'Entregue')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-2 rounded-lg text-sm transition">
+                        <div class="flex gap-2 mt-3 pt-3 border-t border-gray-700">
+                            <button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-2 rounded-lg text-xs transition">
                                 🛎️ Entregar (Paga depois)
                             </button>
-                            <button onclick="atualizarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-2 rounded-lg text-sm transition">
+                            <button onclick="mudarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 px-2 rounded-lg text-xs transition">
                                 ✅ Entregue e PAGO
                             </button>
                         </div>
                     `;
-                } else {
+                } else if(abaAtual === 'caixa') {
+                    corFaixa = 'bg-blue-500';
                     botoesHtml = `
-                        <div class="mt-4 pt-4 border-t border-gray-700">
-                            <button onclick="atualizarStatus('${pedido.id}', 'Pago')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 px-4 rounded-lg text-lg transition shadow-lg">
-                                💲 Receber Pagamento e Finalizar
+                        <div class="mt-3 pt-3 border-t border-gray-700">
+                            <button onclick="mudarStatus('${pedido.id}', 'Pago')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg text-sm transition shadow-lg">
+                                💲 Receber Pagamento e Fechar Mesa
                             </button>
+                        </div>
+                    `;
+                } else {
+                    corFaixa = 'bg-green-500';
+                    botoesHtml = `
+                        <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400 flex justify-between items-center">
+                            <span>Status: <strong class="text-green-400">Pago / Finalizado</strong></span>
+                            <span class="font-mono">${pedido.dataCriacao || ''}</span>
                         </div>
                     `;
                 }
@@ -171,33 +264,27 @@
                 const card = document.createElement('div');
                 card.className = "bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden";
                 
-                const corFaixa = abaAtual === 'cozinha' ? 'bg-yellow-500' : 'bg-blue-500';
-
                 card.innerHTML = `
                     <div class="absolute left-0 top-0 bottom-0 w-1 ${corFaixa}"></div>
                     <div>
-                        <!-- Cabeçalho do Card -->
-                        <div class="flex justify-between items-start mb-3 border-b border-gray-700 pb-2 pl-2">
-                            <h2 class="text-2xl font-bold text-white">${pedido.mesa}</h2>
+                        <div class="flex justify-between items-start mb-2 border-b border-gray-700 pb-2 pl-2">
+                            <h2 class="text-xl font-bold text-white">${pedido.mesa}</h2>
                             <span class="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded font-mono">${pedido.horario || '--:--'}</span>
                         </div>
                         
-                        <!-- Lista de Itens (agora com o preço individual vindo do index) -->
-                        <div class="pl-2 text-gray-300 text-md leading-relaxed mb-3 bg-gray-900 p-3 rounded-lg border border-gray-700 font-mono">
+                        <div class="pl-2 text-gray-300 text-sm leading-relaxed mb-3 bg-gray-900 p-2.5 rounded-lg border border-gray-700 font-mono">
                             ${itensTexto.replace(/\n/g, '<br>')}
                         </div>
 
-                        <!-- Valor Total em Destaque -->
-                        <div class="pl-2 flex justify-between items-center mb-3">
-                            <span class="text-gray-400 font-bold uppercase text-xs">Total da Comanda:</span>
-                            <span class="text-green-400 font-bold text-xl">${pedido.total || 'R$ 0,00'}</span>
+                        <div class="pl-2 flex justify-between items-center mb-2">
+                            <span class="text-gray-400 font-bold uppercase text-xs">Valor Total:</span>
+                            <span class="text-green-400 font-bold text-lg">${pedido.total || 'R$ 0,00'}</span>
                         </div>
 
-                        <!-- Observação -->
                         ${obsTexto ? `
                         <div class="mb-2 pl-2">
-                            <span class="bg-red-900 text-red-200 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">Atenção</span>
-                            <p class="text-red-400 font-semibold mt-1 bg-red-950/30 p-2 rounded border border-red-900/50">"${obsTexto}"</p>
+                            <span class="bg-red-900 text-red-200 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">Atenção</span>
+                            <p class="text-red-400 text-xs font-semibold mt-1 bg-red-950/30 p-1.5 rounded border border-red-900/50">"${obsTexto}"</p>
                         </div>
                         ` : ''}
                     </div>
@@ -208,14 +295,20 @@
             });
         }
 
-        // Função global para mudar o status do pedido
-        window.atualizarStatus = async function(id, novoStatus) {
+        window.mudarStatus = async function(id, novoStatus) {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
-                await updateDoc(pedidoRef, { status: novoStatus });
+                let dadosAtualizacao = { status: novoStatus };
+                
+                // Se o pedido foi marcado como pago agora, grava a data de hoje automaticamente
+                if (novoStatus === 'Pago') {
+                    dadosAtualizacao.dataCriacao = new Date().toISOString().split('T')[0];
+                }
+
+                await updateDoc(pedidoRef, dadosAtualizacao);
             } catch (e) {
                 console.error("Erro: ", e);
-                alert("Erro ao atualizar.");
+                alert("Erro ao atualizar status.");
             }
         }
     </script>
