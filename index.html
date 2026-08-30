@@ -194,13 +194,24 @@
             renderizarCardapio();
         });
 
+        // Cores distintas por grupo/categoria para destacar no Dark Mode
         function obterEstiloCategoria(categoria) {
             let catLower = (categoria || "").toLowerCase();
-            if (catLower.includes('hambúrguer') || catLower.includes('lanche')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-amber-500/50', badge: 'bg-amber-500 text-zinc-950 font-extrabold' };
-            if (catLower.includes('porção') || catLower.includes('porcao')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-amber-500/50', badge: 'bg-amber-600 text-white font-extrabold' };
-            if (catLower.includes('pastel')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-amber-500/50', badge: 'bg-amber-700 text-white font-extrabold' };
-            if (catLower.includes('bebida') || catLower.includes('refri') || catLower.includes('suco') || catLower.includes('água')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-blue-500/50', badge: 'bg-blue-600 text-white font-extrabold' };
-            if (catLower.includes('alcoólica') || catLower.includes('dose') || catLower.includes('drink') || catLower.includes('cerveja')) return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-purple-500/50', badge: 'bg-purple-600 text-white font-extrabold' };
+            if (catLower.includes('hambúrguer') || catLower.includes('lanche')) {
+                return { bg: 'bg-amber-950/30 border-amber-500/40 hover:border-amber-500 text-amber-200', badge: 'bg-amber-500 text-zinc-950 font-extrabold' };
+            }
+            if (catLower.includes('porção') || catLower.includes('porcao')) {
+                return { bg: 'bg-yellow-950/30 border-yellow-500/40 hover:border-yellow-500 text-yellow-200', badge: 'bg-yellow-500 text-zinc-950 font-extrabold' };
+            }
+            if (catLower.includes('pastel')) {
+                return { bg: 'bg-orange-950/30 border-orange-500/40 hover:border-orange-500 text-orange-200', badge: 'bg-orange-600 text-white font-extrabold' };
+            }
+            if (catLower.includes('bebida') || catLower.includes('refri') || catLower.includes('suco') || catLower.includes('água')) {
+                return { bg: 'bg-blue-950/30 border-blue-500/40 hover:border-blue-500 text-blue-200', badge: 'bg-blue-600 text-white font-extrabold' };
+            }
+            if (catLower.includes('alcoólica') || catLower.includes('dose') || catLower.includes('drink') || catLower.includes('cerveja')) {
+                return { bg: 'bg-purple-950/30 border-purple-500/40 hover:border-purple-500 text-purple-200', badge: 'bg-purple-600 text-white font-extrabold' };
+            }
             return { bg: 'bg-zinc-900 border-zinc-800 text-zinc-200', badge: 'bg-zinc-700 text-white font-extrabold' };
         }
 
