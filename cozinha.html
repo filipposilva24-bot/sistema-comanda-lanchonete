@@ -69,16 +69,19 @@
                     💬 Enviar no WhatsApp
                 </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                <div class="min-w-0">
+            
+            <!-- Campos empilhados para garantir zero sobreposição -->
+            <div class="flex flex-col gap-3 mb-3">
+                <div class="w-full">
                     <label class="block text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Dia Específico:</label>
-                    <input type="date" id="filtro-data" onchange="mudarFiltroTipo('dia')" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 box-border">
+                    <input type="date" id="filtro-data" onchange="mudarFiltroTipo('dia')" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500">
                 </div>
-                <div class="min-w-0">
+                <div class="w-full">
                     <label class="block text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Mês Específico:</label>
-                    <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 box-border">
+                    <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500">
                 </div>
             </div>
+
             <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner">
                 <div>
                     <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider" id="titulo-total-filtro">Total do Dia:</span>
