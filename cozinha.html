@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel - Point Derico</title>
+    <title>Painel Completo - Point Derico</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 min-h-screen text-white font-sans flex flex-col">
@@ -22,22 +22,16 @@
         
         <!-- Botões das Abas -->
         <div class="flex gap-1">
-            <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner">
-                👨‍🍳 Cozinha
-            </button>
-            <button onclick="mudarAba('caixa')" id="tab-caixa" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">
-                💲 Mesas A Pagar
-            </button>
-            <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">
-                📊 Fechamento / Caixa
-            </button>
+            <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner">👨‍🍳 Cozinha</button>
+            <button onclick="mudarAba('caixa')" id="tab-caixa" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">💲 Mesas A Pagar</button>
+            <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition">📊 Caixa / Fechamento</button>
         </div>
     </header>
 
     <!-- Área Principal de Conteúdo -->
     <main class="p-4 flex-grow relative">
         
-        <!-- FILTRO DE RELATÓRIO (Aparece apenas na aba de Fechamento) -->
+        <!-- Filtro de Relatório -->
         <div id="painel-filtro" class="hidden mb-4 bg-gray-800 border border-gray-700 p-4 rounded-xl shadow-md">
             <h2 class="text-sm font-bold text-yellow-500 mb-2 uppercase tracking-wide">Filtro de Faturamento</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -50,7 +44,6 @@
                     <input type="month" id="filtro-mes" onchange="mudarFiltroTipo('mes')" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:ring-2 focus:ring-yellow-500 outline-none">
                 </div>
             </div>
-            <!-- Card de Total Arrecadado no Filtro -->
             <div class="mt-3 bg-green-950/40 border border-green-800/60 p-3 rounded-lg flex justify-between items-center">
                 <div>
                     <span class="text-xs text-green-300 font-bold uppercase" id="titulo-total-filtro">Total do Dia:</span>
@@ -61,9 +54,7 @@
         </div>
 
         <!-- Container de Cards -->
-        <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <!-- Os cards dos pedidos entram aqui dinamicamente -->
-        </div>
+        <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
         
         <!-- Mensagem de Vazio -->
         <div id="mensagem-vazia" class="text-center mt-16 text-gray-500 hidden">
@@ -73,24 +64,59 @@
         </div>
     </main>
 
+    <!-- MODAL DE PIX / EXTRATO -->
+    <div id="modal-pix" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+            <button onclick="fecharModalPix()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
+            
+            <h3 class="text-lg font-bold text-yellow-500 mb-1" id="modal-mesa-titulo">Mesa</h3>
+            <p class="text-xs text-gray-400 mb-4">Extrato para pagamento via Pix</p>
+
+            <div id="modal-extrato-lista" class="bg-gray-900 border border-gray-700 rounded-xl p-3 text-left text-xs font-mono text-gray-300 mb-4 max-h-36 overflow-y-auto">
+                <!-- Itens detalhados entram aqui -->
+            </div>
+
+            <div class="mb-4">
+                <span class="text-xs text-gray-400 uppercase font-bold">Valor a Pagar:</span>
+                <p class="text-2xl font-bold text-green-400" id="modal-valor-total">R$ 0,00</p>
+            </div>
+
+            <!-- QR Code do Pix (Gerado via API Pública Segura) -->
+            <div class="bg-white p-3 rounded-xl inline-block mb-3 shadow-inner">
+                <img id="qrcode-img" src="" alt="QR Code Pix" class="w-40 h-40 mx-auto">
+            </div>
+            
+            <p class="text-[10px] text-gray-400 mb-4">Aponte a câmera do celular para pagar</p>
+
+            <button onclick="confirmarPagamentoPix()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg">
+                ✅ Confirmar Pagamento e Fechar Mesa
+            </button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, query, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, query, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // CONFIGURAÇÃO DO SEU PIX (Altere aqui com seus dados reais)
+        const CHAVE_PIX = "thiagoderico15@gmail.com"; 
+        const NOME_TITULAR = "Point Derico";
+        const CIDADE_TITULAR = "Sao Paulo";
+
         let abaAtual = 'cozinha'; 
         let todosPedidos = []; 
-        let tipoFiltroRelatorio = 'dia'; // 'dia' ou 'mes'
+        let tipoFiltroRelatorio = 'dia'; 
+        let pedidoSelecionadoId = null;
 
         const audioAlert = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         let somAtivado = false;
         let primeiroCarregamento = true;
         let qtdPendentesAnterior = 0;
 
-        // Configura datas iniciais do filtro para o dia de hoje
         const hojeISO = new Date().toISOString().split('T')[0];
         document.getElementById('filtro-data').value = hojeISO;
         document.getElementById('filtro-mes').value = hojeISO.slice(0, 7);
@@ -106,42 +132,27 @@
 
         window.mudarAba = function(aba) {
             abaAtual = aba;
-            
             document.getElementById('tab-cozinha').className = aba === 'cozinha' ? "flex-1 bg-yellow-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner" : "flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition";
             document.getElementById('tab-caixa').className = aba === 'caixa' ? "flex-1 bg-blue-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner" : "flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition";
             document.getElementById('tab-relatorio').className = aba === 'relatorio' ? "flex-1 bg-green-500 text-black font-bold py-2 text-xs md:text-sm rounded-t-lg transition shadow-inner" : "flex-1 bg-gray-700 text-gray-300 font-bold py-2 text-xs md:text-sm rounded-t-lg transition";
 
-            const painelFiltro = document.getElementById('painel-filtro');
-            if(aba === 'relatorio') {
-                painelFiltro.classList.remove('hidden');
-            } else {
-                painelFiltro.classList.add('hidden');
-            }
-
+            document.getElementById('painel-filtro').classList.toggle('hidden', aba !== 'relatorio');
             renderizarCards();
         }
 
         window.mudarFiltroTipo = function(tipo) {
             tipoFiltroRelatorio = tipo;
-            if(tipo === 'dia') {
-                document.getElementById('filtro-mes').value = '';
-            } else {
-                document.getElementById('filtro-data').value = '';
-            }
+            if(tipo === 'dia') document.getElementById('filtro-mes').value = '';
+            else document.getElementById('filtro-data').value = '';
             renderizarCards();
         }
 
-        // Pega todos os pedidos do banco de dados em tempo real
         const q = query(collection(db, "pedidos"));
-
         onSnapshot(q, (snapshot) => {
             todosPedidos = [];
             snapshot.forEach((docSnap) => {
                 const dados = docSnap.data();
-                // Se o pedido não tiver data salva, assume a data de hoje para não quebrar relatórios antigos
-                if(!dados.dataCriacao) {
-                    dados.dataCriacao = new Date().toISOString().split('T')[0];
-                }
+                if(!dados.dataCriacao) dados.dataCriacao = new Date().toISOString().split('T')[0];
                 todosPedidos.push({ id: docSnap.id, ...dados });
             });
 
@@ -151,7 +162,6 @@
             }
             qtdPendentesAnterior = qtdPendentesAgora;
             primeiroCarregamento = false;
-
             renderizarCards();
         });
 
@@ -159,54 +169,42 @@
             const container = document.getElementById('pedidos-container');
             const msgVazia = document.getElementById('mensagem-vazia');
             const contadorTxt = document.getElementById('contador');
-            
             container.innerHTML = '';
 
             let filtrados = [];
-
             if (abaAtual === 'cozinha') {
                 filtrados = todosPedidos.filter(p => p.status === 'Pendente');
                 contadorTxt.innerText = `${filtrados.length} pedido(s) na cozinha`;
                 document.getElementById('icone-vazio').innerText = "🍽️";
                 document.getElementById('texto-vazio').innerText = "Cozinha Tranquila!";
-            } 
-            else if (abaAtual === 'caixa') {
+            } else if (abaAtual === 'caixa') {
                 filtrados = todosPedidos.filter(p => p.status === 'Entregue');
                 contadorTxt.innerText = `${filtrados.length} mesa(s) aguardando pagamento`;
                 document.getElementById('icone-vazio').innerText = "💲";
                 document.getElementById('texto-vazio').innerText = "Nenhuma comanda pendente de pagamento!";
-            } 
-            else if (abaAtual === 'relatorio') {
+            } else if (abaAtual === 'relatorio') {
                 const valData = document.getElementById('filtro-data').value;
                 const valMes = document.getElementById('filtro-mes').value;
-
                 filtrados = todosPedidos.filter(p => {
                     if (p.status !== 'Pago') return false;
-                    if (tipoFiltroRelatorio === 'dia' && valData) {
-                        return p.dataCriacao === valData;
-                    } else if (tipoFiltroRelatorio === 'mes' && valMes) {
-                        return p.dataCriacao && p.dataCriacao.startsWith(valMes);
-                    }
+                    if (tipoFiltroRelatorio === 'dia' && valData) return p.dataCriacao === valData;
+                    if (tipoFiltroRelatorio === 'mes' && valMes) return p.dataCriacao && p.dataCriacao.startsWith(valMes);
                     return true;
                 });
 
-                // Calcula o somatório do dinheiro arrecadado no filtro selecionado
                 let totalArrecadado = 0;
                 filtrados.forEach(p => {
                     if (p.total) {
-                        // Converte string "R$ 45,00" para número matemático 45.00
                         let limpo = p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
                         totalArrecadado += parseFloat(limpo) || 0;
                     }
                 });
-
                 document.getElementById('valor-total-filtro').innerText = `R$ ${totalArrecadado.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-filtro').innerText = `${filtrados.length} comanda(s) finalizada(s)`;
-                document.getElementById('titulo-total-filtro').innerText = tipoFiltroRelatorio === 'dia' ? "Total do Dia Selecionado:" : "Total do Mês Selecionado:";
-                
+                document.getElementById('titulo-total-filtro').innerText = tipoFiltroRelatorio === 'dia' ? "Total do Dia:" : "Total do Mês:";
                 contadorTxt.innerText = `Histórico de Caixa`;
                 document.getElementById('icone-vazio').innerText = "📊";
-                document.getElementById('texto-vazio').innerText = "Nenhum fechamento registrado para este período.";
+                document.getElementById('texto-vazio').innerText = "Nenhum fechamento registrado.";
             }
 
             if (filtrados.length === 0) {
@@ -234,36 +232,30 @@
                     corFaixa = 'bg-yellow-500';
                     botoesHtml = `
                         <div class="flex gap-2 mt-3 pt-3 border-t border-gray-700">
-                            <button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-2 rounded-lg text-xs transition">
-                                🛎️ Entregar (Paga depois)
-                            </button>
-                            <button onclick="mudarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 px-2 rounded-lg text-xs transition">
-                                ✅ Entregue e PAGO
-                            </button>
+                            <button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-2 rounded-lg text-xs transition">🛎️ Entregar</button>
+                            <button onclick="mudarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 px-2 rounded-lg text-xs transition">✅ Pago na Hora</button>
+                            <button onclick="excluirPedido('${pedido.id}')" class="bg-red-900/60 hover:bg-red-800 text-red-200 px-3 py-2.5 rounded-lg text-xs transition" title="Cancelar Pedido">🗑️</button>
                         </div>
                     `;
                 } else if(abaAtual === 'caixa') {
                     corFaixa = 'bg-blue-500';
                     botoesHtml = `
-                        <div class="mt-3 pt-3 border-t border-gray-700">
-                            <button onclick="mudarStatus('${pedido.id}', 'Pago')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg text-sm transition shadow-lg">
-                                💲 Receber Pagamento e Fechar Mesa
+                        <div class="mt-3 pt-3 border-t border-gray-700 flex gap-2">
+                            <button onclick="abrirModalPix('${pedido.id}', '${pedido.mesa}', '${pedido.total}', '${encodeURIComponent(pedido.pedido)}') " class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-3 rounded-lg text-xs transition flex justify-center items-center gap-1 shadow-lg">
+                                📱 Gerar Pix (Mesa)
+                            </button>
+                            <button onclick="mudarStatus('${pedido.id}', 'Pago')" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-3 rounded-lg text-xs transition flex justify-center items-center gap-1 shadow-lg">
+                                💲 Fechar (Dinheiro/Cartão)
                             </button>
                         </div>
                     `;
                 } else {
                     corFaixa = 'bg-green-500';
-                    botoesHtml = `
-                        <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400 flex justify-between items-center">
-                            <span>Status: <strong class="text-green-400">Pago / Finalizado</strong></span>
-                            <span class="font-mono">${pedido.dataCriacao || ''}</span>
-                        </div>
-                    `;
+                    botoesHtml = `<div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400 flex justify-between"><span>Status: <strong class="text-green-400">Pago</strong></span><span class="font-mono">${pedido.dataCriacao || ''}</span></div>`;
                 }
 
                 const card = document.createElement('div');
                 card.className = "bg-gray-800 border border-gray-700 rounded-xl p-4 flex flex-col justify-between shadow-lg relative overflow-hidden";
-                
                 card.innerHTML = `
                     <div class="absolute left-0 top-0 bottom-0 w-1 ${corFaixa}"></div>
                     <div>
@@ -271,24 +263,15 @@
                             <h2 class="text-xl font-bold text-white">${pedido.mesa}</h2>
                             <span class="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded font-mono">${pedido.horario || '--:--'}</span>
                         </div>
-                        
                         <div class="pl-2 text-gray-300 text-sm leading-relaxed mb-3 bg-gray-900 p-2.5 rounded-lg border border-gray-700 font-mono">
                             ${itensTexto.replace(/\n/g, '<br>')}
                         </div>
-
                         <div class="pl-2 flex justify-between items-center mb-2">
                             <span class="text-gray-400 font-bold uppercase text-xs">Valor Total:</span>
                             <span class="text-green-400 font-bold text-lg">${pedido.total || 'R$ 0,00'}</span>
                         </div>
-
-                        ${obsTexto ? `
-                        <div class="mb-2 pl-2">
-                            <span class="bg-red-900 text-red-200 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">Atenção</span>
-                            <p class="text-red-400 text-xs font-semibold mt-1 bg-red-950/30 p-1.5 rounded border border-red-900/50">"${obsTexto}"</p>
-                        </div>
-                        ` : ''}
+                        ${obsTexto ? `<div class="mb-2 pl-2"><span class="bg-red-900 text-red-200 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">Atenção</span><p class="text-red-400 text-xs font-semibold mt-1 bg-red-950/30 p-1.5 rounded border border-red-900/50">"${obsTexto}"</p></div>` : ''}
                     </div>
-                    
                     ${botoesHtml}
                 `;
                 container.appendChild(card);
@@ -298,18 +281,87 @@
         window.mudarStatus = async function(id, novoStatus) {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
-                let dadosAtualizacao = { status: novoStatus };
-                
-                // Se o pedido foi marcado como pago agora, grava a data de hoje automaticamente
-                if (novoStatus === 'Pago') {
-                    dadosAtualizacao.dataCriacao = new Date().toISOString().split('T')[0];
-                }
+                let dados = { status: novoStatus };
+                if (novoStatus === 'Pago') dados.dataCriacao = new Date().toISOString().split('T')[0];
+                await updateDoc(pedidoRef, dados);
+                fecharModalPix();
+            } catch (e) { alert("Erro ao atualizar."); }
+        }
 
-                await updateDoc(pedidoRef, dadosAtualizacao);
-            } catch (e) {
-                console.error("Erro: ", e);
-                alert("Erro ao atualizar status.");
+        window.excluirPedido = async function(id) {
+            if (confirm("Tem certeza que deseja cancelar e excluir este pedido?")) {
+                try {
+                    await deleteDoc(doc(db, "pedidos", id));
+                } catch (e) { alert("Erro ao excluir."); }
             }
+        }
+
+        // --- SISTEMA DE QR CODE PIX (Payload Dinâmico BR Code) ---
+        window.abrirModalPix = function(id, mesa, totalStr, pedidoEncoded) {
+            pedidoSelecionadoId = id;
+            document.getElementById('modal-mesa-titulo').innerText = mesa;
+            document.getElementById('modal-valor-total').innerText = totalStr;
+            
+            let textoPedido = decodeURIComponent(pedidoEncoded).replace(/\n/g, '<br>');
+            document.getElementById('modal-extrato-lista').innerHTML = textoPedido;
+
+            // Extrai valor numérico p/ o payload Pix (Ex: "R$ 45,00" -> "45.00")
+            let valorNum = totalStr.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+            let valorFloat = parseFloat(valorNum) || 0;
+
+            // Monta o payload oficial do Pix Copia e Cola / QR Code
+            let payloadPix = gerarPayloadPix(CHAVE_PIX, NOME_TITULAR, CIDADE_TITULAR, valorFloat.toFixed(2));
+            
+            // Gera a imagem do QR Code usando API pública de QRCode
+            let urlQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
+            document.getElementById('qrcode-img').src = urlQrCode;
+
+            document.getElementById('modal-pix').classList.remove('hidden');
+        }
+
+        window.fecharModalPix = function() {
+            document.getElementById('modal-pix').classList.add('hidden');
+            pedidoSelecionadoId = null;
+        }
+
+        window.confirmarPagamentoPix = function() {
+            if (pedidoSelecionadoId) {
+                mudarStatus(pedidoSelecionadoId, 'Pago');
+            }
+        }
+
+        // Função auxiliar que gera o padrão EMV/Pix do Banco Central
+        function gerarPayloadPix(pixKey, name, city, amount) {
+            function formatField(id, value) {
+                let len = value.length.toString().padStart(2, '0');
+                return id + len + value;
+            }
+            let payload = "000201";
+            let merchantAccount = formatField("00", "br.gov.bcb.pix") + formatField("01", pixKey);
+            payload += formatField("26", merchantAccount);
+            payload += "52040000"; // MCC
+            payload += "5303986";  // Moeda Real (BRL)
+            if (amount && amount > 0) payload += formatField("54", amount);
+            payload += "5802BR";
+            payload += formatField("59", name);
+            payload += formatField("60", city);
+            let additional = formatField("05", "POINT_DERICO");
+            payload += formatField("62", additional);
+            payload += "6304";
+            
+            // Cálculo do CRC16 exigido pelo padrão Pix
+            let polinomio = 0x1021;
+            let resultado = 0xFFFF;
+            let texto = payload;
+            for (let c = 0; c < texto.length; c++) {
+                resultado ^= (texto.charCodeAt(c) << 8);
+                for (let i = 0; i < 8; i++) {
+                    if ((resultado & 0x8000) !== 0) resultado = ((resultado << 1) ^ polinomio);
+                    else resultado = (resultado << 1);
+                }
+            }
+            let crc = (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+            return payload + crc;
         }
     </script>
 </body>
