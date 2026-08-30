@@ -165,7 +165,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const CHAVE_PIX_FIXA = "SUA_CHAVE_PIX_AQUI"; 
+        // CHAVE PIX DEFINITIVA JÁ CADASTRADA
+        const CHAVE_PIX_FIXA = "thiagoderico15@gmail.com"; 
         const NOME_PIX_FIXO = "Point Derico";
 
         let mesaSelecionada = "";
@@ -176,9 +177,11 @@
             mesasOcupadas = [];
             snapshot.forEach((doc) => {
                 const dados = doc.data();
-                // ATUALIZADO: Considera a mesa ocupada se o pedido estiver Pendente, Entregue OU se foi Pago mas ainda está em andamento na cozinha
-                if (dados.status === "Pendente" || dados.status === "Entregue" || dados.status === "Pago") {
-                    if (!mesasOcupadas.includes(dados.mesa)) mesasOcupadas.push(dados.mesa);
+                // SÓ CONSIDERA OCUPADA SE O PEDIDO ESTIVER ATIVO (Pendente ou Entregue). Pedido com status 'Pago' nunca deixa mesa vermelha.
+                if (dados.status === "Pendente" || dados.status === "Entregue") {
+                    if (dados.mesa && !mesasOcupadas.includes(dados.mesa)) {
+                        mesasOcupadas.push(dados.mesa);
+                    }
                 }
             });
             renderizarMesas();
@@ -270,11 +273,6 @@
             if (!mesaSelecionada) return alert('Selecione uma Mesa!');
             if (itensCarrinho.length === 0) return alert('Adicione pelo menos um item!');
 
-            if (CHAVE_PIX_FIXA === "thiagoderico15@gmail.com") {
-                alert("Por favor, abra o código do arquivo index.html e substitua 'SUA_CHAVE_PIX_AQUI' pela sua chave real!");
-                return;
-            }
-
             const totalStr = document.getElementById('valor-total').innerText;
             document.getElementById('modal-mesa-titulo').innerText = `${mesaSelecionada} - Pix na Hora`;
             document.getElementById('modal-valor-total').innerText = totalStr;
@@ -295,10 +293,10 @@
 
         window.confirmarPixEnivarPedido = function() {
             fecharModalPixAtendente();
-            enviarPedido('Pago'); 
+            enviarPedido('PagoNaHora'); 
         }
 
-        window.enviarPedido = async function(statusPedido) {
+        window.enviarPedido = async function(tipoEnvio) {
             const obs = document.getElementById('obs').value.trim();
             const statusTxt = document.getElementById('status');
             const total = document.getElementById('valor-total').innerText;
@@ -313,8 +311,8 @@
                 let dadosPedido = {
                     mesa: mesaSelecionada,
                     pedido: textoPedidoFormatado,
-                    status: 'Pendente', // ATUALIZADO: Salva como 'Pendente' para OBRIGATORIAMENTE ir para a cozinha preparar!
-                    pagoNaHora: statusPedido === 'Pago', // Marca se já foi pago para o cozinheiro/caixa saber
+                    status: 'Pendente', // Vai obrigatoriamente para a cozinha preparar
+                    pagoNaHora: tipoEnvio === 'PagoNaHora', // Identificador verde para o cozinheiro
                     total: total,
                     dataCriacao: new Date().toISOString().split('T')[0],
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
@@ -326,7 +324,7 @@
                 document.getElementById('obs').value = '';
                 itensCarrinho = []; atualizarResumo();
                 
-                statusTxt.innerText = statusPedido === 'Pago' ? "Pix pago! Pedido enviado para a cozinha." : "Pedido enviado para cozinha!";
+                statusTxt.innerText = tipoEnvio === 'PagoNaHora' ? "Pix confirmado! Pedido na Cozinha." : "Pedido enviado para cozinha!";
                 setTimeout(() => statusTxt.innerText = "", 3000);
             } catch (e) {
                 alert("Erro ao enviar pedido.");
