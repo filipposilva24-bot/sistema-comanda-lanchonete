@@ -16,8 +16,6 @@
         .tap-scale:active { transform: scale(0.97); transition: transform 0.1s ease; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .swipe-item-container { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
-        .swipe-snap-center { scroll-snap-align: center; }
     </style>
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 pb-24 select-none transition-colors duration-200">
@@ -51,8 +49,8 @@
     <!-- TELA PRINCIPAL DE COMANDA -->
     <div class="max-w-md mx-auto bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 flex flex-col justify-between rounded-b-3xl transition-colors duration-200">
         <div>
+            <!-- TOPO / ALTERNAR ABAS (Salão / Caixa) -->
             <header class="mb-3 text-center relative border-b border-zinc-200 dark:border-zinc-800 pb-3">
-                
                 <div class="absolute left-0 top-0 flex items-center gap-1.5">
                     <span id="status-conexao" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span class="text-[9px] font-bold text-zinc-400 uppercase" id="tempo-cozinha-badge">-- min</span>
@@ -66,6 +64,13 @@
                     Gastronomia & Sabor
                 </div>
                 <h1 class="text-2xl font-black tracking-tight text-amber-500 dark:text-amber-400">POINT DERICO</h1>
+                
+                <!-- ABAS DE NAVEGAÇÃO -->
+                <div class="flex gap-2 mt-3">
+                    <button onclick="mudarAba('salao')" id="aba-salao" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 rounded-xl text-xs shadow">🏠 Salão / Cardápio</button>
+                    <button onclick="mudarAba('caixa')" id="aba-caixa" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2 rounded-xl text-xs shadow">💰 Caixa / Mesas</button>
+                </div>
+
                 <div class="flex justify-between items-center mt-2 px-1">
                     <p class="text-xs text-zinc-500 dark:text-zinc-400 font-medium" id="info-mesa-atual">Painel de Lançamento</p>
                     <button onclick="trocarAtendente()" class="tap-scale text-[10px] bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 px-3 py-1 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 transition">
@@ -74,51 +79,62 @@
                 </div>
             </header>
             
-            <div class="mb-3" id="bloco-selecao-mesas">
-                <div class="flex justify-between items-center mb-1.5">
-                    <label class="block text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider">Mesa / Local:</label>
-                    <span class="text-[10px] text-zinc-400 font-medium">🔴 Ocupada | ⚪ Livre</span>
-                </div>
-                <div id="container-mesas" class="grid grid-cols-4 gap-2"></div>
-            </div>
-
-            <!-- BARRA DE PESQUISA RÁPIDA -->
-            <div class="mb-2">
-                <input type="text" id="filtro-busca" placeholder="🔍 Pesquisar no cardápio..." oninput="renderizarCardapio()" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 shadow-inner">
-            </div>
-
-            <!-- BOTÕES DE ATALHO RÁPIDO PARA CATEGORIAS -->
-            <div id="botoes-categorias-atalho" class="flex gap-1.5 overflow-x-auto pb-2 mb-1 scrollbar-none"></div>
-
-            <!-- CARDÁPIO DINÂMICO -->
-            <div class="mb-3 h-[28vh] overflow-y-auto pr-1 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2 bg-zinc-50 dark:bg-zinc-950/60 shadow-inner" id="cardapio-dinamico-container">
-                <p class="text-center text-xs text-zinc-400 mt-10 font-medium">Carregando cardápio...</p>
-            </div>
-
-            <!-- RESUMO DO PEDIDO -->
-            <div class="mb-2">
-                <div class="flex justify-between items-center mb-1">
-                    <label class="block text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider">Resumo do Pedido:</label>
-                    <button onclick="abrirRacha()" class="tap-scale text-[10px] bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold px-2 py-0.5 rounded-lg">➗ Rachar Conta</button>
-                </div>
-                
-                <div class="bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 flex flex-col min-h-[70px] max-h-[110px] shadow-inner">
-                    <div id="resumo-pedido" class="overflow-y-auto flex-grow divide-y divide-zinc-100 dark:divide-zinc-900">
-                        <p class="text-zinc-400 text-center italic text-xs mt-2 font-medium" id="vazio-texto">Nenhum item adicionado.</p>
+            <!-- VIEW SALÃO -->
+            <div id="view-salao">
+                <div class="mb-3" id="bloco-selecao-mesas">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider">Mesa / Local:</label>
+                        <span class="text-[10px] text-zinc-400 font-medium">🔴 Ocupada | ⚪ Livre</span>
                     </div>
-                    <div class="border-t border-zinc-200 dark:border-zinc-800/80 mt-1.5 pt-1.5 flex justify-between items-center">
-                        <span class="font-bold text-zinc-500 dark:text-zinc-400 text-xs uppercase">TOTAL:</span>
-                        <span id="valor-total" class="font-black text-emerald-600 dark:text-emerald-400 text-base">R$ 0,00</span>
+                    <div id="container-mesas" class="grid grid-cols-4 gap-2"></div>
+                </div>
+
+                <div class="mb-2">
+                    <input type="text" id="filtro-busca" placeholder="🔍 Pesquisar no cardápio..." oninput="renderizarCardapio()" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 shadow-inner">
+                </div>
+
+                <div id="botoes-categorias-atalho" class="flex gap-1.5 overflow-x-auto pb-2 mb-1 scrollbar-none"></div>
+
+                <div class="mb-3 h-[26vh] overflow-y-auto pr-1 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2 bg-zinc-50 dark:bg-zinc-950/60 shadow-inner" id="cardapio-dinamico-container">
+                    <p class="text-center text-xs text-zinc-400 mt-10 font-medium">Carregando cardápio...</p>
+                </div>
+
+                <div class="mb-2">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider">Resumo do Pedido:</label>
+                        <button onclick="abrirRacha()" class="tap-scale text-[10px] bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold px-2 py-0.5 rounded-lg">➗ Rachar Conta</button>
                     </div>
+                    
+                    <div class="bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 flex flex-col min-h-[60px] max-h-[90px] shadow-inner">
+                        <div id="resumo-pedido" class="overflow-y-auto flex-grow divide-y divide-zinc-100 dark:divide-zinc-900">
+                            <p class="text-zinc-400 text-center italic text-xs mt-1 font-medium" id="vazio-texto">Nenhum item adicionado.</p>
+                        </div>
+                        <div class="border-t border-zinc-200 dark:border-zinc-800/80 mt-1 pt-1 flex justify-between items-center">
+                            <span class="font-bold text-zinc-500 dark:text-zinc-400 text-xs uppercase">TOTAL:</span>
+                            <span id="valor-total" class="font-black text-emerald-600 dark:text-emerald-400 text-sm">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, gelo...)" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:border-amber-500 text-xs text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 shadow-inner">
                 </div>
             </div>
 
-            <div class="mb-2">
-                <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, gelo e limão...)" class="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:border-amber-500 text-xs text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 shadow-inner">
+            <!-- VIEW CAIXA (Painel de Mesas com Pagamento Parcial e Fechamento) -->
+            <div id="view-caixa" class="hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xs font-black text-amber-500 uppercase tracking-wider">Mesas Aguardando Fechamento</h2>
+                    <span class="text-[10px] text-zinc-400" id="caixa-contador">0 mesas</span>
+                </div>
+                <div id="lista-caixa-mesas" class="space-y-3 max-h-[55vh] overflow-y-auto pr-1">
+                    <!-- Gerado via JS -->
+                </div>
             </div>
         </div>
 
-        <div>
+        <!-- BOTÕES DE AÇÃO DO SALÃO -->
+        <div id="painel-botoes-acao">
             <div class="flex gap-2">
                 <button id="btn-enviar-pedido" onclick="enviarPedido('Pendente')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3 px-2 rounded-2xl transition shadow-lg text-xs flex items-center justify-center gap-1">
                     🚀 Enviar para Cozinha
@@ -127,39 +143,34 @@
                     📱 Pagar Pix Agora
                 </button>
             </div>
-            <p id="status" class="text-center text-xs mt-2 text-emerald-600 dark:text-emerald-400 font-bold h-4"></p>
+            <p id="status" class="text-center text-xs mt-1 text-emerald-600 dark:text-emerald-400 font-bold h-4"></p>
         </div>
     </div>
 
-    <!-- CARRINHO FLUTUANTE INTERATIVO (Agora abre o Modal do Carrinho) -->
-    <div id="carrinho-flutuante" onclick="abrirModalCarrinho()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3.5 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
+    <!-- CARRINHO FLUTUANTE -->
+    <div id="carrinho-flutuante" onclick="abrirModalCarrinho()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
         <div class="flex items-center gap-2">
-            <span class="text-lg">🛒</span>
-            <span id="flutuante-qtd" class="text-xs font-black bg-zinc-950 text-amber-400 px-2.5 py-0.5 rounded-full">0 itens</span>
+            <span class="text-base">🛒</span>
+            <span id="flutuante-qtd" class="text-xs font-black bg-zinc-950 text-amber-400 px-2 py-0.5 rounded-full">0 itens</span>
         </div>
         <span id="flutuante-total" class="text-sm font-black">R$ 0,00</span>
     </div>
 
-    <!-- MODAL DO CARRINHO COMPLETO (Abre ao clicar no carrinho flutuante) -->
+    <!-- MODAL DO CARRINHO COMPLETO -->
     <div id="modal-carrinho" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex flex-col justify-end hidden">
         <div class="bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 rounded-t-3xl max-w-md w-full mx-auto p-5 shadow-2xl max-h-[80vh] flex flex-col">
             <div class="flex justify-between items-center mb-3 pb-2 border-b border-zinc-200 dark:border-zinc-800">
                 <h3 class="text-sm font-black text-amber-500 uppercase tracking-wider">🛒 Itens no Carrinho</h3>
                 <button onclick="fecharModalCarrinho()" class="text-zinc-400 hover:text-white font-bold text-base p-1">✕</button>
             </div>
-            
-            <div id="modal-lista-carrinho" class="overflow-y-auto flex-grow divide-y divide-zinc-100 dark:divide-zinc-800 mb-3 pr-1">
-                <!-- Itens injetados via JS -->
-            </div>
-
+            <div id="modal-lista-carrinho" class="overflow-y-auto flex-grow divide-y divide-zinc-100 dark:divide-zinc-800 mb-3 pr-1"></div>
             <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 mb-3">
-                <div class="flex justify-between items-center mb-1">
+                <div class="flex justify-between items-center">
                     <span class="text-xs text-zinc-500 font-bold uppercase">Total do Pedido:</span>
                     <span id="modal-carrinho-total" class="text-lg font-black text-emerald-600 dark:text-emerald-400">R$ 0,00</span>
                 </div>
             </div>
-
-            <button onclick="fecharModalCarrinho()" class="tap-scale w-full bg-amber-500 text-zinc-950 font-black py-3.5 rounded-2xl text-xs shadow">Continuar Comprando / Enviar</button>
+            <button onclick="fecharModalCarrinho()" class="tap-scale w-full bg-amber-500 text-zinc-950 font-black py-3.5 rounded-2xl text-xs shadow">Continuar</button>
         </div>
     </div>
 
@@ -168,20 +179,19 @@
         <div class="w-full max-w-xs p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl">
             <p class="text-amber-500 text-center font-bold text-xs uppercase tracking-widest mb-2">Alterar Quantidade</p>
             <div id="numpad-display" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 text-center text-3xl font-black text-white mb-6 min-h-[64px]">1</div>
-            
             <div class="grid grid-cols-3 gap-2">
-                <button onclick="numPress(1)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">1</button>
-                <button onclick="numPress(2)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">2</button>
-                <button onclick="numPress(3)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">3</button>
-                <button onclick="numPress(4)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">4</button>
-                <button onclick="numPress(5)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">5</button>
-                <button onclick="numPress(6)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">6</button>
-                <button onclick="numPress(7)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">7</button>
-                <button onclick="numPress(8)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">8</button>
-                <button onclick="numPress(9)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">9</button>
-                <button onclick="fecharNumpad()" class="tap-scale bg-red-600/80 text-white text-xs font-black py-3.5 rounded-xl">✕ CANCEL</button>
-                <button onclick="numPress(0)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3.5 rounded-xl">0</button>
-                <button onclick="confirmarNumpad()" class="tap-scale bg-emerald-600 text-white text-xs font-black py-3.5 rounded-xl">✅ OK</button>
+                <button onclick="numPress(1)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">1</button>
+                <button onclick="numPress(2)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">2</button>
+                <button onclick="numPress(3)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">3</button>
+                <button onclick="numPress(4)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">4</button>
+                <button onclick="numPress(5)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">5</button>
+                <button onclick="numPress(6)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">6</button>
+                <button onclick="numPress(7)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">7</button>
+                <button onclick="numPress(8)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">8</button>
+                <button onclick="numPress(9)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">9</button>
+                <button onclick="fecharNumpad()" class="tap-scale bg-red-600/80 text-white text-xs font-black py-3 rounded-xl">✕ CANCEL</button>
+                <button onclick="numPress(0)" class="tap-scale bg-zinc-800 text-white text-xl font-bold py-3 rounded-xl">0</button>
+                <button onclick="confirmarNumpad()" class="tap-scale bg-emerald-600 text-white text-xs font-black py-3 rounded-xl">✅ OK</button>
             </div>
         </div>
     </div>
@@ -193,7 +203,7 @@
             <h3 class="text-base font-extrabold text-amber-500 dark:text-amber-400 mb-1" id="modal-mesa-titulo">Pix na Hora</h3>
             <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">Escaneie para pagar e registrar</p>
             <div class="mb-3 bg-zinc-50 dark:bg-zinc-950 py-2 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                <span class="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Valor Total:</span>
+                <span class="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Valor Restante:</span>
                 <p class="text-2xl font-black text-emerald-600 dark:text-emerald-400" id="modal-valor-total">R$ 0,00</p>
             </div>
             <div class="bg-white p-3 rounded-2xl inline-block mb-3 shadow-inner border">
@@ -204,7 +214,7 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHES DA MESA & PAGAMENTO PARCIAL -->
+    <!-- MODAL DETALHES DA MESA & PAGAMENTO PARCIAL (Com as linhas separadas corretas) -->
     <div id="modal-mesa-detalhes" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-5 shadow-2xl relative">
             <button onclick="fecharModalMesaDetalhes()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold">✕</button>
@@ -215,7 +225,7 @@
             
             <div class="flex justify-between items-center mb-1 text-xs">
                 <span class="text-zinc-500 font-bold">Total Original:</span>
-                <span class="font-bold" id="detalhe-mesa-orig">R$ 0,00</span>
+                <span class="font-bold text-zinc-800 dark:text-zinc-200" id="detalhe-mesa-orig">R$ 0,00</span>
             </div>
             <div class="flex justify-between items-center mb-2 text-xs">
                 <span class="text-emerald-600 font-bold">Já Pago / Abatido:</span>
@@ -240,7 +250,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
@@ -251,6 +261,7 @@
 
         let operadorAtual = localStorage.getItem('point_derico_operador') || "";
         let mesaSelecionada = "";
+        let abaAtiva = 'salao';
         let mesasFixas = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
         let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras') || "[]");
         let mesasDetalhesMap = {};
@@ -325,6 +336,30 @@
             document.getElementById('modal-login').classList.remove('hidden');
         }
 
+        window.mudarAba = function(aba) {
+            abaAtiva = aba;
+            const btnSalao = document.getElementById('aba-salao');
+            const btnCaixa = document.getElementById('aba-caixa');
+            const viewSalao = document.getElementById('view-salao');
+            const viewCaixa = document.getElementById('view-caixa');
+            const painelAcao = document.getElementById('painel-botoes-acao');
+
+            if (aba === 'salao') {
+                btnSalao.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 rounded-xl text-xs shadow";
+                btnCaixa.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2 rounded-xl text-xs shadow";
+                viewSalao.classList.remove('hidden');
+                viewCaixa.classList.add('hidden');
+                painelAcao.classList.remove('hidden');
+            } else {
+                btnCaixa.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 rounded-xl text-xs shadow";
+                btnSalao.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2 rounded-xl text-xs shadow";
+                viewCaixa.classList.remove('hidden');
+                viewSalao.classList.add('hidden');
+                painelAcao.classList.add('hidden');
+                renderizarCaixaMesas();
+            }
+        }
+
         window.addEventListener('online', () => document.getElementById('status-conexao').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse");
         window.addEventListener('offline', () => document.getElementById('status-conexao').className = "w-2 h-2 rounded-full bg-red-500");
 
@@ -357,7 +392,7 @@
                 if(p.status === "Pendente" || p.status === "Entregue") {
                     if(p.mesa) {
                         if(!mesasDetalhesMap[p.mesa]) {
-                            mesasDetalhesMap[p.mesa] = { id: p.id, status: p.status, pedido: p.pedido, total: 0, pagoParcial: p.valorPagoParcial || 0 };
+                            mesasDetalhesMap[p.mesa] = { id: p.id, status: p.status, pedido: p.pedido, total: 0, pagoParcial: p.valorPagoParcial || 0, atendente: p.atendente || "Geral" };
                         }
                         if(p.status === 'Pendente') mesasDetalhesMap[p.mesa].status = 'Pendente';
                         let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.'));
@@ -371,6 +406,7 @@
             document.getElementById('tempo-cozinha-badge').innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
 
             if(!mesaUrl) renderizarMesas();
+            if(abaAtiva === 'caixa') renderizarCaixaMesas();
         });
 
         function obterEstiloCategoria(categoria) {
@@ -523,6 +559,95 @@
             container.appendChild(btnAdd);
         }
 
+        // RENDERIZAR CAIXA COM AS OPÇÕES COMPLETAS (Pix, Fechar e Abater Parcial)
+        window.renderizarCaixaMesas = function() {
+            const container = document.getElementById('lista-caixa-mesas');
+            const contador = document.getElementById('caixa-contador');
+            container.innerHTML = '';
+            
+            let mesasOcupadas = Object.keys(mesasDetalhesMap);
+            contador.innerText = `${mesasOcupadas.length} mesa(s)`;
+
+            if(mesasOcupadas.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-zinc-400 py-10">Nenhuma mesa aguardando pagamento.</p>`;
+                return;
+            }
+
+            mesasOcupadas.forEach(mesa => {
+                const info = mesasDetalhesMap[mesa];
+                let valorRestante = info.total - info.pagoParcial;
+
+                let card = document.createElement('div');
+                card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 shadow-sm";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-2">
+                        <span class="font-black text-amber-500 text-sm">${mesa}</span>
+                        <span class="text-[10px] bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-zinc-400 font-bold">👤 ${info.atendente}</span>
+                    </div>
+                    <div class="bg-zinc-50 dark:bg-zinc-950 p-2.5 rounded-xl text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-2 max-h-20 overflow-y-auto">
+                        ${info.pedido}
+                    </div>
+                    <div class="space-y-1 mb-3 text-xs">
+                        <div class="flex justify-between text-zinc-400">
+                            <span>Total Original:</span>
+                            <span>R$ ${info.total.toFixed(2).replace('.',',')}</span>
+                        </div>
+                        ${info.pagoParcial > 0 ? `
+                        <div class="flex justify-between text-emerald-500 font-bold">
+                            <span>Já Pago / Abatido:</span>
+                            <span>- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}</span>
+                        </div>` : ''}
+                        <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                            <span>VALOR RESTANTE:</span>
+                            <span class="text-amber-500">R$ ${valorRestante.toFixed(2).replace('.',',')}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button onclick="abrirPixMesaCaixa('${mesa}')" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">📱 Pix</button>
+                        <button onclick="abrirAbaterCaixa('${mesa}')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">💸 Abater</button>
+                        <button onclick="fecharMesaCaixa('${info.id}', '${mesa}')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">✅ Fechar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.abrirPixMesaCaixa = function(mesa) {
+            const info = mesasDetalhesMap[mesa];
+            let valorRestante = info.total - info.pagoParcial;
+            document.getElementById('modal-mesa-titulo').innerText = `${mesa} - Pix`;
+            document.getElementById('modal-valor-total').innerText = `R$ ${valorRestante.toFixed(2).replace('.',',')}`;
+            document.getElementById('aviso-chave-pix').innerText = `Chave: ${CHAVE_PIX_FIXA}`;
+
+            let payloadPix = criarPayloadPix(CHAVE_PIX_FIXA, NOME_PIX_FIXO, "SAO PAULO", valorRestante.toFixed(2));
+            document.getElementById('qrcode-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
+            document.getElementById('modal-pix-atendente').classList.remove('hidden');
+        }
+
+        window.abrirAbaterCaixa = async function(mesa) {
+            let valorStr = prompt(`Valor pago agora para a ${mesa} (Ex: 10.00):`);
+            if(!valorStr) return;
+            let val = parseFloat(valorStr.replace(',','.'));
+            if(isNaN(val) || val <= 0) return alert("Valor inválido!");
+            
+            try {
+                let info = mesasDetalhesMap[mesa];
+                let pRef = doc(db, "pedidos", info.id);
+                let atualPago = info.pagoParcial || 0;
+                await updateDoc(pRef, { valorPagoParcial: atualPago + val });
+                mostrarToast(`R$ ${val.toFixed(2)} abatido com sucesso!`);
+            } catch(e) { alert("Erro ao abater valor."); }
+        }
+
+        window.fecharMesaCaixa = async function(idPedido, mesa) {
+            if(confirm(`Deseja realmente fechar e quitar a ${mesa}?`)) {
+                try {
+                    await deleteDoc(doc(db, "pedidos", idPedido));
+                    mostrarToast(`${mesa} fechada com sucesso!`);
+                } catch(e) { alert("Erro ao fechar mesa."); }
+            }
+        }
+
         let mesaAtualDetalhe = null;
         window.abrirModalMesaDetalhes = function(mesa) {
             mesaAtualDetalhe = mesa;
@@ -541,7 +666,7 @@
         window.continuarAtendimentoMesa = function() { mesaSelecionada = mesaAtualDetalhe; fecharModalMesaDetalhes(); }
 
         window.abrirPagamentoParcial = async function() {
-            let valorStr = prompt("Valor pago agora (Ex: 50.00):");
+            let valorStr = prompt("Valor pago agora (Ex: 10.00):");
             if(!valorStr) return;
             let val = parseFloat(valorStr.replace(',','.'));
             if(isNaN(val) || val <= 0) return alert("Valor inválido!");
@@ -582,7 +707,7 @@
             modalContainer.innerHTML = '';
             
             if (itensCarrinho.length === 0) {
-                container.innerHTML = '<p class="text-zinc-400 text-center italic text-xs mt-2 font-medium" id="vazio-texto">Nenhum item adicionado.</p>';
+                container.innerHTML = '<p class="text-zinc-400 text-center italic text-xs mt-1 font-medium" id="vazio-texto">Nenhum item adicionado.</p>';
                 modalContainer.innerHTML = '<p class="text-zinc-400 text-center text-xs py-6">Carrinho vazio.</p>';
                 totalDisplay.innerText = 'R$ 0,00';
                 modalTotalDisplay.innerText = 'R$ 0,00';
@@ -598,12 +723,11 @@
                 somaTotal += (item.preco * item.qtd);
                 qtdTotalItens += item.qtd;
 
-                // Renderiza na tela principal
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center py-1.5 px-1";
+                div.className = "flex justify-between items-center py-1 px-1";
                 div.innerHTML = `
                     <div class="flex items-center gap-2">
-                        <button onclick="abrirNumpad(${index})" class="tap-scale bg-zinc-200 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold text-xs px-2 py-1 rounded-lg border border-zinc-300 dark:border-zinc-700">
+                        <button onclick="abrirNumpad(${index})" class="tap-scale bg-zinc-200 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold text-xs px-2 py-0.5 rounded-lg border border-zinc-300 dark:border-zinc-700">
                             ${item.qtd}x
                         </button>
                         <span class="font-bold text-zinc-800 dark:text-zinc-200 text-xs">${item.nome}</span>
@@ -625,7 +749,6 @@
             document.getElementById('flutuante-total').innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
         }
 
-        // Funções do Modal do Carrinho
         window.abrirModalCarrinho = function() {
             if(itensCarrinho.length > 0) document.getElementById('modal-carrinho').classList.remove('hidden');
         }
@@ -671,7 +794,7 @@
             if (itensCarrinho.length === 0) return alert('Adicione pelo menos um item!');
 
             const totalStr = document.getElementById('valor-total').innerText;
-            document.getElementById('modal-mesa-titulo').innerText = `${mesaSelecionada} - Pix na Hora`;
+            document.getElementById('modal-mesa-titulo').innerText = `${mesaSelecionada} - Pix`;
             document.getElementById('modal-valor-total').innerText = totalStr;
             document.getElementById('aviso-chave-pix').innerText = `Chave: ${CHAVE_PIX_FIXA}`;
 
