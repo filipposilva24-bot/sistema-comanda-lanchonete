@@ -106,7 +106,6 @@
                 <p class="text-2xl font-bold text-green-400" id="modal-valor-total">R$ 0,00</p>
             </div>
 
-            <!-- QR Code Renderizado -->
             <div class="bg-white p-3 rounded-xl inline-block mb-2 shadow-inner">
                 <img id="qrcode-img" src="" alt="QR Code Pix" class="w-40 h-40 mx-auto">
             </div>
@@ -238,6 +237,8 @@
             } else if (abaAtual === 'relatorio') {
                 const valData = document.getElementById('filtro-data').value;
                 const valMes = document.getElementById('filtro-mes').value;
+                
+                // FILTRA TUDO O QUE ESTÁ COM STATUS 'Pago' (Seja pago na hora ou fechado depois)
                 filtrados = todosPedidos.filter(p => {
                     if (p.status !== 'Pago') return false;
                     if (tipoFiltroRelatorio === 'dia' && valData) return p.dataCriacao === valData;
@@ -349,7 +350,6 @@
             }
         }
 
-        // --- GERAÇÃO DE PIX COM PAYLOAD BR CODE CORRIGIDO (SEM ERROS DE CRC) ---
         window.abrirModalPix = function(id, mesa, totalStr, pedidoEncoded) {
             const config = obterChaveConfigurada();
             if (!config.chave) {
@@ -369,7 +369,6 @@
             let valorNum = totalStr.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
             let valorFloat = parseFloat(valorNum) || 0;
 
-            // Gera o código exato compatível com qualquer banco brasileiro
             let payloadPix = criarPayloadPix(config.chave, config.nome, "SAO PAULO", valorFloat.toFixed(2));
             
             let urlQrCode = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
@@ -388,12 +387,10 @@
             }
         }
 
-        // Função de montagem do padrão EMV do Banco Central
         function criarPayloadPix(pixKey, name, city, amount) {
             function format(id, val) {
                 return id + String(val.length).padStart(2, '0') + val;
             }
-            
             let merchantAccount = format("00", "br.gov.bcb.pix") + format("01", pixKey);
             let payload = 
                 format("00", "01") +
@@ -407,17 +404,13 @@
                 format("62", format("05", "POINTDERICO")) +
                 "6304";
 
-            // Cálculo correto do CRC16-CCITT
             let polinomio = 0x1021;
             let resultado = 0xFFFF;
             for (let c = 0; c < payload.length; c++) {
                 resultado ^= (payload.charCodeAt(c) << 8);
                 for (let i = 0; i < 8; i++) {
-                    if ((resultado & 0x8000) !== 0) {
-                        resultado = ((resultado << 1) ^ polinomio);
-                    } else {
-                        resultado = (resultado << 1);
-                    }
+                    if ((resultado & 0x8000) !== 0) resultado = ((resultado << 1) ^ polinomio);
+                    else resultado = (resultado << 1);
                 }
             }
             let crc = (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
