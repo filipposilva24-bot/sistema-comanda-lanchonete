@@ -259,7 +259,7 @@
         let mesaSelecionada = "";
         let abaAtiva = 'salao';
         let mesasFixas = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
-        let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras') || "[]");
+        let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras'] || "[]");
         let mesasDetalhesMap = {};
         let cardapioLista = [];
         let itensCarrinho = [];
@@ -372,13 +372,13 @@
             let somaTempo = 0;
             let qtdPendentes = 0;
             let agora = Date.now();
-            let meuPedidoAtivo = null;
+            let meusPedidosMesa = [];
 
             snapshot.forEach(docSnap => {
                 let p = { id: docSnap.id, ...docSnap.data() };
 
                 if(mesaUrl && p.mesa === mesaUrl && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
-                    meuPedidoAtivo = p;
+                    meusPedidosMesa.push(p);
                 }
 
                 if(!mesaUrl && p.status === 'Entregue' && !pedidosAlertados.has(p.id)) {
@@ -423,6 +423,15 @@
                     }
                 }
             });
+
+            // SELEÇÃO INTELIGENTE DO PEDIDO ATIVO PARA O CLIENTE (QR CODE)
+            let meuPedidoAtivo = null;
+            if(mesaUrl && meusPedidosMesa.length > 0) {
+                // Ordena do mais recente para o mais antigo
+                meusPedidosMesa.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
+                // Prioriza pedidos Pendentes ou Em Preparo, se não houver, pega o mais recente Entregue
+                meuPedidoAtivo = meusPedidosMesa.find(p => p.status === 'Pendente' || p.status === 'Preparando') || meusPedidosMesa[0];
+            }
 
             if(mesaUrl) {
                 const painelStatus = document.getElementById('painel-status-cliente');
@@ -932,7 +941,7 @@
         function criarPayloadPix(pixKey, name, city, amount) {
             function format(id, val) { return id + String(val.length).padStart(2, '0') + val; }
             let merchantAccount = format("00", "br.gov.bcb.pix") + format("01", pixKey);
-            let payload = format("00", "01") + format("26", merchantAccount) + format("52", "0000") + format("53", "986") + (amount > 0 ? format("54", amount) : "") + format("58", "BR") + format("59", name.substring(0, 25).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("60", city.substring(0, 15).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("62", format("05", "POINTDERICO")) + "6304";
+            let payload = format("00", "01") + format("26", merchantAccount) + format("52", "0000") + format("53", "986") + (amount > 0 ? format("54", amount) : "") + format("58", "BR") + format("59", name.substring(0, 25).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("60", city.summary ? city : city.substring(0, 15).normalize("NFD").replace(/[\u0300-\u036f]/g, "")) + format("62", format("05", "POINTDERICO")) + "6304";
             let polinomio = 0x1021, resultado = 0xFFFF;
             for (let c = 0; c < payload.length; c++) {
                 resultado ^= (payload.charCodeAt(c) << 8);
