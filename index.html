@@ -76,6 +76,9 @@
                     </button>
                 </div>
             </header>
+
+            <!-- BANNER PERSISTENTE DE ALERTAS DA COZINHA (EXCLUSIVO PARA O ATENDENTE) -->
+            <div id="container-alertas-cozinha" class="space-y-2 mb-3 hidden"></div>
             
             <!-- VIEW SALÃO -->
             <div id="view-salao">
@@ -380,6 +383,7 @@
                 let qtdPendentes = 0;
                 let agora = Date.now();
                 let meusPedidosMesa = [];
+                let alertasProntosAtendente = [];
 
                 snapshot.forEach(docSnap => {
                     let p = { id: docSnap.id, ...docSnap.data() };
@@ -388,12 +392,15 @@
                         meusPedidosMesa.push(p);
                     }
 
-                    // Dispara alerta apenas se o pedido está entregue/pronto e o atendente ainda não marcou como visto
-                    if(!mesaUrl && p.status === 'Entregue' && !p.alertaVisto && !pedidosAlertados.has(p.id)) {
-                        pedidosAlertados.add(p.id);
-                        let nomeMesaAlerta = p.mesa ? p.mesa : "Mesa";
-                        mostrarToast(`${nomeMesaAlerta} está pronta na cozinha!`);
-                        if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    // Identifica pedidos prontos/entregues que ainda não tiveram o alerta visto pelo atendente
+                    if(!mesaUrl && p.status === 'Entregue' && !p.alertaVisto) {
+                        alertasProntosAtendente.push(p);
+                        if(!pedidosAlertados.has(p.id)) {
+                            pedidosAlertados.add(p.id);
+                            let nomeMesaAlerta = p.mesa ? p.mesa : "Mesa";
+                            mostrarToast(`${nomeMesaAlerta} está pronta na cozinha!`);
+                            if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                        }
                     }
 
                     if(p.status === 'Pendente' && p.timestampCriacao) {
@@ -434,6 +441,44 @@
                         }
                     }
                 });
+
+                // Renderiza o banner persistente de alertas na tela do atendente
+                if(!mesaUrl) {
+                    const containerAlertas = document.getElementById('container-alertas-cozinha');
+                    if(containerAlertas) {
+                        containerAlertas.innerHTML = '';
+                        if(alertasProntosAtendente.length > 0) {
+                            containerAlertas.classList.remove('hidden');
+                            // Agrupa por ids da mesa
+                            let mesasProntasMap = {};
+                            alertasProntosAtendente.forEach(ap => {
+                                if(!mesasProntasMap[ap.mesa]) mesasProntasMap[ap.mesa] = [];
+                                mesasProntasMap[ap.mesa].push(ap.id);
+                            });
+
+                            for(let m in mesasProntasMap) {
+                                let idsMesaJson = encodeURIComponent(JSON.stringify(mesasProntasMap[m]));
+                                let banner = document.createElement('div');
+                                banner.className = "bg-emerald-500/15 border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 p-3 rounded-2xl flex justify-between items-center shadow-md animate-pulse";
+                                banner.innerHTML = `
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="text-xl">🔔</span>
+                                        <div>
+                                            <p class="text-[10px] font-bold uppercase tracking-wider opacity-80">Aviso da Cozinha</p>
+                                            <p class="text-xs font-black">${m} está pronta na cozinha!</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="marcarPedidoEntregue('${idsMesaJson}')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] px-3 py-2 rounded-xl shadow">
+                                        Marcar Pedido Entregue
+                                    </button>
+                                `;
+                                containerAlertas.appendChild(banner);
+                            }
+                        } else {
+                            containerAlertas.classList.add('hidden');
+                        }
+                    }
+                }
 
                 let meuPedidoAtivo = null;
                 if(mesaUrl && meusPedidosMesa.length > 0) {
@@ -479,7 +524,6 @@
                 const badgeCozinha = document.getElementById('tempo-cozinha-badge');
                 if(badgeCozinha) badgeCozinha.innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
 
-                // Atualiza em tempo real as telas do atendente
                 renderizarMesas();
                 renderizarCaixaMesas();
             } catch (err) {
@@ -714,7 +758,7 @@
                     alertaVisto: true
                 }));
                 await Promise.all(promessas);
-                mostrarToast("Alerta de pedido entregue limpo!");
+                mostrarToast("Alerta marcado como entregue!");
             } catch(e) {
                 alert("Erro ao atualizar status do pedido.");
             }
@@ -869,7 +913,6 @@
         }
 
         window.abrirModalCarrinho = function() {
-            if(itensCarrinho.length > 0) document.getElementById('modal-carrinho').classList.add('hidden'); // wait, keep it open if has items
             if(itensCarrinho.length > 0) document.getElementById('modal-carrinho').classList.remove('hidden');
         }
         window.fecharModalCarrinho = function() {
