@@ -271,7 +271,7 @@
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">📊 3. Relatórios PDF & WhatsApp</strong>
-                    • Exporte relatórios em PDF limpos e resumidos contendo o faturamento total, ranking e lista compacta de comandas.
+                    • Selecione o dia ou mês desejado para gerar relatórios precisos, respeitando os dias em que a loja esteve fechada.
                 </div>
             </div>
 
@@ -696,7 +696,7 @@
 
             } 
             /* ======================================================== */
-            /* ABA RELATÓRIO (MENSAL COMPACTO + DIÁRIO COMPACTO EM LISTA) */
+            /* ABA RELATÓRIO (MENSAL + DIÁRIO SEGUINDO O FILTRO EXATO) */
             /* ======================================================== */
             else if (abaAtual === 'relatorio') {
                 contadorTxt.innerText = `Painel de Faturamento`;
@@ -707,8 +707,8 @@
 
                 let pedidosPago = todosPedidos.filter(p => p.status === 'Pago' && p.dataCriacao);
 
-                // 1. Processar Mês
-                let filtradosMes = pedidosPago.filter(p => valMes ? p.dataCriacao.startsWith(valMes) : true);
+                // 1. Processar Mês (Respeitando estritamente o mês selecionado)
+                let filtradosMes = pedidosPago.filter(p => valMes ? p.dataCriacao.startsWith(valMes) : false);
                 let totalMes = 0;
                 let prodMes = {};
                 filtradosMes.forEach(p => {
@@ -739,8 +739,8 @@
                     });
                 }
 
-                // 2. Processar Dia (com Ranking e Lista Compacta)
-                let filtradosDia = pedidosPago.filter(p => valData ? p.dataCriacao === valData : true);
+                // 2. Processar Dia (Respeitando estritamente a data selecionada)
+                let filtradosDia = pedidosPago.filter(p => valData ? p.dataCriacao === valData : false);
                 let totalDia = 0;
                 let prodDia = {};
                 filtradosDia.forEach(p => {
