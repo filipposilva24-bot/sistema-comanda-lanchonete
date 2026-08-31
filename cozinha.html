@@ -70,41 +70,10 @@
 
     <main class="p-4 flex-grow relative">
         
+        <!-- PAINEL DE RELATÓRIO (Exibido apenas na Aba Relatórios) -->
         <div id="painel-filtro" class="hidden mb-4 space-y-4">
             
-            <!-- PAINEL RELATÓRIO DIÁRIO -->
-            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-3xl shadow-xl transition-colors duration-200">
-                <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">📅 Faturamento Diário</h2>
-                    <button onclick="enviarRelatorioWhatsApp('dia')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1.5">
-                        💬 Enviar Diário
-                    </button>
-                </div>
-                
-                <div class="mb-3 w-full">
-                    <label class="block text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Selecionar Dia:</label>
-                    <div class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden focus-within:border-amber-500">
-                        <input type="date" id="filtro-data" onchange="renderizarCards()" class="w-full bg-transparent px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none border-none m-0">
-                    </div>
-                </div>
-
-                <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
-                    <div>
-                        <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider">Total do Dia:</span>
-                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-pedidos-dia">0 comandas pagas</p>
-                    </div>
-                    <span class="text-xl font-black text-emerald-600 dark:text-emerald-400" id="valor-total-dia">R$ 0,00</span>
-                </div>
-
-                <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
-                    <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">🏆 Ranking do Dia</h3>
-                    <div id="ranking-produtos-dia" class="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300 max-h-36 overflow-y-auto">
-                        <p class="text-zinc-400 italic">Nenhuma venda hoje.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PAINEL RELATÓRIO MENSAL -->
+            <!-- Bloco 1: Relatório Mensal (Resumo compacto e Ranking do Mês) -->
             <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-3xl shadow-xl transition-colors duration-200">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">📊 Faturamento Mensal</h2>
@@ -136,10 +105,44 @@
                 </div>
             </div>
 
+            <!-- Bloco 2: Relatório Diário (Com seletor de dia, total, ranking E listagem dos cards abaixo) -->
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-3xl shadow-xl transition-colors duration-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">📅 Faturamento Diário & Comandas</h2>
+                    <button onclick="enviarRelatorioWhatsApp('dia')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1.5">
+                        💬 Enviar Diário
+                    </button>
+                </div>
+                
+                <div class="mb-3 w-full">
+                    <label class="block text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Selecionar Dia:</label>
+                    <div class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden focus-within:border-amber-500">
+                        <input type="date" id="filtro-data" onchange="renderizarCards()" class="w-full bg-transparent px-3 py-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none border-none m-0">
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
+                    <div>
+                        <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider">Total do Dia:</span>
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-pedidos-dia">0 comandas pagas</p>
+                    </div>
+                    <span class="text-xl font-black text-emerald-600 dark:text-emerald-400" id="valor-total-dia">R$ 0,00</span>
+                </div>
+
+                <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
+                    <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">🏆 Ranking do Dia</h3>
+                    <div id="ranking-produtos-dia" class="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300 max-h-36 overflow-y-auto">
+                        <p class="text-zinc-400 italic">Nenhuma venda hoje.</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
+        <!-- Container de Cards (Cozinha, Caixa e Relatório Diário) -->
         <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
         
+        <!-- Mensagem de Vazio -->
         <div id="mensagem-vazia" class="text-center mt-20 text-zinc-400 hidden">
             <span class="text-5xl block mb-3" id="icone-vazio">🍽️</span>
             <h2 class="text-base font-bold text-zinc-600 dark:text-zinc-400" id="texto-vazio">Cozinha Tranquila!</h2>
@@ -147,6 +150,7 @@
         </div>
     </main>
 
+    <!-- MODAIS -->
     <div id="modal-admin-cardapio" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto transition-colors duration-200">
             <button onclick="fecharAdminCardapio()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -240,8 +244,8 @@
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">📊 3. Relatórios Diário e Mensal</strong>
-                    • A aba de Relatórios agora mostra simultaneamente o **Faturamento do Dia** e o **Faturamento do Mês**.<br>
-                    • Cada painel possui seu próprio botão para enviar o resumo direto no WhatsApp.
+                    • Veja simultaneamente o **Faturamento do Mês** e o **Faturamento do Dia** com listagem completa das comandas pagas.<br>
+                    • Envie o fechamento diário ou mensal diretamente no WhatsApp.
                 </div>
             </div>
 
@@ -670,18 +674,49 @@
 
             } 
             /* ======================================================== */
-            /* ABA RELATÓRIO (DIÁRIO E MENSAL SIMULTÂNEOS) */
+            /* ABA RELATÓRIO (MENSAL COMPACTO + DIÁRIO COM CARDS) */
             /* ======================================================== */
             else if (abaAtual === 'relatorio') {
-                msgVazia.classList.add('hidden');
                 contadorTxt.innerText = `Painel de Faturamento`;
 
                 const valData = document.getElementById('filtro-data').value;
                 const valMes = document.getElementById('filtro-mes').value;
 
-                // 1. Filtrar e calcular Diário
                 let pedidosPago = todosPedidos.filter(p => p.status === 'Pago' && p.dataCriacao);
-                
+
+                // 1. Processar Mês
+                let filtradosMes = pedidosPago.filter(p => valMes ? p.dataCriacao.startsWith(valMes) : true);
+                let totalMes = 0;
+                let prodMes = {};
+                filtradosMes.forEach(p => {
+                    if (p.total) totalMes += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
+                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) {
+                        p.itensBrutos.forEach(i => {
+                            if (!prodMes[i.nome]) prodMes[i.nome] = { qtd: 0, faturamento: 0 };
+                            prodMes[i.nome].qtd += i.qtd;
+                            prodMes[i.nome].faturamento += (i.preco * i.qtd);
+                        });
+                    }
+                });
+
+                document.getElementById('valor-total-mes').innerText = `R$ ${totalMes.toFixed(2).replace('.', ',')}`;
+                document.getElementById('qtd-pedidos-mes').innerText = `${filtradosMes.length} comanda(s) finalizada(s)`;
+
+                const rankingMes = document.getElementById('ranking-produtos-mes');
+                rankingMes.innerHTML = '';
+                let arrayRankMes = Object.keys(prodMes).map(nome => ({ nome, ...prodMes[nome] })).sort((a, b) => b.qtd - a.qtd);
+                if (arrayRankMes.length === 0) {
+                    rankingMes.innerHTML = '<p class="text-zinc-400 italic">Nenhuma venda registrada neste mês.</p>';
+                } else {
+                    arrayRankMes.forEach((prod, index) => {
+                        let div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800";
+                        div.innerHTML = `<span><strong class="text-amber-600 dark:text-amber-400">#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span><span class="text-blue-600 dark:text-blue-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>`;
+                        rankingMes.appendChild(div);
+                    });
+                }
+
+                // 2. Processar Dia (com Cards na listagem principal)
                 let filtradosDia = pedidosPago.filter(p => valData ? p.dataCriacao === valData : true);
                 let totalDia = 0;
                 let prodDia = {};
@@ -713,35 +748,40 @@
                     });
                 }
 
-                // 2. Filtrar e calcular Mensal
-                let filtradosMes = pedidosPago.filter(p => valMes ? p.dataCriacao.startsWith(valMes) : true);
-                let totalMes = 0;
-                let prodMes = {};
-                filtradosMes.forEach(p => {
-                    if (p.total) totalMes += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
-                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) {
-                        p.itensBrutos.forEach(i => {
-                            if (!prodMes[i.nome]) prodMes[i.nome] = { qtd: 0, faturamento: 0 };
-                            prodMes[i.nome].qtd += i.qtd;
-                            prodMes[i.nome].faturamento += (i.preco * i.qtd);
-                        });
-                    }
-                });
-
-                document.getElementById('valor-total-mes').innerText = `R$ ${totalMes.toFixed(2).replace('.', ',')}`;
-                document.getElementById('qtd-pedidos-mes').innerText = `${filtradosMes.length} comanda(s) finalizada(s)`;
-
-                const rankingMes = document.getElementById('ranking-produtos-mes');
-                rankingMes.innerHTML = '';
-                let arrayRankMes = Object.keys(prodMes).map(nome => ({ nome, ...prodMes[nome] })).sort((a, b) => b.qtd - a.qtd);
-                if (arrayRankMes.length === 0) {
-                    rankingMes.innerHTML = '<p class="text-zinc-400 italic">Nenhuma venda registrada neste mês.</p>';
+                if (filtradosDia.length === 0) {
+                    msgVazia.classList.remove('hidden');
+                    document.getElementById('texto-vazio').innerText = "Nenhuma comanda paga neste dia.";
                 } else {
-                    arrayRankMes.forEach((prod, index) => {
-                        let div = document.createElement('div');
-                        div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800";
-                        div.innerHTML = `<span><strong class="text-amber-600 dark:text-amber-400">#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span><span class="text-blue-600 dark:text-blue-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>`;
-                        rankingMes.appendChild(div);
+                    msgVazia.classList.add('hidden');
+                    filtradosDia.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
+
+                    filtradosDia.forEach((pedido) => {
+                        let itensTexto = pedido.pedido || "";
+                        let blocoAbatimentoRelatorio = `
+                            <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                                <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100">
+                                    <span>VALOR TOTAL PAGO:</span>
+                                    <span class="text-emerald-500">${pedido.total || 'R$ 0,00'}</span>
+                                </div>
+                            </div>
+                        `;
+                        let botoesHtml = `${blocoAbatimentoRelatorio}<div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 flex justify-between"><span>Status: <strong class="text-emerald-600 dark:text-emerald-400">Pago</strong></span><span class="font-mono">${pedido.dataCriacao || ''}</span></div>`;
+                        let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${pedido.atendente}</span>` : '';
+
+                        const card = document.createElement('div');
+                        card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
+                        card.innerHTML = `
+                            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
+                            <div>
+                                <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
+                                    <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${pedido.mesa}</h2><div class="mt-1">${badgeAtendente}</div></div>
+                                    <div class="flex flex-col items-end gap-1.5"><span class="text-zinc-400 text-[11px] font-mono">${pedido.horario || '--:--'}</span></div>
+                                </div>
+                                <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${itensTexto.replace(/\n/g, '<br>')}</div>
+                            </div>
+                            ${botoesHtml}
+                        `;
+                        container.appendChild(card);
                     });
                 }
             }
