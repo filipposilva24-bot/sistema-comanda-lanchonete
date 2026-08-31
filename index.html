@@ -46,13 +46,13 @@
         </div>
     </div>
 
-    <!-- TELA PRINCIPAL DE COMANDA -->
-    <div class="max-w-md mx-auto bg-white dark:bg-zinc-900/90 border-x border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 flex flex-col justify-between transition-colors duration-200">
+    <!-- TELA PRINCIPAL DE COMANDA (ADAPTADA PARA CELULAR E TABLET) -->
+    <div class="max-w-md md:max-w-3xl lg:max-w-4xl mx-auto bg-white dark:bg-zinc-900/90 border-x border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 md:p-6 flex flex-col justify-between transition-colors duration-200">
         <div>
-            <header class="mb-3 text-center relative border-b border-zinc-200 dark:border-zinc-800 pb-3">
+            <header class="mb-4 text-center relative border-b border-zinc-200 dark:border-zinc-800 pb-3">
                 <div class="absolute left-0 top-0 flex items-center gap-1.5">
                     <span id="status-conexao" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-[9px] font-bold text-zinc-400 uppercase" id="tempo-cozinha-badge">-- min</span>
+                    <span class="text-[10px] font-bold text-zinc-400 uppercase" id="tempo-cozinha-badge">-- min</span>
                 </div>
 
                 <button onclick="alternarTema()" class="tap-scale absolute right-0 top-0 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm" title="Mudar Tema">
@@ -62,22 +62,22 @@
                 <div class="inline-block bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-1">
                     Gastronomia & Sabor
                 </div>
-                <h1 class="text-2xl font-black tracking-tight text-amber-500 dark:text-amber-400">POINT DERICO</h1>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight text-amber-500 dark:text-amber-400">POINT DERICO</h1>
                 
-                <div class="flex gap-2 mt-3" id="container-abas-navegacao">
-                    <button onclick="mudarAba('salao')" id="aba-salao" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 rounded-xl text-xs shadow">🏠 Salão / Cardápio</button>
-                    <button onclick="mudarAba('caixa')" id="aba-caixa" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2 rounded-xl text-xs shadow">💰 Caixa / Mesas</button>
+                <div class="flex gap-2 mt-3 max-w-md mx-auto" id="container-abas-navegacao">
+                    <button onclick="mudarAba('salao')" id="aba-salao" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow">🏠 Salão / Cardápio</button>
+                    <button onclick="mudarAba('caixa')" id="aba-caixa" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow">💰 Caixa / Mesas</button>
                 </div>
 
                 <div class="flex justify-between items-center mt-2 px-1">
                     <p class="text-xs text-zinc-500 dark:text-zinc-400 font-medium" id="info-mesa-atual">Painel de Lançamento</p>
-                    <button id="btn-trocar-operador" onclick="trocarAtendente()" class="tap-scale text-[10px] bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 px-3 py-1 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 transition">
+                    <button id="btn-trocar-operador" onclick="trocarAtendente()" class="tap-scale text-[11px] bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 px-3 py-1 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 transition">
                         👤 <span id="badge-atendente">--</span>
                     </button>
                 </div>
             </header>
 
-            <!-- BANNER PERSISTENTE DE ALERTAS DA COZINHA (EXCLUSIVO PARA O ATENDENTE) -->
+            <!-- BANNER PERSISTENTE DE ALERTAS DA COZINHA -->
             <div id="container-alertas-cozinha" class="space-y-2 mb-3 hidden"></div>
             
             <!-- VIEW SALÃO -->
@@ -90,57 +90,57 @@
                         <label class="block text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider">Mesa / Local:</label>
                         <span class="text-[10px] text-zinc-400 font-medium">🔴 Ocupada | ⚪ Livre</span>
                     </div>
-                    <div id="container-mesas" class="grid grid-cols-4 gap-2"></div>
+                    <div id="container-mesas" class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-2"></div>
                 </div>
 
                 <div class="mb-2">
-                    <input type="text" id="filtro-busca" placeholder="🔍 Pesquisar no cardápio..." oninput="renderizarCardapio()" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 shadow-inner">
+                    <input type="text" id="filtro-busca" placeholder="🔍 Pesquisar no cardápio..." oninput="renderizarCardapio()" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 text-xs md:text-sm text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 shadow-inner">
                 </div>
 
                 <div id="botoes-categorias-atalho" class="flex gap-1.5 overflow-x-auto pb-2 mb-1 scrollbar-none"></div>
 
-                <div class="mb-3 h-[26vh] overflow-y-auto pr-1 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-2 bg-zinc-50 dark:bg-zinc-950/60 shadow-inner" id="cardapio-dinamico-container">
+                <div class="mb-3 h-[32vh] md:h-[40vh] overflow-y-auto pr-1 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 bg-zinc-50 dark:bg-zinc-950/60 shadow-inner" id="cardapio-dinamico-container">
                     <p class="text-center text-xs text-zinc-400 mt-10 font-medium">Carregando cardápio...</p>
                 </div>
 
                 <div class="mb-2">
                     <div class="flex justify-between items-center mb-1">
                         <label class="block text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider">Resumo do Pedido:</label>
-                        <button onclick="abrirRacha()" class="tap-scale text-[10px] bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold px-2 py-0.5 rounded-lg">➗ Rachar Conta</button>
+                        <button onclick="abrirRacha()" class="tap-scale text-[10px] md:text-xs bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold px-2.5 py-1 rounded-lg">➗ Rachar Conta</button>
                     </div>
                     
-                    <div class="bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 flex flex-col min-h-[60px] max-h-[90px] shadow-inner">
+                    <div class="bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 flex flex-col min-h-[65px] max-h-[110px] shadow-inner">
                         <div id="resumo-pedido" class="overflow-y-auto flex-grow divide-y divide-zinc-100 dark:divide-zinc-900">
                             <p class="text-zinc-400 text-center italic text-xs mt-1 font-medium" id="vazio-texto">Nenhum item adicionado.</p>
                         </div>
                         <div class="border-t border-zinc-200 dark:border-zinc-800/80 mt-1 pt-1 flex justify-between items-center">
                             <span class="font-bold text-zinc-500 dark:text-zinc-400 text-xs uppercase">TOTAL:</span>
-                            <span id="valor-total" class="font-black text-emerald-600 dark:text-emerald-400 text-sm">R$ 0,00</span>
+                            <span id="valor-total" class="font-black text-emerald-600 dark:text-emerald-400 text-base md:text-lg">R$ 0,00</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, gelo...)" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:border-amber-500 text-xs text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 shadow-inner">
+                    <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, gelo...)" class="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:border-amber-500 text-xs md:text-sm text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 shadow-inner">
                 </div>
             </div>
 
             <!-- VIEW CAIXA -->
             <div id="view-caixa" class="hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xs font-black text-amber-500 uppercase tracking-wider">Mesas Aguardando Fechamento</h2>
-                    <span class="text-[10px] text-zinc-400" id="caixa-contador">0 mesas</span>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xs md:text-sm font-black text-amber-500 uppercase tracking-wider">Mesas Aguardando Fechamento</h2>
+                    <span class="text-xs text-zinc-400 font-bold" id="caixa-contador">0 mesas</span>
                 </div>
-                <div id="lista-caixa-mesas" class="space-y-3 max-h-[55vh] overflow-y-auto pr-1"></div>
+                <div id="lista-caixa-mesas" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1"></div>
             </div>
         </div>
 
-        <div id="painel-botoes-acao" class="pb-4">
+        <div id="painel-botoes-acao" class="pb-2 pt-2">
             <div class="flex gap-2">
-                <button id="btn-enviar-pedido" onclick="enviarPedido('Pendente')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3 px-2 rounded-2xl transition shadow-lg text-xs flex items-center justify-center gap-1">
+                <button id="btn-enviar-pedido" onclick="enviarPedido('Pendente')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3.5 px-3 rounded-2xl transition shadow-lg text-xs md:text-sm flex items-center justify-center gap-1.5">
                     🚀 Enviar para Cozinha
                 </button>
-                <button id="btn-pix-atendente" onclick="abrirPixAtendente()" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-2 rounded-2xl transition shadow-lg text-xs flex items-center justify-center gap-1">
+                <button id="btn-pix-atendente" onclick="abrirPixAtendente()" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-3 rounded-2xl transition shadow-lg text-xs md:text-sm flex items-center justify-center gap-1.5">
                     📱 Pagar Pix Agora
                 </button>
             </div>
@@ -149,16 +149,16 @@
     </div>
 
     <!-- MODAL CARRINHO -->
-    <div id="carrinho-flutuante" onclick="abrirModalCarrinho()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
+    <div id="carrinho-flutuante" onclick="abrirModalCarrinho()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3.5 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
         <div class="flex items-center gap-2">
-            <span class="text-base">🛒</span>
-            <span id="flutuante-qtd" class="text-xs font-black bg-zinc-950 text-amber-400 px-2 py-0.5 rounded-full">0 itens</span>
+            <span class="text-lg">🛒</span>
+            <span id="flutuante-qtd" class="text-xs font-black bg-zinc-950 text-amber-400 px-2.5 py-1 rounded-full">0 itens</span>
         </div>
-        <span id="flutuante-total" class="text-sm font-black">R$ 0,00</span>
+        <span id="flutuante-total" class="text-sm md:text-base font-black">R$ 0,00</span>
     </div>
 
     <div id="modal-carrinho" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex flex-col justify-end hidden">
-        <div class="bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 rounded-t-3xl max-w-md w-full mx-auto p-5 shadow-2xl max-h-[80vh] flex flex-col">
+        <div class="bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 rounded-t-3xl max-w-md md:max-w-xl w-full mx-auto p-5 shadow-2xl max-h-[80vh] flex flex-col">
             <div class="flex justify-between items-center mb-3 pb-2 border-b border-zinc-200 dark:border-zinc-800">
                 <h3 class="text-sm font-black text-amber-500 uppercase tracking-wider">🛒 Itens no Carrinho</h3>
                 <button onclick="fecharModalCarrinho()" class="text-zinc-400 hover:text-white font-bold text-base p-1">✕</button>
@@ -354,15 +354,15 @@
             const painelAcao = document.getElementById('painel-botoes-acao');
 
             if (aba === 'salao') {
-                btnSalao.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 rounded-xl text-xs shadow";
-                btnCaixa.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2 rounded-xl text-xs shadow";
+                btnSalao.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
+                btnCaixa.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
                 viewSalao.classList.remove('hidden');
                 viewCaixa.classList.add('hidden');
                 painelAcao.classList.remove('hidden');
                 renderizarMesas();
             } else {
-                btnCaixa.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 rounded-xl text-xs shadow";
-                btnSalao.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2 rounded-xl text-xs shadow";
+                btnCaixa.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
+                btnSalao.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
                 viewCaixa.classList.remove('hidden');
                 viewSalao.classList.add('hidden');
                 painelAcao.classList.add('hidden');
@@ -392,7 +392,6 @@
                         meusPedidosMesa.push(p);
                     }
 
-                    // Identifica pedidos prontos/entregues que ainda não tiveram o alerta visto pelo atendente
                     if(!mesaUrl && p.status === 'Entregue' && !p.alertaVisto) {
                         alertasProntosAtendente.push(p);
                         if(!pedidosAlertados.has(p.id)) {
@@ -442,14 +441,12 @@
                     }
                 });
 
-                // Renderiza o banner persistente de alertas na tela do atendente
                 if(!mesaUrl) {
                     const containerAlertas = document.getElementById('container-alertas-cozinha');
                     if(containerAlertas) {
                         containerAlertas.innerHTML = '';
                         if(alertasProntosAtendente.length > 0) {
                             containerAlertas.classList.remove('hidden');
-                            // Agrupa por ids da mesa
                             let mesasProntasMap = {};
                             alertasProntosAtendente.forEach(ap => {
                                 if(!mesasProntasMap[ap.mesa]) mesasProntasMap[ap.mesa] = [];
@@ -465,10 +462,10 @@
                                         <span class="text-xl">🔔</span>
                                         <div>
                                             <p class="text-[10px] font-bold uppercase tracking-wider opacity-80">Aviso da Cozinha</p>
-                                            <p class="text-xs font-black">${m} está pronta na cozinha!</p>
+                                            <p class="text-xs md:text-sm font-black">${m} está pronta na cozinha!</p>
                                         </div>
                                     </div>
-                                    <button onclick="marcarPedidoEntregue('${idsMesaJson}')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] px-3 py-2 rounded-xl shadow">
+                                    <button onclick="marcarPedidoEntregue('${idsMesaJson}')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-3.5 py-2 rounded-xl shadow">
                                         Marcar Pedido Entregue
                                     </button>
                                 `;
@@ -583,19 +580,19 @@
 
                 let btnAtalho = document.createElement('button');
                 let estiloCat = obterEstiloCategoria(cat);
-                btnAtalho.className = `tap-scale ${estiloCat.badge} text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-xl flex-shrink-0 shadow transition`;
+                btnAtalho.className = `tap-scale ${estiloCat.badge} text-[10px] md:text-xs uppercase tracking-wider px-3.5 py-2 rounded-xl flex-shrink-0 shadow transition`;
                 btnAtalho.innerText = cat;
                 btnAtalho.onclick = () => rolarParaCategoria(catIdSafe);
                 atalhosContainer.appendChild(btnAtalho);
 
                 let tituloCat = document.createElement('h3');
                 tituloCat.id = 'cat-' + catIdSafe;
-                tituloCat.className = "font-extrabold text-amber-600 dark:text-amber-400 border-b border-zinc-200 dark:border-zinc-800 mb-2 pb-1 mt-3 text-xs uppercase tracking-wider";
+                tituloCat.className = "font-extrabold text-amber-600 dark:text-amber-400 border-b border-zinc-200 dark:border-zinc-800 mb-2 pb-1 mt-3 text-xs md:text-sm uppercase tracking-wider";
                 tituloCat.innerText = cat;
                 container.appendChild(tituloCat);
 
                 let grid = document.createElement('div');
-                grid.className = "grid grid-cols-2 gap-2 mb-3";
+                grid.className = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 mb-3";
 
                 categorias[cat].forEach(prod => {
                     let btn = document.createElement('button');
@@ -608,11 +605,11 @@
                     }
                     
                     if(prod.ativo === false) {
-                        btn.className = "tap-scale bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 p-2.5 rounded-2xl text-left flex flex-col opacity-50 grayscale cursor-not-allowed";
-                        btn.innerHTML = `<span class="text-xs font-bold text-zinc-600 line-through">${nomeExibicao}</span><span class="bg-red-600 text-white text-[9px] font-black px-1 py-0.5 rounded mt-1 w-max">ESGOTADO</span>`;
+                        btn.className = "tap-scale bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 p-3 rounded-2xl text-left flex flex-col opacity-50 grayscale cursor-not-allowed";
+                        btn.innerHTML = `<span class="text-xs md:text-sm font-bold text-zinc-600 line-through">${nomeExibicao}</span><span class="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded mt-1 w-max">ESGOTADO</span>`;
                     } else {
-                        btn.className = `tap-scale ${estilo.bg} border p-2.5 rounded-2xl text-left flex flex-col transition shadow-sm`;
-                        btn.innerHTML = `<span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">${nomeExibicao}</span><span class="text-[10px] text-amber-600 dark:text-amber-400/90 mt-1 font-extrabold">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
+                        btn.className = `tap-scale ${estilo.bg} border p-3 rounded-2xl text-left flex flex-col transition shadow-sm`;
+                        btn.innerHTML = `<span class="text-xs md:text-sm font-bold text-zinc-900 dark:text-zinc-100">${nomeExibicao}</span><span class="text-[11px] md:text-xs text-amber-600 dark:text-amber-400/90 mt-1 font-extrabold">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
                         btn.onclick = () => adicionarItem(nomeExibicao, Number(prod.preco));
                     }
                     grid.appendChild(btn);
@@ -636,7 +633,7 @@
                 wrapper.className = "relative flex";
 
                 const btn = document.createElement('button');
-                let estilo = "tap-scale w-full font-extrabold py-2.5 px-1 rounded-2xl text-xs border transition shadow-sm ";
+                let estilo = "tap-scale w-full font-extrabold py-3 px-1 rounded-2xl text-xs md:text-sm border transition shadow-sm ";
                 if (isSelected) estilo += "bg-amber-500 text-zinc-950 border-amber-400 shadow-amber-500/20";
                 else if (isOccupied) estilo += "bg-red-500/20 border-red-500/60 text-red-600 dark:text-red-400";
                 else estilo += "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700";
@@ -670,7 +667,7 @@
             });
 
             const btnAdd = document.createElement('button');
-            btnAdd.className = "tap-scale bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 font-extrabold py-2 px-1 rounded-2xl text-xs border border-dashed border-emerald-500/50 hover:bg-emerald-500/10 transition";
+            btnAdd.className = "tap-scale bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 font-extrabold py-3 px-1 rounded-2xl text-xs md:text-sm border border-dashed border-emerald-500/50 hover:bg-emerald-500/10 transition";
             btnAdd.innerText = "+ Nova";
             btnAdd.onclick = () => {
                 const novaMesa = prompt("Nome da mesa/local extra:");
@@ -699,7 +696,7 @@
             if(contador) contador.innerText = `${mesasOcupadas.length} mesa(s)`;
 
             if(mesasOcupadas.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs text-zinc-400 py-10">Nenhuma mesa aguardando pagamento.</p>`;
+                container.innerHTML = `<p class="text-center text-xs text-zinc-400 py-10 col-span-2">Nenhuma mesa aguardando pagamento.</p>`;
                 return;
             }
 
@@ -710,7 +707,7 @@
                 let idsStr = encodeURIComponent(JSON.stringify(info.ids));
 
                 let card = document.createElement('div');
-                card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 shadow-sm";
+                card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 shadow-sm flex flex-col justify-between";
                 
                 let botaoEntregueHtml = "";
                 if(info.temPronto) {
@@ -718,33 +715,35 @@
                 }
 
                 card.innerHTML = `
-                    <div class="flex justify-between items-center mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-2">
-                        <span class="font-black text-amber-500 text-sm">${info.mesaNome}</span>
-                        <span class="text-[10px] bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-zinc-400 font-bold">👤 ${info.atendente}</span>
-                    </div>
-                    ${botaoEntregueHtml}
-                    <div class="bg-zinc-50 dark:bg-zinc-950 p-2.5 rounded-xl text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-2 max-h-24 overflow-y-auto">
-                        ${extratoCombinado}
-                    </div>
-                    <div class="space-y-1 mb-3 text-xs">
-                        <div class="flex justify-between text-zinc-400">
-                            <span>Total Original:</span>
-                            <span>R$ ${info.total.toFixed(2).replace('.',',')}</span>
+                    <div>
+                        <div class="flex justify-between items-center mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-2">
+                            <span class="font-black text-amber-500 text-sm md:text-base">${info.mesaNome}</span>
+                            <span class="text-[10px] bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 rounded text-zinc-400 font-bold">👤 ${info.atendente}</span>
                         </div>
-                        ${info.pagoParcial > 0 ? `
-                        <div class="flex justify-between text-emerald-500 font-bold">
-                            <span>Já Pago / Abatido:</span>
-                            <span>- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}</span>
-                        </div>` : ''}
-                        <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-100 dark:border-zinc-800">
-                            <span>VALOR RESTANTE:</span>
-                            <span class="text-amber-500">R$ ${valorRestante.toFixed(2).replace('.',',')}</span>
+                        ${botaoEntregueHtml}
+                        <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-xl text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-3 max-h-28 overflow-y-auto">
+                            ${extratoCombinado}
+                        </div>
+                        <div class="space-y-1 mb-3 text-xs md:text-sm">
+                            <div class="flex justify-between text-zinc-400">
+                                <span>Total Original:</span>
+                                <span>R$ ${info.total.toFixed(2).replace('.',',')}</span>
+                            </div>
+                            ${info.pagoParcial > 0 ? `
+                            <div class="flex justify-between text-emerald-500 font-bold">
+                                <span>Já Pago / Abatido:</span>
+                                <span>- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}</span>
+                            </div>` : ''}
+                            <div class="flex justify-between font-black text-sm md:text-base text-zinc-800 dark:text-zinc-100 pt-1.5 border-t border-zinc-100 dark:border-zinc-800">
+                                <span>VALOR RESTANTE:</span>
+                                <span class="text-amber-500">R$ ${valorRestante.toFixed(2).replace('.',',')}</span>
+                            </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-1.5">
-                        <button onclick="abrirPixMesaCaixa('${mesaKey}')" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">📱 Pix</button>
-                        <button onclick="abrirAbaterCaixa('${mesaKey}')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">💸 Abater</button>
-                        <button onclick="fecharMesaCaixa('${idsStr}', '${info.mesaNome}')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">✅ Fechar</button>
+                        <button onclick="abrirPixMesaCaixa('${mesaKey}')" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-xs shadow">📱 Pix</button>
+                        <button onclick="abrirAbaterCaixa('${mesaKey}')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-xs shadow">💸 Abater</button>
+                        <button onclick="fecharMesaCaixa('${idsStr}', '${info.mesaNome}')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-xs shadow">✅ Fechar</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -887,16 +886,16 @@
                 qtdTotalItens += item.qtd;
 
                 const div = document.createElement('div');
-                div.className = "flex justify-between items-center py-1 px-1";
+                div.className = "flex justify-between items-center py-1.5 px-1";
                 div.innerHTML = `
                     <div class="flex items-center gap-2">
                         <button onclick="abrirNumpad(${index})" class="tap-scale bg-zinc-200 dark:bg-zinc-800 text-amber-600 dark:text-amber-400 font-extrabold text-xs px-2 py-0.5 rounded-lg border border-zinc-300 dark:border-zinc-700">
                             ${item.qtd}x
                         </button>
-                        <span class="font-bold text-zinc-800 dark:text-zinc-200 text-xs">${item.nome}</span>
+                        <span class="font-bold text-zinc-800 dark:text-zinc-200 text-xs md:text-sm">${item.nome}</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[11px] text-zinc-400 font-mono">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
+                        <span class="text-xs text-zinc-400 font-mono">R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</span>
                         <button onclick="removerItemCarrinhoIndex(${index})" class="text-red-500 font-bold text-xs p-1">🗑️</button>
                     </div>
                 `;
