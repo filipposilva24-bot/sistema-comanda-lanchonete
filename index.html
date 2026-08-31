@@ -374,106 +374,111 @@
         });
 
         onSnapshot(collection(db, "pedidos"), (snapshot) => {
-            mesasDetalhesMap = {};
-            let somaTempo = 0;
-            let qtdPendentes = 0;
-            let agora = Date.now();
-            let meusPedidosMesa = [];
+            try {
+                mesasDetalhesMap = {};
+                let somaTempo = 0;
+                let qtdPendentes = 0;
+                let agora = Date.now();
+                let meusPedidosMesa = [];
 
-            snapshot.forEach(docSnap => {
-                let p = { id: docSnap.id, ...docSnap.data() };
+                snapshot.forEach(docSnap => {
+                    let p = { id: docSnap.id, ...docSnap.data() };
 
-                if(mesaUrl && p.mesa && normalizarNomeMesa(p.mesa) === normalizarNomeMesa(mesaUrl) && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
-                    meusPedidosMesa.push(p);
+                    if(mesaUrl && p.mesa && normalizarNomeMesa(p.mesa) === normalizarNomeMesa(mesaUrl) && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
+                        meusPedidosMesa.push(p);
+                    }
+
+                    if(!mesaUrl && p.status === 'Entregue' && !pedidosAlertados.has(p.id)) {
+                        pedidosAlertados.add(p.id);
+                        let nomeMesaAlerta = p.mesa ? p.mesa : "Mesa";
+                        mostrarToast(`${nomeMesaAlerta} está pronta na cozinha!`);
+                        if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    }
+
+                    if(p.status === 'Pendente' && p.timestampCriacao) {
+                        qtdPendentes++;
+                        somaTempo += Math.floor((agora - p.timestampCriacao) / 60000);
+                    }
+
+                    if(p.status === "Pendente" || p.status === "Preparando" || p.status === "Entregue") {
+                        if(p.mesa) {
+                            let mesaKey = p.mesa.trim();
+                            let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
+                            let pagoPart = p.valorPagoParcial || 0;
+
+                            if(!mesasDetalhesMap[mesaKey]) {
+                                mesasDetalhesMap[mesaKey] = {
+                                    ids: [p.id],
+                                    mesaNome: p.mesa,
+                                    status: p.status,
+                                    pedidosLista: [p.pedido],
+                                    total: 0,
+                                    pagoParcial: 0,
+                                    atendente: p.atendente || "Geral"
+                                };
+                            } else {
+                                mesasDetalhesMap[mesaKey].ids.push(p.id);
+                                mesasDetalhesMap[mesaKey].pedidosLista.push(p.pedido);
+                            }
+
+                            if(p.status === 'Pendente' || p.status === 'Preparando') {
+                                mesasDetalhesMap[mesaKey].status = p.status;
+                            }
+                            mesasDetalhesMap[mesaKey].total += val;
+                            mesasDetalhesMap[mesaKey].pagoParcial += pagoPart;
+                        }
+                    }
+                });
+
+                let meuPedidoAtivo = null;
+                if(mesaUrl && meusPedidosMesa.length > 0) {
+                    meusPedidosMesa.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
+                    meuPedidoAtivo = meusPedidosMesa.find(p => p.status === 'Pendente' || p.status === 'Preparando') || meusPedidosMesa[0];
                 }
 
-                if(!mesaUrl && p.status === 'Entregue' && !pedidosAlertados.has(p.id)) {
-                    pedidosAlertados.add(p.id);
-                    let nomeMesaAlerta = p.mesa ? p.mesa : "Mesa";
-                    mostrarToast(`${nomeMesaAlerta} está pronta na cozinha!`);
-                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                }
+                if(mesaUrl) {
+                    const painelStatus = document.getElementById('painel-status-cliente');
+                    if(painelStatus) {
+                        if(meuPedidoAtivo) {
+                            painelStatus.classList.remove('hidden');
+                            let iconeStatus = '⏳';
+                            let textoStatus = 'Aguardando aceite da cozinha...';
+                            let corStatus = 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400';
+                            
+                            if(meuPedidoAtivo.status === 'Preparando') {
+                                iconeStatus = '👨‍🍳';
+                                textoStatus = 'Seu pedido está sendo preparado na cozinha!';
+                                corStatus = 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400';
+                            } else if(meuPedidoAtivo.status === 'Entregue') {
+                                iconeStatus = '🛎️';
+                                textoStatus = 'Seu pedido foi entregue / está pronto!';
+                                corStatus = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400';
+                            }
 
-                if(p.status === 'Pendente' && p.timestampCriacao) {
-                    qtdPendentes++;
-                    somaTempo += Math.floor((agora - p.timestampCriacao) / 60000);
-                }
-
-                if(p.status === "Pendente" || p.status === "Preparando" || p.status === "Entregue") {
-                    if(p.mesa) {
-                        let mesaKey = p.mesa.trim();
-                        let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
-                        let pagoPart = p.valorPagoParcial || 0;
-
-                        if(!mesasDetalhesMap[mesaKey]) {
-                            mesasDetalhesMap[mesaKey] = {
-                                ids: [p.id],
-                                mesaNome: p.mesa,
-                                status: p.status,
-                                pedidosLista: [p.pedido],
-                                total: 0,
-                                pagoParcial: 0,
-                                atendente: p.atendente || "Geral"
-                            };
+                            painelStatus.innerHTML = `
+                                <div class="border ${corStatus} p-3 rounded-2xl flex items-center gap-3 shadow-sm">
+                                    <span class="text-2xl animate-pulse">${iconeStatus}</span>
+                                    <div>
+                                        <p class="text-[10px] font-bold uppercase tracking-wider opacity-80">Status do Pedido</p>
+                                        <p class="text-xs font-black">${textoStatus}</p>
+                                    </div>
+                                </div>
+                            `;
                         } else {
-                            mesasDetalhesMap[mesaKey].ids.push(p.id);
-                            mesasDetalhesMap[mesaKey].pedidosLista.push(p.pedido);
+                            painelStatus.classList.add('hidden');
                         }
-
-                        if(p.status === 'Pendente' || p.status === 'Preparando') {
-                            mesasDetalhesMap[mesaKey].status = p.status;
-                        }
-                        mesasDetalhesMap[mesaKey].total += val;
-                        mesasDetalhesMap[mesaKey].pagoParcial += pagoPart;
                     }
                 }
-            });
 
-            let meuPedidoAtivo = null;
-            if(mesaUrl && meusPedidosMesa.length > 0) {
-                meusPedidosMesa.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
-                meuPedidoAtivo = meusPedidosMesa.find(p => p.status === 'Pendente' || p.status === 'Preparando') || meusPedidosMesa[0];
-            }
+                let media = qtdPendentes > 0 ? Math.floor(somaTempo / qtdPendentes) : 0;
+                const badgeCozinha = document.getElementById('tempo-cozinha-badge');
+                if(badgeCozinha) badgeCozinha.innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
 
-            if(mesaUrl) {
-                const painelStatus = document.getElementById('painel-status-cliente');
-                if(meuPedidoAtivo) {
-                    painelStatus.classList.remove('hidden');
-                    let iconeStatus = '⏳';
-                    let textoStatus = 'Aguardando aceite da cozinha...';
-                    let corStatus = 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400';
-                    
-                    if(meuPedidoAtivo.status === 'Preparando') {
-                        iconeStatus = '👨‍🍳';
-                        textoStatus = 'Seu pedido está sendo preparado na cozinha!';
-                        corStatus = 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400';
-                    } else if(meuPedidoAtivo.status === 'Entregue') {
-                        iconeStatus = '🛎️';
-                        textoStatus = 'Seu pedido foi entregue / está pronto!';
-                        corStatus = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400';
-                    }
-
-                    painelStatus.innerHTML = `
-                        <div class="border ${corStatus} p-3 rounded-2xl flex items-center gap-3 shadow-sm">
-                            <span class="text-2xl animate-pulse">${iconeStatus}</span>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-wider opacity-80">Status do Pedido</p>
-                                <p class="text-xs font-black">${textoStatus}</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    painelStatus.classList.add('hidden');
-                }
-            }
-
-            let media = qtdPendentes > 0 ? Math.floor(somaTempo / qtdPendentes) : 0;
-            const badgeCozinha = document.getElementById('tempo-cozinha-badge');
-            if(badgeCozinha) badgeCozinha.innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
-
-            renderizarMesas();
-            if(abaAtiva === 'caixa') {
+                // Atualiza ambas as telas do atendente em tempo real
+                renderizarMesas();
                 renderizarCaixaMesas();
+            } catch (err) {
+                console.error("Erro no listener de pedidos:", err);
             }
         });
 
@@ -575,7 +580,6 @@
 
             todasAsMesas.forEach(mesa => {
                 const isSelected = mesaSelecionada === mesa;
-                // Compara usando normalização completa para garantir detecção em tempo real (mesa 2, Mesa 2, etc.)
                 const mesaKeyEncontrada = Object.keys(mesasDetalhesMap).find(k => normalizarNomeMesa(k) === normalizarNomeMesa(mesa));
                 const isOccupied = !!mesaKeyEncontrada;
 
