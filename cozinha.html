@@ -212,7 +212,7 @@
         let somAtivado = false;
         let primeiroCarregamento = true;
         let qtdPendentesAnterior = 0;
-        let intervaloAlarme = null; // Variável para controlar o toque contínuo
+        let intervaloAlarme = null; // Alarme contínuo até clicar em aceitar
 
         const hojeISO = new Date().toISOString().split('T')[0];
         document.getElementById('filtro-data').value = hojeISO;
@@ -346,8 +346,6 @@
             const btn = document.getElementById('btn-som');
             btn.innerText = "🔊 Som ON"; 
             btn.className = "tap-scale bg-emerald-600 border border-emerald-500 px-2 py-1.5 rounded-xl text-[11px] font-bold text-white transition shadow";
-            
-            // Se já houver pedidos pendentes ao ativar o som, dispara o alarme contínuo
             verificarEAtivarAlarmeContínuo();
         }
 
@@ -380,7 +378,7 @@
                             clearInterval(intervaloAlarme);
                             intervaloAlarme = null;
                         }
-                    }, 5000); // Toca a cada 5 segundos enquanto houver pendentes
+                    }, 5000); // Toca a cada 5s enquanto houver pedidos não aceitos (Pendente)
                 }
             } else {
                 if (intervaloAlarme) {
@@ -406,9 +404,7 @@
             qtdPendentesAnterior = qtdPendentesAgora;
             primeiroCarregamento = false;
 
-            // Gerencia o alarme contínuo
             verificarEAtivarAlarmeContínuo();
-
             renderizarCards();
         });
 
@@ -420,7 +416,8 @@
 
             let filtrados = [];
             if (abaAtual === 'cozinha') {
-                filtrados = todosPedidos.filter(p => p.status === 'Pendente');
+                // Cozinha mostra tanto os Pendentes (não aceitos) quanto os Preparando (aceitos)
+                filtrados = todosPedidos.filter(p => p.status === 'Pendente' || p.status === 'Preparando');
                 contadorTxt.innerText = `${filtrados.length} pedido(s) na cozinha`;
                 document.getElementById('icone-vazio').innerText = "🍽️";
                 document.getElementById('texto-vazio').innerText = "Cozinha Tranquila!";
@@ -525,13 +522,22 @@
                 }
 
                 if(abaAtual === 'cozinha') {
-                    corFaixa = 'bg-amber-500';
-                    botoesHtml = pedido.pagoNaHora ? 
-                        `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2"><button onclick="marcarPagoNaHoraConcluido('${pedido.id}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">✅ Concluir</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button></div>` :
-                        `<div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap"><button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Entregar</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">✅ Pago</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-700 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button><button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition">🗑️</button></div>`;
+                    if (pedido.status === 'Pendente') {
+                        corFaixa = 'bg-amber-500';
+                        let btnAceitar = `<button onclick="mudarStatus('${pedido.id}', 'Preparando')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex items-center justify-center gap-1">👨‍🍳 Aceitar / Preparar</button>`;
+                        botoesHtml = pedido.pagoNaHora ? 
+                            `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">${btnAceitar}<button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button></div>` :
+                            `<div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">${btnAceitar}<button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Entregar</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">✅ Pago</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-700 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button><button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition">🗑️</button></div>`;
+                    } else {
+                        // Status 'Preparando'
+                        corFaixa = 'bg-blue-500';
+                        botoesHtml = pedido.pagoNaHora ? 
+                            `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2"><button onclick="marcarPagoNaHoraConcluido('${pedido.id}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">✅ Concluir</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button></div>` :
+                            `<div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap"><button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Entregar</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">✅ Pago</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-700 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button><button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition">🗑️</button></div>`;
+                    }
                 } else if(abaAtual === 'caixa') {
                     corFaixa = 'bg-blue-500';
-                    botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2"><button onclick="abrirModalPix('${pedido.id}', '${pedido.mesa}', 'R$ ${restante.toFixed(2).replace('.',',')}', '${encodeURIComponent(pedido.pedido)}') " class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">💲 Fechar</button></div>`;
+                    botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2"><button onclick="abrirModalPix('${pedido.id}', '${pedido.mesa}', 'R$ ${restante.toFixed(2).replace('.',',')}', '${encodeURIComponent(pedido.pedido)}') " class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">💲 Fechar</button></div>`;
                 } else {
                     corFaixa = 'bg-emerald-500';
                     let blocoAbatimentoRelatorio = `
@@ -545,6 +551,15 @@
                     botoesHtml = `${blocoAbatimentoRelatorio}<div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 flex justify-between"><span>Status: <strong class="text-emerald-600 dark:text-emerald-400">Pago</strong></span><span class="font-mono">${pedido.dataCriacao || ''}</span></div>`;
                 }
 
+                let badgeStatusCozinha = '';
+                if (abaAtual === 'cozinha') {
+                    if (pedido.status === 'Pendente') {
+                        badgeStatusCozinha = `<div class="mb-2"><span class="bg-amber-100 dark:bg-amber-950 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">🔔 Novo Pedido - Aguardando Aceite</span></div>`;
+                    } else if (pedido.status === 'Preparando') {
+                        badgeStatusCozinha = `<div class="mb-2"><span class="bg-blue-100 dark:bg-blue-950 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">👨‍🍳 Em Preparo na Cozinha</span></div>`;
+                    }
+                }
+
                 const card = document.createElement('div');
                 card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
                 card.innerHTML = `
@@ -555,6 +570,7 @@
                             <div class="flex flex-col items-end gap-1.5">${badgeCronometro}<span class="text-zinc-400 text-[11px] font-mono">${pedido.horario || '--:--'}</span></div>
                         </div>
                         <div class="pl-2">${avisoPagoNaHora}</div>
+                        <div class="pl-2">${badgeStatusCozinha}</div>
                         <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${itensTexto.replace(/\n/g, '<br>')}</div>
                         ${abaAtual !== 'relatorio' ? `<div class="pl-2">${blocoAbatimento}</div>` : ''}
                         ${obsTexto ? `<div class="mb-2 pl-2"><span class="bg-red-100 dark:bg-red-950/80 border border-red-300 dark:border-red-900/60 text-red-800 dark:text-red-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg uppercase tracking-wider">Atenção</span><p class="text-red-700 dark:text-red-300 text-xs font-semibold mt-1 bg-red-50 dark:bg-red-950/30 p-2 rounded-xl border border-red-200 dark:border-red-900/40">"${obsTexto}"</p></div>` : ''}
