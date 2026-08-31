@@ -33,15 +33,19 @@
                     <p class="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium leading-tight" id="contador">Sincronizando...</p>
                 </div>
             </div>
+            <!-- Adicionado o botão de Sync aqui -->
             <div class="flex gap-1.5 items-center">
+                <button onclick="window.location.reload()" class="tap-scale bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-900/60 hover:bg-emerald-200 dark:hover:bg-emerald-900 px-2 py-1.5 rounded-xl text-[11px] font-bold text-emerald-700 dark:text-emerald-400 transition shadow-sm" title="Forçar Atualização">
+                    🔄
+                </button>
                 <button onclick="abrirAdminCardapio()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-amber-600 dark:text-amber-400 transition shadow-sm">
-                    🍔 Cardápio
+                    🍔
                 </button>
                 <button onclick="abrirConfigPix()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2 py-1.5 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-zinc-300 transition shadow-sm">
-                    ⚙️ Pix
+                    ⚙️
                 </button>
                 <button id="btn-som" onclick="ativarSom()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2 py-1.5 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-zinc-300 transition shadow-sm">
-                    🔇 Som
+                    🔇
                 </button>
                 <button onclick="alternarTema()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2 py-1.5 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-zinc-300 transition shadow-sm" title="Mudar Tema">
                     <span id="icone-tema">🌙</span>
@@ -443,7 +447,7 @@
                     let totalNum = parseFloat((pedido.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.'));
                     let pagoParcial = pedido.valorPagoParcial || 0;
                     if (pedido.pagoNaHora) {
-                        pagoParcial += totalNum; // Abate automaticamente 100%
+                        pagoParcial += totalNum; 
                     }
                     
                     let restante = totalNum - pagoParcial;
@@ -469,7 +473,6 @@
                         </div>
                     `;
 
-                    // FLUXO CORRIGIDO: Sempre envia para "Entregue" (que cai no Caixa), independente se pagou Pix ou não.
                     let botoesHtml = "";
                     if (pedido.status === 'Pendente') {
                         botoesHtml = `
@@ -529,7 +532,6 @@
                     let mesaKey = (p.mesa || "Mesa").trim();
                     let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
                     
-                    // CÁLCULO CORRIGIDO: Se for Pix, já soma o valor como abatido.
                     let pagoPart = p.valorPagoParcial || 0;
                     if (p.pagoNaHora) { pagoPart += val; }
 
@@ -590,7 +592,6 @@
                     let badgeAtendente = info.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${info.atendente}</span>` : '';
                     let avisoQuitado = restante === 0 ? `<div class="mt-1"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO ONLINE (PIX)</span></div>` : '';
 
-                    // BOTÕES CORRIGIDOS: Se restante é 0, só mostra o botão de Fechar Mesa (que vai pro relatório)
                     let botoesHtml = "";
                     if (restante <= 0) {
                         botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
@@ -638,7 +639,6 @@
                 let totalArrecadado = 0;
                 let produtosContagem = {};
                 filtrados.forEach(p => {
-                    // Aqui ele usa p.total (Total original), garantindo que os relatórios puxem o valor correto!
                     if (p.total) {
                         let limpo = p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
                         totalArrecadado += parseFloat(limpo) || 0;
@@ -797,6 +797,18 @@
             }
             return payload + (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
         }
+
+        // DESPERTADOR AUTOMÁTICO (Anti-dorminhoco)
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                const statusEl = document.getElementById('contador');
+                if(statusEl) statusEl.classList.add('animate-spin');
+                setTimeout(() => {
+                    if (typeof renderizarCards === "function") renderizarCards(); 
+                    if(statusEl) statusEl.classList.remove('animate-spin');
+                }, 800);
+            }
+        });
     </script>
 </body>
 </html>
