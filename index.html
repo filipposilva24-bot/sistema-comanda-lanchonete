@@ -388,7 +388,8 @@
                         meusPedidosMesa.push(p);
                     }
 
-                    if(!mesaUrl && p.status === 'Entregue' && !pedidosAlertados.has(p.id)) {
+                    // Dispara alerta apenas se o pedido está entregue/pronto e o atendente ainda não marcou como visto
+                    if(!mesaUrl && p.status === 'Entregue' && !p.alertaVisto && !pedidosAlertados.has(p.id)) {
                         pedidosAlertados.add(p.id);
                         let nomeMesaAlerta = p.mesa ? p.mesa : "Mesa";
                         mostrarToast(`${nomeMesaAlerta} está pronta na cozinha!`);
@@ -414,7 +415,8 @@
                                     pedidosLista: [p.pedido],
                                     total: 0,
                                     pagoParcial: 0,
-                                    atendente: p.atendente || "Geral"
+                                    atendente: p.atendente || "Geral",
+                                    temPronto: p.status === 'Entregue' && !p.alertaVisto
                                 };
                             } else {
                                 mesasDetalhesMap[mesaKey].ids.push(p.id);
@@ -423,6 +425,9 @@
 
                             if(p.status === 'Pendente' || p.status === 'Preparando') {
                                 mesasDetalhesMap[mesaKey].status = p.status;
+                            }
+                            if(p.status === 'Entregue' && !p.alertaVisto) {
+                                mesasDetalhesMap[mesaKey].temPronto = true;
                             }
                             mesasDetalhesMap[mesaKey].total += val;
                             mesasDetalhesMap[mesaKey].pagoParcial += pagoPart;
@@ -474,7 +479,7 @@
                 const badgeCozinha = document.getElementById('tempo-cozinha-badge');
                 if(badgeCozinha) badgeCozinha.innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
 
-                // Atualiza ambas as telas do atendente em tempo real
+                // Atualiza em tempo real as telas do atendente
                 renderizarMesas();
                 renderizarCaixaMesas();
             } catch (err) {
@@ -662,11 +667,18 @@
 
                 let card = document.createElement('div');
                 card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 shadow-sm";
+                
+                let botaoEntregueHtml = "";
+                if(info.temPronto) {
+                    botaoEntregueHtml = `<button onclick="marcarPedidoEntregue('${idsStr}')" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2 px-2 rounded-xl text-xs shadow mb-2 flex items-center justify-center gap-1">🛎️ Marcar Pedido Entregue</button>`;
+                }
+
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-2">
                         <span class="font-black text-amber-500 text-sm">${info.mesaNome}</span>
                         <span class="text-[10px] bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-zinc-400 font-bold">👤 ${info.atendente}</span>
                     </div>
+                    ${botaoEntregueHtml}
                     <div class="bg-zinc-50 dark:bg-zinc-950 p-2.5 rounded-xl text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-2 max-h-24 overflow-y-auto">
                         ${extratoCombinado}
                     </div>
@@ -693,6 +705,19 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        window.marcarPedidoEntregue = async function(idsStr) {
+            try {
+                let ids = JSON.parse(decodeURIComponent(idsStr));
+                let promessas = ids.map(id => updateDoc(doc(db, "pedidos", id), {
+                    alertaVisto: true
+                }));
+                await Promise.all(promessas);
+                mostrarToast("Alerta de pedido entregue limpo!");
+            } catch(e) {
+                alert("Erro ao atualizar status do pedido.");
+            }
         }
 
         window.abrirPixMesaCaixa = function(mesaKey) {
@@ -844,6 +869,7 @@
         }
 
         window.abrirModalCarrinho = function() {
+            if(itensCarrinho.length > 0) document.getElementById('modal-carrinho').classList.add('hidden'); // wait, keep it open if has items
             if(itensCarrinho.length > 0) document.getElementById('modal-carrinho').classList.remove('hidden');
         }
         window.fecharModalCarrinho = function() {
@@ -930,7 +956,8 @@
                     dataCriacao: new Date().toISOString().split('T')[0],
                     timestampCriacao: Date.now(),
                     horario: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
-                    valorPagoParcial: 0
+                    valorPagoParcial: 0,
+                    alertaVisto: false
                 };
 
                 await addDoc(collection(db, "pedidos"), dadosPedido);
