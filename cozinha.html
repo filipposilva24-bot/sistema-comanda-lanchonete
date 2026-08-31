@@ -19,6 +19,13 @@
             background: transparent; bottom: 0; color: transparent; cursor: pointer; height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto;
         }
         input[type="date"], input[type="month"] { position: relative; }
+
+        /* Estilo limpo para impressão/geração de PDF */
+        @media print {
+            body { background: white !important; color: black !important; }
+            header, #painel-botoes-acao, button, .no-print { display: none !important; }
+            #painel-filtro { border: none !important; box-shadow: none !important; background: white !important; }
+        }
     </style>
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-950 min-h-screen text-zinc-950 dark:text-zinc-100 font-sans flex flex-col select-none transition-colors duration-200">
@@ -73,8 +80,8 @@
         <div id="painel-filtro" class="hidden mb-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-3xl shadow-xl transition-colors duration-200">
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">Faturamento & Ranking</h2>
-                <button onclick="enviarRelatorioWhatsApp()" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1.5">
-                    💬 Enviar no WhatsApp
+                <button onclick="salvarRelatorioPDF()" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1.5">
+                    📄 Salvar em PDF
                 </button>
             </div>
             
@@ -213,7 +220,7 @@
                     <strong class="text-amber-500 block mb-1">📊 3. Relatórios & Cardápio</strong>
                     • Filtre faturamento por dia ou por mês específico.<br>
                     • Veja o ranking automático dos produtos mais vendidos.<br>
-                    • Botão verde para exportar o fechamento direto no WhatsApp.
+                    • Botão roxo para salvar ou imprimir o relatório em PDF.
                 </div>
             </div>
 
@@ -758,12 +765,9 @@
             } catch(e) { alert("Erro ao abater valor."); }
         }
 
-        window.enviarRelatorioWhatsApp = function() {
-            let totalTxt = document.getElementById('valor-total-filtro').innerText;
-            let qtdTxt = document.getElementById('qtd-pedidos-filtro').innerText;
-            let periodo = tipoFiltroRelatorio === 'dia' ? `do dia ${document.getElementById('filtro-data').value}` : `do mês ${document.getElementById('filtro-mes').value}`;
-            let mensagem = `📊 *Fechamento Point Derico* (${periodo})\n\n💰 *Faturamento Total:* ${totalTxt}\n🧾 *Comandas Finalizadas:* ${qtdTxt}\n\n🔥 Sistema Point Derico`;
-            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
+        // Função para Salvar em PDF / Imprimir Relatório
+        window.salvarRelatorioPDF = function() {
+            window.print();
         }
 
         window.mudarStatus = async function(id, novoStatus) {
