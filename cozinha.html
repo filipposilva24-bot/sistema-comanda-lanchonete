@@ -415,6 +415,10 @@
             container.innerHTML = '';
 
             let filtrados = [];
+            
+            /* ======================================================== */
+            /* ABA COZINHA (Preparo e Entrega) */
+            /* ======================================================== */
             if (abaAtual === 'cozinha') {
                 filtrados = todosPedidos.filter(p => p.status === 'Pendente' || p.status === 'Preparando');
                 contadorTxt.innerText = `${filtrados.length} pedido(s) na cozinha`;
@@ -435,9 +439,17 @@
                         obsTexto = partes[1].trim();
                     }
 
+                    // CÁLCULO CORRIGIDO: Se pagoNaHora for true, já considera o total como abatido
                     let totalNum = parseFloat((pedido.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.'));
                     let pagoParcial = pedido.valorPagoParcial || 0;
+                    if (pedido.pagoNaHora) {
+                        pagoParcial += totalNum; // Abate automaticamente 100%
+                    }
+                    
                     let restante = totalNum - pagoParcial;
+                    if (restante < 0) restante = 0;
+
+                    let classeRestante = restante === 0 ? "text-emerald-500 font-black" : "text-amber-500";
 
                     let blocoAbatimento = `
                         <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
@@ -452,31 +464,34 @@
                             </div>` : ''}
                             <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-200 dark:border-zinc-800">
                                 <span>VALOR RESTANTE:</span>
-                                <span class="text-amber-500">R$ ${restante.toFixed(2).replace('.',',')}</span>
+                                <span class="${classeRestante}">R$ ${restante.toFixed(2).replace('.',',')}</span>
                             </div>
                         </div>
                     `;
 
-                    let botoesHtml = "", corFaixa = 'bg-amber-500';
-                    let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO NO PIX</span></div>` : '';
-                    let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${pedido.atendente}</span>` : '';
+                    // FLUXO CORRIGIDO: Sempre envia para "Entregue" (que cai no Caixa), independente se pagou Pix ou não.
+                    let botoesHtml = "";
+                    if (pedido.status === 'Pendente') {
+                        botoesHtml = `
+                        <div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">
+                            <button onclick="mudarStatus('${pedido.id}', 'Preparando')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex items-center justify-center gap-1">👨‍🍳 Aceitar / Preparar</button>
+                            <button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Entregar</button>
+                            <button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition shadow">🗑️</button>
+                        </div>`;
+                    } else { // Preparando
+                        botoesHtml = `
+                        <div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">
+                            <button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Marcar Entregue (Vai para o Caixa)</button>
+                            <button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition shadow">🗑️</button>
+                        </div>`;
+                    }
 
+                    let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO NO PIX ONLINE</span></div>` : '';
+                    let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${pedido.atendente}</span>` : '';
                     let ts = pedido.timestampCriacao || Date.now();
                     let badgeCronometro = `<span class="cronometro-card bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs px-2.5 py-1 rounded-xl font-mono font-bold shadow-inner" data-timestamp="${ts}">⏱️ 0m 00s</span>`;
 
-                    if (pedido.status === 'Pendente') {
-                        corFaixa = 'bg-amber-500';
-                        let btnAceitar = `<button onclick="mudarStatus('${pedido.id}', 'Preparando')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex items-center justify-center gap-1">👨‍🍳 Aceitar / Preparar</button>`;
-                        botoesHtml = pedido.pagoNaHora ? 
-                            `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">${btnAceitar}<button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button></div>` :
-                            `<div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">${btnAceitar}<button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Entregar</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">✅ Pago</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-700 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button><button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition">🗑️</button></div>`;
-                    } else {
-                        corFaixa = 'bg-blue-500';
-                        botoesHtml = pedido.pagoNaHora ? 
-                            `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2"><button onclick="marcarPagoNaHoraConcluido('${pedido.id}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">✅ Concluir</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button></div>` :
-                            `<div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap"><button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Entregar</button><button onclick="mudarStatus('${pedido.id}', 'Pago')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">✅ Pago</button><button onclick="abrirAbaterCozinha('${pedido.id}', ${pagoParcial})" class="tap-scale bg-blue-700 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button><button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition">🗑️</button></div>`;
-                    }
-
+                    let corFaixa = pedido.status === 'Pendente' ? 'bg-amber-500' : 'bg-blue-500';
                     let badgeStatusCozinha = '';
                     if (pedido.status === 'Pendente') {
                         badgeStatusCozinha = `<div class="mb-2"><span class="bg-amber-100 dark:bg-amber-950 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">🔔 Novo Pedido - Aguardando Aceite</span></div>`;
@@ -504,13 +519,19 @@
                     container.appendChild(card);
                 });
 
-            } else if (abaAtual === 'caixa') {
-                // UNIFICAÇÃO DOS PEDIDOS DA MESMA MESA NO CAIXA DA COZINHA
+            } 
+            /* ======================================================== */
+            /* ABA CAIXA (Fechamento da Mesa) */
+            /* ======================================================== */
+            else if (abaAtual === 'caixa') {
                 let caixaMap = {};
                 todosPedidos.filter(p => p.status === 'Entregue').forEach(p => {
                     let mesaKey = (p.mesa || "Mesa").trim();
                     let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
+                    
+                    // CÁLCULO CORRIGIDO: Se for Pix, já soma o valor como abatido.
                     let pagoPart = p.valorPagoParcial || 0;
+                    if (p.pagoNaHora) { pagoPart += val; }
 
                     if (!caixaMap[mesaKey]) {
                         caixaMap[mesaKey] = {
@@ -531,7 +552,7 @@
                 });
 
                 let mesasOcupadas = Object.keys(caixaMap);
-                contadorTxt.innerText = `${mesasOcupadas.length} mesa(s) aguardando pagamento`;
+                contadorTxt.innerText = `${mesasOcupadas.length} mesa(s) aguardando atendimento / saída`;
                 document.getElementById('icone-vazio').innerText = "💲";
                 document.getElementById('texto-vazio').innerText = "Nenhuma comanda pendente de pagamento!";
 
@@ -541,8 +562,12 @@
                 mesasOcupadas.forEach(mesaKey => {
                     let info = caixaMap[mesaKey];
                     let restante = info.totalNum - info.pagoParcial;
+                    if (restante < 0) restante = 0;
+
                     let extratoCombinado = info.pedidosLista.join('<br>--<br>');
                     let idsStr = encodeURIComponent(JSON.stringify(info.ids));
+
+                    let classeRestante = restante === 0 ? "text-emerald-500 font-black" : "text-amber-500";
 
                     let blocoAbatimento = `
                         <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
@@ -557,14 +582,27 @@
                             </div>` : ''}
                             <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-200 dark:border-zinc-800">
                                 <span>VALOR RESTANTE:</span>
-                                <span class="text-amber-500">R$ ${restante.toFixed(2).replace('.',',')}</span>
+                                <span class="${classeRestante}">R$ ${restante.toFixed(2).replace('.',',')}</span>
                             </div>
                         </div>
                     `;
 
                     let badgeAtendente = info.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${info.atendente}</span>` : '';
+                    let avisoQuitado = restante === 0 ? `<div class="mt-1"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO ONLINE (PIX)</span></div>` : '';
 
-                    let botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2"><button onclick="abrirModalPixMulti('${idsStr}', '${info.mesa}', 'R$ ${restante.toFixed(2).replace('.',',')}', '${encodeURIComponent(extratoCombinado)}')" class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix</button><button onclick="abrirAbaterMulti('${idsStr}')" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button><button onclick="fecharMesaMulti('${idsStr}', '${info.mesa}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">💲 Fechar</button></div>`;
+                    // BOTÕES CORRIGIDOS: Se restante é 0, só mostra o botão de Fechar Mesa (que vai pro relatório)
+                    let botoesHtml = "";
+                    if (restante <= 0) {
+                        botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
+                            <button onclick="fecharMesaMulti('${idsStr}', '${info.mesa}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Cliente Saiu - Fechar Mesa</button>
+                        </div>`;
+                    } else {
+                        botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
+                            <button onclick="abrirModalPixMulti('${idsStr}', '${info.mesa}', 'R$ ${restante.toFixed(2).replace('.',',')}', '${encodeURIComponent(extratoCombinado)}')" class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix</button>
+                            <button onclick="abrirAbaterMulti('${idsStr}')" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button>
+                            <button onclick="fecharMesaMulti('${idsStr}', '${info.mesa}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Fechar</button>
+                        </div>`;
+                    }
 
                     const card = document.createElement('div');
                     card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
@@ -572,7 +610,7 @@
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
                         <div>
                             <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
-                                <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${info.mesa}</h2><div class="mt-1">${badgeAtendente}</div></div>
+                                <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${info.mesa}</h2><div class="mt-1">${badgeAtendente}</div>${avisoQuitado}</div>
                                 <div class="flex flex-col items-end gap-1.5"><span class="text-zinc-400 text-[11px] font-mono">${info.horario}</span></div>
                             </div>
                             <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${extratoCombinado.replace(/\n/g, '<br>')}</div>
@@ -583,7 +621,11 @@
                     container.appendChild(card);
                 });
 
-            } else if (abaAtual === 'relatorio') {
+            } 
+            /* ======================================================== */
+            /* ABA RELATÓRIO */
+            /* ======================================================== */
+            else if (abaAtual === 'relatorio') {
                 const valData = document.getElementById('filtro-data').value;
                 const valMes = document.getElementById('filtro-mes').value;
                 filtrados = todosPedidos.filter(p => {
@@ -596,6 +638,7 @@
                 let totalArrecadado = 0;
                 let produtosContagem = {};
                 filtrados.forEach(p => {
+                    // Aqui ele usa p.total (Total original), garantindo que os relatórios puxem o valor correto!
                     if (p.total) {
                         let limpo = p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
                         totalArrecadado += parseFloat(limpo) || 0;
@@ -668,19 +711,6 @@
             }
         }
 
-        window.abrirAbaterCozinha = async function(idPedido, valorAtualPago) {
-            let valorStr = prompt("Valor pago agora (Ex: 10.00):");
-            if(!valorStr) return;
-            let val = parseFloat(valorStr.replace(',','.'));
-            if(isNaN(val) || val <= 0) return alert("Valor inválido!");
-            
-            try {
-                let novoValorPago = (valorAtualPago || 0) + val;
-                await updateDoc(doc(db, "pedidos", idPedido), { valorPagoParcial: novoValorPago });
-                alert(`R$ ${val.toFixed(2)} abatido com sucesso!`);
-            } catch(e) { alert("Erro ao abater valor."); }
-        }
-
         window.abrirAbaterMulti = async function(idsStr) {
             let valorStr = prompt("Valor pago agora (Ex: 10.00):");
             if(!valorStr) return;
@@ -690,10 +720,6 @@
             try {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
                 let primaryId = ids[0];
-                let pRef = doc(db, "pedidos", primaryId);
-                let pSnap = await getDocs(collection(db, "pedidos")); // update main
-                // let's fetch primary doc directly via getDoc if imported or query
-                // Actually, let's just use updateDoc on primaryId with fetched current partial
                 let targetDoc = todosPedidos.find(p => p.id === primaryId);
                 let atualPago = targetDoc ? (targetDoc.valorPagoParcial || 0) : 0;
                 await updateDoc(doc(db, "pedidos", primaryId), { valorPagoParcial: atualPago + val });
@@ -719,26 +745,8 @@
             } catch (e) { alert("Erro ao atualizar."); }
         }
 
-        window.marcarPagoNaHoraConcluido = async function(id) {
-            await updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: new Date().toISOString().split('T')[0] });
-        }
-
         window.excluirPedido = async function(id) {
             if (confirm("Deseja excluir este pedido?")) { await deleteDoc(doc(db, "pedidos", id)); }
-        }
-
-        window.abrirModalPix = function(id, mesa, totalRestanteStr, pedidoEncoded) {
-            const config = obterChaveConfigurada();
-            pedidoSelecionadoIds = [id];
-            document.getElementById('modal-mesa-titulo').innerText = mesa;
-            document.getElementById('modal-valor-total').innerText = totalRestanteStr;
-            document.getElementById('modal-extrato-lista').innerHTML = decodeURIComponent(pedidoEncoded).replace(/\n/g, '<br>');
-            document.getElementById('aviso-chave-pix').innerText = `Chave: ${config.chave}`;
-
-            let valorNum = totalRestanteStr.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
-            let payloadPix = criarPayloadPix(config.chave, config.nome, "SAO PAULO", (parseFloat(valorNum) || 0).toFixed(2));
-            document.getElementById('qrcode-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
-            document.getElementById('modal-pix').classList.remove('hidden');
         }
 
         window.abrirModalPixMulti = function(idsStr, mesa, totalRestanteStr, pedidoEncoded) {
