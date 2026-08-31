@@ -55,11 +55,17 @@
                     <span class="text-[10px] font-bold text-zinc-400 uppercase" id="tempo-cozinha-badge">-- min</span>
                 </div>
 
-                <button onclick="alternarTema()" class="tap-scale absolute right-0 top-0 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm" title="Mudar Tema">
-                    <span id="icone-tema">🌙</span>
-                </button>
+                <!-- Botões de Sync e Tema -->
+                <div class="absolute right-0 top-0 flex items-center gap-1">
+                    <button onclick="window.location.reload()" class="tap-scale bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-900/60 hover:bg-emerald-200 dark:hover:bg-emerald-900 px-2 py-1.5 rounded-xl text-[10px] font-bold text-emerald-700 dark:text-emerald-400 transition shadow-sm" title="Forçar Atualização">
+                        🔄 Sync
+                    </button>
+                    <button onclick="alternarTema()" class="tap-scale bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-2.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm" title="Mudar Tema">
+                        <span id="icone-tema">🌙</span>
+                    </button>
+                </div>
 
-                <div class="inline-block bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-1">
+                <div class="inline-block bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-1 mt-6 md:mt-0">
                     Gastronomia & Sabor
                 </div>
                 <h1 class="text-2xl md:text-3xl font-black tracking-tight text-amber-500 dark:text-amber-400">POINT DERICO</h1>
@@ -413,9 +419,8 @@
                             let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
                             let pagoPart = p.valorPagoParcial || 0;
 
-                            // Se o pedido foi pago na hora pelo cliente, abate automaticamente do valor restante
                             if (p.pagoNaHora) {
-                                pagoPart += val;
+                                pagoPart = val; 
                             }
 
                             if(!mesasDetalhesMap[mesaKey]) {
@@ -722,7 +727,7 @@
                     botaoEntregueHtml = `<button onclick="marcarPedidoEntregue('${idsStr}')" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2 px-2 rounded-xl text-xs shadow mb-2 flex items-center justify-center gap-1">🛎️ Marcar Pedido Entregue</button>`;
                 }
 
-                let badgePixOnline = info.pagoOnline ? `<span class="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded ml-2">🟢 Pago Online (Pix)</span>` : '';
+                let badgePixOnline = info.pagoOnline ? `<span class="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded ml-2">⚡ Já pago no Pix</span>` : '';
 
                 card.innerHTML = `
                     <div>
@@ -749,7 +754,7 @@
                             </div>` : ''}
                             <div class="flex justify-between font-black text-sm md:text-base text-zinc-800 dark:text-zinc-100 pt-1.5 border-t border-zinc-100 dark:border-zinc-800">
                                 <span>VALOR RESTANTE:</span>
-                                <span class="${valorRestante === 0 ? 'text-emerald-500' : 'text-amber-500'}">R$ ${valorRestante.toFixed(2).replace('.',',')}</span>
+                                <span class="${valorRestante === 0 ? 'text-emerald-500 font-black' : 'text-amber-500'}">R$ ${valorRestante.toFixed(2).replace('.',',')}</span>
                             </div>
                         </div>
                     </div>
@@ -1055,6 +1060,19 @@
 
         verificarLogin();
         renderizarMesas();
+
+        // DESPERTADOR AUTOMÁTICO (Anti-dorminhoco)
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                const statusEl = document.getElementById('status-conexao');
+                if(statusEl) statusEl.classList.add('animate-spin');
+                setTimeout(() => {
+                    if (typeof renderizarMesas === "function") renderizarMesas(); 
+                    if (typeof renderizarCaixaMesas === "function") renderizarCaixaMesas(); 
+                    if(statusEl) statusEl.classList.remove('animate-spin');
+                }, 800);
+            }
+        });
     </script>
 </body>
 </html>
