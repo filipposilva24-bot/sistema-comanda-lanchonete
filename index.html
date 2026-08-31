@@ -266,6 +266,11 @@
         let numpadCallbackIndex = null;
         let pedidosAlertados = new Set();
 
+        function normalizarNomeMesa(nome) {
+            if (!nome) return "";
+            return nome.toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
+        }
+
         window.alternarTema = function() {
             const html = document.getElementById('html-root');
             const icone = document.getElementById('icone-tema');
@@ -351,6 +356,7 @@
                 viewSalao.classList.remove('hidden');
                 viewCaixa.classList.add('hidden');
                 painelAcao.classList.remove('hidden');
+                renderizarMesas();
             } else {
                 btnCaixa.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 rounded-xl text-xs shadow";
                 btnSalao.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2 rounded-xl text-xs shadow";
@@ -377,13 +383,13 @@
             snapshot.forEach(docSnap => {
                 let p = { id: docSnap.id, ...docSnap.data() };
 
-                if(mesaUrl && p.mesa && p.mesa.trim().toLowerCase() === mesaUrl.trim().toLowerCase() && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
+                if(mesaUrl && p.mesa && normalizarNomeMesa(p.mesa) === normalizarNomeMesa(mesaUrl) && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
                     meusPedidosMesa.push(p);
                 }
 
                 if(!mesaUrl && p.status === 'Entregue' && !pedidosAlertados.has(p.id)) {
                     pedidosAlertados.add(p.id);
-                    let nomeMesaAlerta = p.mesa.startsWith('Mesa') || p.mesa.startsWith('Balcão') ? p.mesa : `Mesa ${p.mesa}`;
+                    let nomeMesaAlerta = p.mesa ? p.mesa : "Mesa";
                     mostrarToast(`${nomeMesaAlerta} está pronta na cozinha!`);
                     if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
@@ -462,10 +468,13 @@
             }
 
             let media = qtdPendentes > 0 ? Math.floor(somaTempo / qtdPendentes) : 0;
-            document.getElementById('tempo-cozinha-badge').innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
+            const badgeCozinha = document.getElementById('tempo-cozinha-badge');
+            if(badgeCozinha) badgeCozinha.innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
 
             renderizarMesas();
-            if(abaAtiva === 'caixa') renderizarCaixaMesas();
+            if(abaAtiva === 'caixa') {
+                renderizarCaixaMesas();
+            }
         });
 
         function obterEstiloCategoria(categoria) {
@@ -496,6 +505,7 @@
         window.renderizarCardapio = function() {
             const container = document.getElementById('cardapio-dinamico-container');
             const atalhosContainer = document.getElementById('botoes-categorias-atalho');
+            if(!container || !atalhosContainer) return;
             const termoBusca = (document.getElementById('filtro-busca').value || "").toLowerCase();
             
             let categorias = {};
@@ -565,8 +575,8 @@
 
             todasAsMesas.forEach(mesa => {
                 const isSelected = mesaSelecionada === mesa;
-                // Busca a mesa de forma case-insensitive e trimmed
-                const mesaKeyEncontrada = Object.keys(mesasDetalhesMap).find(k => k.trim().toLowerCase() === mesa.trim().toLowerCase());
+                // Compara usando normalização completa para garantir detecção em tempo real (mesa 2, Mesa 2, etc.)
+                const mesaKeyEncontrada = Object.keys(mesasDetalhesMap).find(k => normalizarNomeMesa(k) === normalizarNomeMesa(mesa));
                 const isOccupied = !!mesaKeyEncontrada;
 
                 const wrapper = document.createElement('div');
@@ -633,7 +643,7 @@
             container.innerHTML = '';
             
             let mesasOcupadas = Object.keys(mesasDetalhesMap);
-            contador.innerText = `${mesasOcupadas.length} mesa(s)`;
+            if(contador) contador.innerText = `${mesasOcupadas.length} mesa(s)`;
 
             if(mesasOcupadas.length === 0) {
                 container.innerHTML = `<p class="text-center text-xs text-zinc-400 py-10">Nenhuma mesa aguardando pagamento.</p>`;
@@ -782,6 +792,7 @@
             const modalTotalDisplay = document.getElementById('modal-carrinho-total');
             const carrinhoFlutuante = document.getElementById('carrinho-flutuante');
             
+            if(!container) return;
             container.innerHTML = '';
             modalContainer.innerHTML = '';
             
@@ -932,6 +943,7 @@
 
         window.mostrarToast = function(msg) {
             const toast = document.getElementById('toast');
+            if(!toast) return;
             document.getElementById('toast-msg').innerText = msg;
             toast.classList.remove('opacity-0', 'translate-y-[-20px]');
             setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-[-20px]'); }, 4000);
