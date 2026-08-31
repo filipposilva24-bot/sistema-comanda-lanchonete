@@ -259,7 +259,7 @@
         let mesaSelecionada = "";
         let abaAtiva = 'salao';
         let mesasFixas = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
-        let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras') || "[]");
+        let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras'] || "[]");
         let mesasDetalhesMap = {};
         let cardapioLista = [];
         let itensCarrinho = [];
@@ -377,7 +377,6 @@
             snapshot.forEach(docSnap => {
                 let p = { id: docSnap.id, ...docSnap.data() };
 
-                // Acompanhamento em tempo real para o Cliente QR
                 if(mesaUrl && p.mesa === mesaUrl && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
                     meuPedidoAtivo = p;
                 }
@@ -394,7 +393,6 @@
                     somaTempo += Math.floor((agora - p.timestampCriacao) / 60000);
                 }
 
-                // INCLUÍDO 'Preparando' PARA MANTER A MESA OCUPADA NA COR CORRETA
                 if(p.status === "Pendente" || p.status === "Preparando" || p.status === "Entregue") {
                     if(p.mesa) {
                         if(!mesasDetalhesMap[p.mesa]) {
@@ -408,7 +406,6 @@
                 }
             });
 
-            // Atualizar Banner de Status do Cliente QR
             if(mesaUrl) {
                 const painelStatus = document.getElementById('painel-status-cliente');
                 if(meuPedidoAtivo) {
@@ -683,10 +680,14 @@
             } catch(e) { alert("Erro ao abater valor."); }
         }
 
+        // CORRIGIDO: Agora atualiza o status para 'Pago' em vez de apagar o pedido, contabilizando no relatório!
         window.fecharMesaCaixa = async function(idPedido, mesa) {
             if(confirm(`Deseja realmente fechar e quitar a ${mesa}?`)) {
                 try {
-                    await deleteDoc(doc(db, "pedidos", idPedido));
+                    await updateDoc(doc(db, "pedidos", idPedido), {
+                        status: 'Pago',
+                        dataCriacao: new Date().toISOString().split('T')[0]
+                    });
                     mostrarToast(`${mesa} fechada com sucesso!`);
                 } catch(e) { alert("Erro ao fechar mesa."); }
             }
