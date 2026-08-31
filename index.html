@@ -47,7 +47,7 @@
     </div>
 
     <!-- TELA PRINCIPAL DE COMANDA -->
-    <div class="max-w-md md:max-w-3xl lg:max-w-4xl mx-auto bg-white dark:bg-zinc-900/90 border-x border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 md:p-6 flex flex-col justify-between transition-colors duration-200">
+    <div class="max-w-md md:max-w-3xl lg:max-w-4xl mx-auto bg-white dark:bg-zinc-900/90 border-x border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 md:p-6 pb-24 flex flex-col justify-between transition-colors duration-200">
         <div>
             <header class="mb-4 text-center relative border-b border-zinc-200 dark:border-zinc-800 pb-3">
                 <div class="absolute left-0 top-0 flex items-center gap-1.5">
@@ -88,7 +88,6 @@
             
             <!-- VIEW SALÃO -->
             <div id="view-salao">
-                <!-- PAINEL DE STATUS EM TEMPO REAL PARA O CLIENTE QR -->
                 <div id="painel-status-cliente" class="mb-3 hidden"></div>
 
                 <div class="mb-3" id="bloco-selecao-mesas">
@@ -127,7 +126,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, gelo...)" class="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:border-amber-500 text-xs md:text-sm text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 shadow-inner">
+                    <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, gelo...)" class="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:border-amber-500 text-xs md:text-sm text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 shadow-inner">
                 </div>
             </div>
 
@@ -154,31 +153,8 @@
         </div>
     </div>
 
-    <!-- MODAL CARRINHO -->
-    <div id="carrinho-flutuante" onclick="abrirModalCarrinho()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3.5 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
-        <div class="flex items-center gap-2">
-            <span class="text-lg">🛒</span>
-            <span id="flutuante-qtd" class="text-xs font-black bg-zinc-950 text-amber-400 px-2.5 py-1 rounded-full">0 itens</span>
-        </div>
-        <span id="flutuante-total" class="text-sm md:text-base font-black">R$ 0,00</span>
-    </div>
-
-    <div id="modal-carrinho" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex flex-col justify-end hidden">
-        <div class="bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 rounded-t-3xl max-w-md md:max-w-xl w-full mx-auto p-5 shadow-2xl max-h-[80vh] flex flex-col">
-            <div class="flex justify-between items-center mb-3 pb-2 border-b border-zinc-200 dark:border-zinc-800">
-                <h3 class="text-sm font-black text-amber-500 uppercase tracking-wider">🛒 Itens no Carrinho</h3>
-                <button onclick="fecharModalCarrinho()" class="text-zinc-400 hover:text-white font-bold text-base p-1">✕</button>
-            </div>
-            <div id="modal-lista-carrinho" class="overflow-y-auto flex-grow divide-y divide-zinc-100 dark:divide-zinc-800 mb-3 pr-1"></div>
-            <div class="border-t border-zinc-200 dark:border-zinc-800 pt-3 mb-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs text-zinc-500 font-bold uppercase">Total do Pedido:</span>
-                    <span id="modal-carrinho-total" class="text-lg font-black text-emerald-600 dark:text-emerald-400">R$ 0,00</span>
-                </div>
-            </div>
-            <button onclick="fecharModalCarrinho()" class="tap-scale w-full bg-amber-500 text-zinc-950 font-black py-3.5 rounded-2xl text-xs shadow">Continuar</button>
-        </div>
-    </div>
+    <!-- CARRINHO FLUTUANTE DESATIVADO PARA NÃO COBRIR OS BOTÕES -->
+    <div id="carrinho-flutuante" style="display: none !important;"></div>
 
     <!-- TECLADO NUMÉRICO -->
     <div id="modal-numpad" class="fixed inset-0 bg-black/95 z-[60] flex flex-col justify-center items-center hidden p-4">
@@ -880,31 +856,21 @@
 
         function atualizarResumo() {
             const container = document.getElementById('resumo-pedido');
-            const modalContainer = document.getElementById('modal-lista-carrinho');
             const totalDisplay = document.getElementById('valor-total');
-            const modalTotalDisplay = document.getElementById('modal-carrinho-total');
-            const carrinhoFlutuante = document.getElementById('carrinho-flutuante');
             
             if(!container) return;
             container.innerHTML = '';
-            modalContainer.innerHTML = '';
             
             if (itensCarrinho.length === 0) {
                 container.innerHTML = '<p class="text-zinc-400 text-center italic text-xs mt-1 font-medium" id="vazio-texto">Nenhum item adicionado.</p>';
-                modalContainer.innerHTML = '<p class="text-zinc-400 text-center text-xs py-6">Carrinho vazio.</p>';
                 totalDisplay.innerText = 'R$ 0,00';
-                modalTotalDisplay.innerText = 'R$ 0,00';
-                carrinhoFlutuante.classList.add('hidden');
-                fecharModalCarrinho();
                 return;
             }
 
             let somaTotal = 0;
-            let qtdTotalItens = 0;
 
             itensCarrinho.forEach((item, index) => {
                 somaTotal += (item.preco * item.qtd);
-                qtdTotalItens += item.qtd;
 
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center py-1.5 px-1";
@@ -920,23 +886,10 @@
                         <button onclick="removerItemCarrinhoIndex(${index})" class="text-red-500 font-bold text-xs p-1">🗑️</button>
                     </div>
                 `;
-                container.appendChild(div.cloneNode(true));
-                modalContainer.appendChild(div);
+                container.appendChild(div);
             });
 
             totalDisplay.innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
-            modalTotalDisplay.innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
-            
-            carrinhoFlutuante.classList.remove('hidden');
-            document.getElementById('flutuante-qtd').innerText = `${qtdTotalItens} itens`;
-            document.getElementById('flutuante-total').innerText = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
-        }
-
-        window.abrirModalCarrinho = function() {
-            if(itensCarrinho.length > 0) document.getElementById('modal-carrinho').classList.remove('hidden');
-        }
-        window.fecharModalCarrinho = function() {
-            document.getElementById('modal-carrinho').classList.add('hidden');
         }
 
         window.abrirNumpad = function(index) {
@@ -1025,7 +978,6 @@
 
                 await addDoc(collection(db, "pedidos"), dadosPedido);
 
-                fecharModalCarrinho();
                 if(!mesaUrl) { mesaSelecionada = ""; renderizarMesas(); }
                 document.getElementById('obs').value = '';
                 itensCarrinho = []; atualizarResumo();
