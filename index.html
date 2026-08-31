@@ -46,7 +46,7 @@
         </div>
     </div>
 
-    <!-- TELA PRINCIPAL DE COMANDA (ADAPTADA PARA CELULAR E TABLET) -->
+    <!-- TELA PRINCIPAL DE COMANDA -->
     <div class="max-w-md md:max-w-3xl lg:max-w-4xl mx-auto bg-white dark:bg-zinc-900/90 border-x border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 md:p-6 flex flex-col justify-between transition-colors duration-200">
         <div>
             <header class="mb-4 text-center relative border-b border-zinc-200 dark:border-zinc-800 pb-3">
@@ -128,7 +128,7 @@
             <!-- VIEW CAIXA -->
             <div id="view-caixa" class="hidden">
                 <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-xs md:text-sm font-black text-amber-500 uppercase tracking-wider">Mesas Aguardando Fechamento</h2>
+                    <h2 class="text-xs md:text-sm font-black text-amber-500 uppercase tracking-wider">Mesas em Atendimento / Fechamento</h2>
                     <span class="text-xs text-zinc-400 font-bold" id="caixa-contador">0 mesas</span>
                 </div>
                 <div id="lista-caixa-mesas" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1"></div>
@@ -413,6 +413,11 @@
                             let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
                             let pagoPart = p.valorPagoParcial || 0;
 
+                            // Se o pedido foi pago na hora pelo cliente, abate automaticamente do valor restante
+                            if (p.pagoNaHora) {
+                                pagoPart += val;
+                            }
+
                             if(!mesasDetalhesMap[mesaKey]) {
                                 mesasDetalhesMap[mesaKey] = {
                                     ids: [p.id],
@@ -422,11 +427,13 @@
                                     total: 0,
                                     pagoParcial: 0,
                                     atendente: p.atendente || "Geral",
-                                    temPronto: p.status === 'Entregue' && !p.alertaVisto
+                                    temPronto: p.status === 'Entregue' && !p.alertaVisto,
+                                    pagoOnline: p.pagoNaHora
                                 };
                             } else {
                                 mesasDetalhesMap[mesaKey].ids.push(p.id);
                                 mesasDetalhesMap[mesaKey].pedidosLista.push(p.pedido);
+                                if(p.pagoNaHora) mesasDetalhesMap[mesaKey].pagoOnline = true;
                             }
 
                             if(p.status === 'Pendente' || p.status === 'Preparando') {
@@ -696,13 +703,14 @@
             if(contador) contador.innerText = `${mesasOcupadas.length} mesa(s)`;
 
             if(mesasOcupadas.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs text-zinc-400 py-10 col-span-2">Nenhuma mesa aguardando pagamento.</p>`;
+                container.innerHTML = `<p class="text-center text-xs text-zinc-400 py-10 col-span-2">Nenhuma mesa em atendimento.</p>`;
                 return;
             }
 
             mesasOcupadas.forEach(mesaKey => {
                 const info = mesasDetalhesMap[mesaKey];
                 let valorRestante = info.total - info.pagoParcial;
+                if(valorRestante < 0) valorRestante = 0;
                 let extratoCombinado = info.pedidosLista.join('<br>--<br>');
                 let idsStr = encodeURIComponent(JSON.stringify(info.ids));
 
@@ -714,10 +722,15 @@
                     botaoEntregueHtml = `<button onclick="marcarPedidoEntregue('${idsStr}')" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2 px-2 rounded-xl text-xs shadow mb-2 flex items-center justify-center gap-1">🛎️ Marcar Pedido Entregue</button>`;
                 }
 
+                let badgePixOnline = info.pagoOnline ? `<span class="text-[10px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded ml-2">🟢 Pago Online (Pix)</span>` : '';
+
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-center mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-2">
-                            <span class="font-black text-amber-500 text-sm md:text-base">${info.mesaNome}</span>
+                            <div class="flex items-center">
+                                <span class="font-black text-amber-500 text-sm md:text-base">${info.mesaNome}</span>
+                                ${badgePixOnline}
+                            </div>
                             <span class="text-[10px] bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 rounded text-zinc-400 font-bold">👤 ${info.atendente}</span>
                         </div>
                         ${botaoEntregueHtml}
@@ -736,7 +749,7 @@
                             </div>` : ''}
                             <div class="flex justify-between font-black text-sm md:text-base text-zinc-800 dark:text-zinc-100 pt-1.5 border-t border-zinc-100 dark:border-zinc-800">
                                 <span>VALOR RESTANTE:</span>
-                                <span class="text-amber-500">R$ ${valorRestante.toFixed(2).replace('.',',')}</span>
+                                <span class="${valorRestante === 0 ? 'text-emerald-500' : 'text-amber-500'}">R$ ${valorRestante.toFixed(2).replace('.',',')}</span>
                             </div>
                         </div>
                     </div>
@@ -766,6 +779,7 @@
         window.abrirPixMesaCaixa = function(mesaKey) {
             const info = mesasDetalhesMap[mesaKey];
             let valorRestante = info.total - info.pagoParcial;
+            if(valorRestante < 0) valorRestante = 0;
             document.getElementById('modal-mesa-titulo').innerText = `${info.mesaNome} - Pix`;
             document.getElementById('modal-valor-total').innerText = `R$ ${valorRestante.toFixed(2).replace('.',',')}`;
             document.getElementById('aviso-chave-pix').innerText = `Chave: ${CHAVE_PIX_FIXA}`;
@@ -812,13 +826,15 @@
             mesaAtualDetalhe = mesaKey;
             const info = mesasDetalhesMap[mesaKey];
             if(!info) return;
+            let valorRestante = info.total - info.pagoParcial;
+            if(valorRestante < 0) valorRestante = 0;
 
             let extratoCombinado = info.pedidosLista.join('<br>--<br>');
             document.getElementById('detalhe-mesa-nome').innerText = info.mesaNome;
             document.getElementById('detalhe-mesa-extrato').innerHTML = extratoCombinado;
             document.getElementById('detalhe-mesa-orig').innerText = `R$ ${info.total.toFixed(2).replace('.',',')}`;
             document.getElementById('detalhe-mesa-pago').innerText = `- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}`;
-            document.getElementById('detalhe-mesa-restante').innerText = `R$ ${(info.total - info.pagoParcial).toFixed(2).replace('.',',')}`;
+            document.getElementById('detalhe-mesa-restante').innerText = `R$ ${valorRestante.toFixed(2).replace('.',',')}`;
 
             document.getElementById('modal-mesa-detalhes').classList.remove('hidden');
         }
