@@ -18,7 +18,7 @@
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 pb-24 select-none transition-colors duration-200">
+<body class="bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 select-none transition-colors duration-200 m-0 p-0">
 
     <!-- TELA DE LOGIN / ESCOLHA DO ACESSO -->
     <div id="modal-login" class="fixed inset-0 bg-black/80 dark:bg-black/95 backdrop-blur-md z-50 flex justify-center items-center p-4">
@@ -47,7 +47,7 @@
     </div>
 
     <!-- TELA PRINCIPAL DE COMANDA -->
-    <div class="max-w-md mx-auto bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 flex flex-col justify-between rounded-b-3xl transition-colors duration-200">
+    <div class="max-w-md mx-auto bg-white dark:bg-zinc-900/90 border-x border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 flex flex-col justify-between transition-colors duration-200">
         <div>
             <header class="mb-3 text-center relative border-b border-zinc-200 dark:border-zinc-800 pb-3">
                 <div class="absolute left-0 top-0 flex items-center gap-1.5">
@@ -117,7 +117,7 @@
                     </div>
                 </div>
 
-                <div class="mb-2">
+                <div class="mb-4">
                     <input type="text" id="obs" placeholder="Observações (Ex: Sem cebola, gelo...)" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:border-amber-500 text-xs text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 shadow-inner">
                 </div>
             </div>
@@ -132,7 +132,7 @@
             </div>
         </div>
 
-        <div id="painel-botoes-acao">
+        <div id="painel-botoes-acao" class="pb-4">
             <div class="flex gap-2">
                 <button id="btn-enviar-pedido" onclick="enviarPedido('Pendente')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3 px-2 rounded-2xl transition shadow-lg text-xs flex items-center justify-center gap-1">
                     🚀 Enviar para Cozinha
@@ -259,7 +259,7 @@
         let mesaSelecionada = "";
         let abaAtiva = 'salao';
         let mesasFixas = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
-        let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras') || "[]");
+        let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras'] || "[]");
         let mesasDetalhesMap = {};
         let cardapioLista = [];
         let itensCarrinho = [];
@@ -393,7 +393,6 @@
                     somaTempo += Math.floor((agora - p.timestampCriacao) / 60000);
                 }
 
-                // UNIFICAÇÃO DOS PEDIDOS DA MESMA MESA NO CAIXA
                 if(p.status === "Pendente" || p.status === "Preparando" || p.status === "Entregue") {
                     if(p.mesa) {
                         let mesaKey = p.mesa.trim();
@@ -424,12 +423,9 @@
                 }
             });
 
-            // SELEÇÃO INTELIGENTE DO PEDIDO ATIVO PARA O CLIENTE (QR CODE)
             let meuPedidoAtivo = null;
             if(mesaUrl && meusPedidosMesa.length > 0) {
-                // Ordena do mais recente para o mais antigo
                 meusPedidosMesa.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
-                // Prioriza pedidos Pendentes ou Em Preparo, se não houver, pega o mais recente Entregue
                 meuPedidoAtivo = meusPedidosMesa.find(p => p.status === 'Pendente' || p.status === 'Preparando') || meusPedidosMesa[0];
             }
 
