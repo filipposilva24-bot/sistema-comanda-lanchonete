@@ -20,7 +20,6 @@
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 pb-24 select-none transition-colors duration-200">
 
-    <!-- TELA DE LOGIN / ESCOLHA DO ACESSO -->
     <div id="modal-login" class="fixed inset-0 bg-black/80 dark:bg-black/95 backdrop-blur-md z-50 flex justify-center items-center p-4">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl">
             <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
@@ -46,7 +45,6 @@
         </div>
     </div>
 
-    <!-- TELA PRINCIPAL DE COMANDA -->
     <div class="max-w-md mx-auto bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 flex flex-col justify-between rounded-b-3xl transition-colors duration-200">
         <div>
             <header class="mb-3 text-center relative border-b border-zinc-200 dark:border-zinc-800 pb-3">
@@ -64,20 +62,19 @@
                 </div>
                 <h1 class="text-2xl font-black tracking-tight text-amber-500 dark:text-amber-400">POINT DERICO</h1>
                 
-                <div class="flex gap-2 mt-3">
+                <div class="flex gap-2 mt-3" id="container-abas-navegacao">
                     <button onclick="mudarAba('salao')" id="aba-salao" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 rounded-xl text-xs shadow">🏠 Salão / Cardápio</button>
                     <button onclick="mudarAba('caixa')" id="aba-caixa" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2 rounded-xl text-xs shadow">💰 Caixa / Mesas</button>
                 </div>
 
                 <div class="flex justify-between items-center mt-2 px-1">
                     <p class="text-xs text-zinc-500 dark:text-zinc-400 font-medium" id="info-mesa-atual">Painel de Lançamento</p>
-                    <button onclick="trocarAtendente()" class="tap-scale text-[10px] bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 px-3 py-1 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 transition">
+                    <button id="btn-trocar-operador" onclick="trocarAtendente()" class="tap-scale text-[10px] bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 px-3 py-1 rounded-xl font-semibold text-zinc-700 dark:text-zinc-300 transition">
                         👤 <span id="badge-atendente">--</span>
                     </button>
                 </div>
             </header>
             
-            <!-- VIEW SALÃO -->
             <div id="view-salao">
                 <div class="mb-3" id="bloco-selecao-mesas">
                     <div class="flex justify-between items-center mb-1.5">
@@ -119,7 +116,6 @@
                 </div>
             </div>
 
-            <!-- VIEW CAIXA -->
             <div id="view-caixa" class="hidden">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xs font-black text-amber-500 uppercase tracking-wider">Mesas Aguardando Fechamento</h2>
@@ -142,7 +138,6 @@
         </div>
     </div>
 
-    <!-- MODAL CARRINHO -->
     <div id="carrinho-flutuante" onclick="abrirModalCarrinho()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
         <div class="flex items-center gap-2">
             <span class="text-base">🛒</span>
@@ -168,7 +163,6 @@
         </div>
     </div>
 
-    <!-- TECLADO NUMÉRICO -->
     <div id="modal-numpad" class="fixed inset-0 bg-black/95 z-[60] flex flex-col justify-center items-center hidden p-4">
         <div class="w-full max-w-xs p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl">
             <p class="text-amber-500 text-center font-bold text-xs uppercase tracking-widest mb-2">Alterar Quantidade</p>
@@ -190,7 +184,6 @@
         </div>
     </div>
 
-    <!-- MODAL PIX -->
     <div id="modal-pix-atendente" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <button onclick="fecharModalPixAtendente()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -208,7 +201,6 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHES DA MESA -->
     <div id="modal-mesa-detalhes" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-5 shadow-2xl relative">
             <button onclick="fecharModalMesaDetalhes()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold">✕</button>
@@ -305,6 +297,12 @@
             document.getElementById('info-mesa-atual').innerText = `Autoatendimento - ${mesaUrl}`;
             const btnPix = document.getElementById('btn-pix-atendente');
             if (btnPix) btnPix.style.display = 'none';
+            
+            // Ocultar aba de Caixa/Mesas e botão de trocar operador para o Cliente QR
+            const containerAbas = document.getElementById('container-abas-navegacao');
+            if (containerAbas) containerAbas.style.display = 'none';
+            const btnTrocarOp = document.getElementById('btn-trocar-operador');
+            if (btnTrocarOp) btnTrocarOp.style.display = 'none';
         }
 
         window.verificarLogin = function() {
@@ -368,9 +366,11 @@
             snapshot.forEach(docSnap => {
                 let p = { id: docSnap.id, ...docSnap.data() };
 
-                if(p.status === 'Entregue' && !pedidosAlertados.has(p.id)) {
+                // Apenas alerta se NÃO estiver no modo QR code do cliente
+                if(!mesaUrl && p.status === 'Entregue' && !pedidosAlertados.has(p.id)) {
                     pedidosAlertados.add(p.id);
-                    mostrarToast(`Mesa ${p.mesa} está pronta na cozinha!`);
+                    let nomeMesaAlerta = p.mesa.startsWith('Mesa') || p.mesa.startsWith('Balcão') ? p.mesa : `Mesa ${p.mesa}`;
+                    mostrarToast(`${nomeMesaAlerta} está pronta na cozinha!`);
                     if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
 
@@ -468,13 +468,20 @@
                     let btn = document.createElement('button');
                     let estilo = obterEstiloCategoria(cat);
                     
+                    // Formatação automática para pastéis (garante "Pastel de [Sabor]")
+                    let nomeExibicao = prod.nome;
+                    let catUpper = cat.toUpperCase();
+                    if ((catUpper.includes('PASTEL') || catUpper.includes('PASTÉIS')) && !prod.nome.toLowerCase().includes('pastel')) {
+                        nomeExibicao = `Pastel de ${prod.nome}`;
+                    }
+                    
                     if(prod.ativo === false) {
                         btn.className = "tap-scale bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 p-2.5 rounded-2xl text-left flex flex-col opacity-50 grayscale cursor-not-allowed";
-                        btn.innerHTML = `<span class="text-xs font-bold text-zinc-600 line-through">${prod.nome}</span><span class="bg-red-600 text-white text-[9px] font-black px-1 py-0.5 rounded mt-1 w-max">ESGOTADO</span>`;
+                        btn.innerHTML = `<span class="text-xs font-bold text-zinc-600 line-through">${nomeExibicao}</span><span class="bg-red-600 text-white text-[9px] font-black px-1 py-0.5 rounded mt-1 w-max">ESGOTADO</span>`;
                     } else {
                         btn.className = `tap-scale ${estilo.bg} border p-2.5 rounded-2xl text-left flex flex-col transition shadow-sm`;
-                        btn.innerHTML = `<span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">${prod.nome}</span><span class="text-[10px] text-amber-600 dark:text-amber-400/90 mt-1 font-extrabold">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
-                        btn.onclick = () => adicionarItem(prod.nome, Number(prod.preco));
+                        btn.innerHTML = `<span class="text-xs font-bold text-zinc-900 dark:text-zinc-100">${nomeExibicao}</span><span class="text-[10px] text-amber-600 dark:text-amber-400/90 mt-1 font-extrabold">R$ ${Number(prod.preco).toFixed(2).replace('.', ',')}</span>`;
+                        btn.onclick = () => adicionarItem(nomeExibicao, Number(prod.preco));
                     }
                     grid.appendChild(btn);
                 });
