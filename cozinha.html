@@ -19,6 +19,12 @@
             background: transparent; bottom: 0; color: transparent; cursor: pointer; height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto;
         }
         input[type="date"], input[type="month"] { position: relative; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #area-impressao, #area-impressao * { visibility: visible; }
+            #area-impressao { position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-950 min-h-screen text-zinc-950 dark:text-zinc-100 font-sans flex flex-col select-none transition-colors duration-200">
@@ -70,16 +76,21 @@
 
     <main class="p-4 flex-grow relative">
         
-        <!-- PAINEL DE RELATÓRIO (Exibido apenas na Aba Relatórios) -->
+        <!-- PAINEL DE RELATÓRIO -->
         <div id="painel-filtro" class="hidden mb-4 space-y-4">
             
-            <!-- Bloco 1: Relatório Mensal (Resumo compacto e Ranking do Mês) -->
+            <!-- Bloco 1: Relatório Mensal -->
             <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-3xl shadow-xl transition-colors duration-200">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">📊 Faturamento Mensal</h2>
-                    <button onclick="enviarRelatorioWhatsApp('mes')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1.5">
-                        💬 Enviar Mensal
-                    </button>
+                    <div class="flex gap-1.5">
+                        <button onclick="exportarPdfMensal()" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-2.5 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1">
+                            📄 PDF
+                        </button>
+                        <button onclick="enviarRelatorioWhatsApp('mes')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-2.5 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1">
+                            💬 WhatsApp
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="mb-3 w-full">
@@ -105,13 +116,18 @@
                 </div>
             </div>
 
-            <!-- Bloco 2: Relatório Diário (Com seletor de dia, total, ranking E listagem dos cards abaixo) -->
+            <!-- Bloco 2: Relatório Diário & Comandas em Lista Compacta -->
             <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-3xl shadow-xl transition-colors duration-200">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">📅 Faturamento Diário & Comandas</h2>
-                    <button onclick="enviarRelatorioWhatsApp('dia')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1.5">
-                        💬 Enviar Diário
-                    </button>
+                    <div class="flex gap-1.5">
+                        <button onclick="exportarPdfDiario()" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-2.5 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1">
+                            📄 PDF
+                        </button>
+                        <button onclick="enviarRelatorioWhatsApp('dia')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-2.5 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1">
+                            💬 WhatsApp
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="mb-3 w-full">
@@ -129,26 +145,37 @@
                     <span class="text-xl font-black text-emerald-600 dark:text-emerald-400" id="valor-total-dia">R$ 0,00</span>
                 </div>
 
-                <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
+                <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full mb-3">
                     <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">🏆 Ranking do Dia</h3>
                     <div id="ranking-produtos-dia" class="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300 max-h-36 overflow-y-auto">
                         <p class="text-zinc-400 italic">Nenhuma venda hoje.</p>
+                    </div>
+                </div>
+
+                <!-- Lista Compacta de Comandas do Dia -->
+                <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
+                    <h3 class="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">🧾 Lista de Comandas do Dia</h3>
+                    <div id="lista-comandas-compacta" class="space-y-1.5 text-xs max-h-60 overflow-y-auto font-mono">
+                        <p class="text-zinc-400 italic">Nenhuma comanda registrada.</p>
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <!-- Container de Cards (Cozinha, Caixa e Relatório Diário) -->
+        <!-- Container de Cards (Cozinha e Caixa) -->
         <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
         
-        <!-- Mensagem de Vazio -->
+        <!-- Mensagem de Vazia -->
         <div id="mensagem-vazia" class="text-center mt-20 text-zinc-400 hidden">
             <span class="text-5xl block mb-3" id="icone-vazio">🍽️</span>
             <h2 class="text-base font-bold text-zinc-600 dark:text-zinc-400" id="texto-vazio">Cozinha Tranquila!</h2>
             <p class="text-xs mt-1 text-zinc-400">Nenhum registro encontrado nesta aba.</p>
         </div>
     </main>
+
+    <!-- ÁREA OCULTA PARA IMPRESSÃO EM PDF DO RELATÓRIO -->
+    <div id="area-impressao" class="hidden p-6 bg-white text-zinc-900 font-sans"></div>
 
     <!-- MODAIS -->
     <div id="modal-admin-cardapio" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
@@ -243,9 +270,8 @@
                 </div>
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                    <strong class="text-amber-500 block mb-1">📊 3. Relatórios Diário e Mensal</strong>
-                    • Veja simultaneamente o **Faturamento do Mês** e o **Faturamento do Dia** com listagem completa das comandas pagas.<br>
-                    • Envie o fechamento diário ou mensal diretamente no WhatsApp.
+                    <strong class="text-amber-500 block mb-1">📊 3. Relatórios PDF & WhatsApp</strong>
+                    • Exporte relatórios em PDF limpos e resumidos contendo o faturamento total, ranking e lista compacta de comandas.
                 </div>
             </div>
 
@@ -315,12 +341,8 @@
             }
         }, 1000);
 
-        window.abrirModalAjudaCozinha = function() {
-            document.getElementById('modal-ajuda-cozinha').classList.remove('hidden');
-        }
-        window.fecharModalAjudaCozinha = function() {
-            document.getElementById('modal-ajuda-cozinha').classList.add('hidden');
-        }
+        window.abrirModalAjudaCozinha = function() { document.getElementById('modal-ajuda-cozinha').classList.remove('hidden'); }
+        window.fecharModalAjudaCozinha = function() { document.getElementById('modal-ajuda-cozinha').classList.add('hidden'); }
 
         window.abrirAdminCardapio = function() {
             document.getElementById('input-senha-cardapio').value = '';
@@ -674,10 +696,11 @@
 
             } 
             /* ======================================================== */
-            /* ABA RELATÓRIO (MENSAL COMPACTO + DIÁRIO COM CARDS) */
+            /* ABA RELATÓRIO (MENSAL COMPACTO + DIÁRIO COMPACTO EM LISTA) */
             /* ======================================================== */
             else if (abaAtual === 'relatorio') {
                 contadorTxt.innerText = `Painel de Faturamento`;
+                msgVazia.classList.add('hidden');
 
                 const valData = document.getElementById('filtro-data').value;
                 const valMes = document.getElementById('filtro-mes').value;
@@ -716,7 +739,7 @@
                     });
                 }
 
-                // 2. Processar Dia (com Cards na listagem principal)
+                // 2. Processar Dia (com Ranking e Lista Compacta)
                 let filtradosDia = pedidosPago.filter(p => valData ? p.dataCriacao === valData : true);
                 let totalDia = 0;
                 let prodDia = {};
@@ -748,43 +771,82 @@
                     });
                 }
 
+                // 3. Renderizar Lista Compacta de Comandas do Dia
+                const listaComandasDiv = document.getElementById('lista-comandas-compacta');
+                listaComandasDiv.innerHTML = '';
                 if (filtradosDia.length === 0) {
-                    msgVazia.classList.remove('hidden');
-                    document.getElementById('texto-vazio').innerText = "Nenhuma comanda paga neste dia.";
+                    listaComandasDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma comanda paga neste dia.</p>';
                 } else {
-                    msgVazia.classList.add('hidden');
                     filtradosDia.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
-
-                    filtradosDia.forEach((pedido) => {
-                        let itensTexto = pedido.pedido || "";
-                        let blocoAbatimentoRelatorio = `
-                            <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                                <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100">
-                                    <span>VALOR TOTAL PAGO:</span>
-                                    <span class="text-emerald-500">${pedido.total || 'R$ 0,00'}</span>
-                                </div>
-                            </div>
+                    filtradosDia.forEach(p => {
+                        let div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[11px]";
+                        div.innerHTML = `
+                            <div><strong class="text-amber-600 dark:text-amber-400">${p.mesa}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
+                            <span class="text-emerald-600 font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
                         `;
-                        let botoesHtml = `${blocoAbatimentoRelatorio}<div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 flex justify-between"><span>Status: <strong class="text-emerald-600 dark:text-emerald-400">Pago</strong></span><span class="font-mono">${pedido.dataCriacao || ''}</span></div>`;
-                        let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${pedido.atendente}</span>` : '';
-
-                        const card = document.createElement('div');
-                        card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
-                        card.innerHTML = `
-                            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
-                            <div>
-                                <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
-                                    <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${pedido.mesa}</h2><div class="mt-1">${badgeAtendente}</div></div>
-                                    <div class="flex flex-col items-end gap-1.5"><span class="text-zinc-400 text-[11px] font-mono">${pedido.horario || '--:--'}</span></div>
-                                </div>
-                                <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${itensTexto.replace(/\n/g, '<br>')}</div>
-                            </div>
-                            ${botoesHtml}
-                        `;
-                        container.appendChild(card);
+                        listaComandasDiv.appendChild(div);
                     });
                 }
             }
+        }
+
+        window.exportarPdfMensal = function() {
+            let mesVal = document.getElementById('filtro-mes').value;
+            let totalTxt = document.getElementById('valor-total-mes').innerText;
+            let qtdTxt = document.getElementById('qtd-pedidos-mes').innerText;
+            let rankingHtml = document.getElementById('ranking-produtos-mes').innerHTML;
+
+            let area = document.getElementById('area-impressao');
+            area.innerHTML = `
+                <div style="font-family: sans-serif; padding: 20px; color: #111;">
+                    <h2 style="color: #d97706; margin-bottom: 5px;">POINT DERICO - RELATÓRIO MENSAL</h2>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Mês Referência: <strong>${mesVal}</strong></p>
+                    
+                    <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bfdbfe;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #1e40af;">Faturamento Total</h3>
+                        <p style="font-size: 22px; font-weight: bold; color: #2563eb; margin: 0;">${totalTxt}</p>
+                        <p style="font-size: 11px; color: #555; margin: 5px 0 0 0;">${qtdTxt}</p>
+                    </div>
+
+                    <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🏆 Ranking de Produtos do Mês</h3>
+                    <div style="font-size: 12px;">${rankingHtml}</div>
+                </div>
+            `;
+            area.classList.remove('hidden');
+            window.print();
+            area.classList.add('hidden');
+        }
+
+        window.exportarPdfDiario = function() {
+            let dataVal = document.getElementById('filtro-data').value;
+            let totalTxt = document.getElementById('valor-total-dia').innerText;
+            let qtdTxt = document.getElementById('qtd-pedidos-dia').innerText;
+            let rankingHtml = document.getElementById('ranking-produtos-dia').innerHTML;
+            let comandasHtml = document.getElementById('lista-comandas-compacta').innerHTML;
+
+            let area = document.getElementById('area-impressao');
+            area.innerHTML = `
+                <div style="font-family: sans-serif; padding: 20px; color: #111;">
+                    <h2 style="color: #d97706; margin-bottom: 5px;">POINT DERICO - RELATÓRIO DIÁRIO</h2>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Data: <strong>${dataVal}</strong></p>
+                    
+                    <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #065f46;">Faturamento do Dia</h3>
+                        <p style="font-size: 22px; font-weight: bold; color: #059669; margin: 0;">${totalTxt}</p>
+                        <p style="font-size: 11px; color: #555; margin: 5px 0 0 0;">${qtdTxt}</p>
+                    </div>
+
+                    <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🏆 Ranking do Dia</h3>
+                    <div style="font-size: 12px; margin-bottom: 20px;">${rankingHtml}</div>
+
+                    <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🧾 Lista de Comandas Pagas</h3>
+                    <div style="font-size: 11px;">${comandasHtml}</div>
+                </div>
+            `;
+            area.classList.remove('hidden');
+            window.print();
+            area.classList.add('hidden');
         }
 
         window.abrirAbaterMulti = async function(idsStr) {
