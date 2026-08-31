@@ -19,29 +19,11 @@
             background: transparent; bottom: 0; color: transparent; cursor: pointer; height: auto; left: 0; position: absolute; right: 0; top: 0; width: auto;
         }
         input[type="date"], input[type="month"] { position: relative; }
-
-        /* Estilo profissional exclusivo para o relatório impresso/PDF */
-        @media print {
-            body { background: white !important; color: black !important; padding: 0 !important; }
-            header, #painel-botoes-acao, button, .no-print, #pedidos-container { display: none !important; }
-            #painel-filtro { 
-                display: block !important; 
-                border: none !important; 
-                box-shadow: none !important; 
-                background: white !important; 
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            #relatorio-cabecalho-pdf { display: block !important; }
-            input, select { border: none !important; background: transparent !important; font-weight: bold; }
-        }
     </style>
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-950 min-h-screen text-zinc-950 dark:text-zinc-100 font-sans flex flex-col select-none transition-colors duration-200">
 
-    <!-- Cabeçalho Principal -->
-    <header class="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-3 sticky top-0 z-50 shadow-xl transition-colors duration-200 no-print">
+    <header class="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-3 sticky top-0 z-50 shadow-xl transition-colors duration-200">
         <div class="flex justify-between items-center mb-2.5">
             <div class="flex items-center gap-2">
                 <span class="text-amber-500 dark:text-amber-400 text-base">🔥</span>
@@ -55,7 +37,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Botões de Ação no Topo -->
             <div class="flex gap-1.5 items-center">
                 <button onclick="window.location.reload()" class="tap-scale bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-900/60 hover:bg-emerald-200 dark:hover:bg-emerald-900 px-2 py-1.5 rounded-xl text-[11px] font-bold text-emerald-700 dark:text-emerald-400 transition shadow-sm" title="Forçar Atualização">
                     🔄
@@ -75,7 +56,6 @@
             </div>
         </div>
         
-        <!-- Abas de Navegação -->
         <div class="flex gap-1 justify-between items-center">
             <div class="flex gap-1 flex-grow overflow-x-auto">
                 <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 px-2 text-[11px] rounded-xl transition shadow text-center whitespace-nowrap">👨‍🍳 Cozinha</button>
@@ -88,26 +68,17 @@
         </div>
     </header>
 
-    <!-- Área Principal -->
     <main class="p-4 flex-grow relative">
         
-        <!-- Filtro de Relatório -->
         <div id="painel-filtro" class="hidden mb-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-3xl shadow-xl transition-colors duration-200">
-            
-            <!-- Cabeçalho Exclusivo para Impressão/PDF -->
-            <div id="relatorio-cabecalho-pdf" class="hidden mb-4 pb-3 border-b-2 border-amber-500">
-                <h1 class="text-lg font-black text-amber-600 uppercase">POINT DERICO - RELATÓRIO DE FATURAMENTO</h1>
-                <p class="text-xs text-zinc-600" id="pdf-data-geracao">Gerado em: --/--/----</p>
-            </div>
-
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">Faturamento & Ranking</h2>
-                <button onclick="salvarRelatorioPDF()" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1.5 no-print">
-                    📄 Salvar em PDF
+                <button onclick="enviarRelatorioWhatsApp()" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs transition shadow flex items-center gap-1.5">
+                    💬 Enviar no WhatsApp
                 </button>
             </div>
             
-            <div class="flex flex-col gap-3 mb-3 w-full no-print">
+            <div class="flex flex-col gap-3 mb-3 w-full">
                 <div class="w-full">
                     <label class="block text-[10px] text-zinc-500 dark:text-zinc-400 uppercase font-bold mb-1">Dia Específico:</label>
                     <div class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500 transition-colors block">
@@ -122,7 +93,7 @@
                 </div>
             </div>
 
-            <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
+            <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full">
                 <div>
                     <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider" id="titulo-total-filtro">Total do Dia:</span>
                     <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-pedidos-filtro">0 comandas pagas</p>
@@ -130,7 +101,7 @@
                 <span class="text-xl font-black text-emerald-600 dark:text-emerald-400" id="valor-total-filtro">R$ 0,00</span>
             </div>
 
-            <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
+            <div class="mt-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
                 <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">🏆 Ranking de Itens Mais Vendidos</h3>
                 <div id="ranking-produtos-lista" class="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300 max-h-48 overflow-y-auto">
                     <p class="text-zinc-400 italic">Nenhuma venda registrada no período.</p>
@@ -138,10 +109,8 @@
             </div>
         </div>
 
-        <!-- Container de Cards (Oculto no Relatório / Usado apenas Cozinha e Caixa) -->
         <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
         
-        <!-- Mensagem de Vazio -->
         <div id="mensagem-vazia" class="text-center mt-20 text-zinc-400 hidden">
             <span class="text-5xl block mb-3" id="icone-vazio">🍽️</span>
             <h2 class="text-base font-bold text-zinc-600 dark:text-zinc-400" id="texto-vazio">Cozinha Tranquila!</h2>
@@ -149,7 +118,6 @@
         </div>
     </main>
 
-    <!-- MODAL ADMIN CARDÁPIO -->
     <div id="modal-admin-cardapio" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto transition-colors duration-200">
             <button onclick="fecharAdminCardapio()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -171,7 +139,6 @@
         </div>
     </div>
 
-    <!-- MODAL SENHA CARDÁPIO -->
     <div id="modal-senha-admin" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative transition-colors duration-200">
             <button onclick="document.getElementById('modal-senha-admin').classList.add('hidden')" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -184,7 +151,6 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIG PIX -->
     <div id="modal-config-pix" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative transition-colors duration-200">
             <button onclick="fecharConfigPix()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -201,7 +167,6 @@
         </div>
     </div>
 
-    <!-- MODAL RESET -->
     <div id="modal-reset" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-red-300 dark:border-red-900/50 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative transition-colors duration-200">
             <button onclick="fecharModalReset()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -212,7 +177,6 @@
         </div>
     </div>
 
-    <!-- MODAL PIX CAIXA -->
     <div id="modal-pix" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative transition-colors duration-200">
             <button onclick="fecharModalPix()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -225,7 +189,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE AJUDA - GESTÃO & COZINHA -->
     <div id="modal-ajuda-cozinha" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
             <button onclick="fecharModalAjudaCozinha()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
@@ -248,9 +211,9 @@
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">📊 3. Relatórios & Cardápio</strong>
-                    • Filtre o faturamento por **Dia Específico** ou por **Mês Específico**.<br>
+                    • Filtre faturamento por dia ou por mês específico.<br>
                     • Veja o ranking automático dos produtos mais vendidos.<br>
-                    • Botão roxo para salvar ou imprimir o relatório resumido em PDF.
+                    • Botão verde para exportar o fechamento direto no WhatsApp.
                 </div>
             </div>
 
@@ -433,6 +396,8 @@
 
         window.mudarFiltroTipo = function(tipo) {
             tipoFiltroRelatorio = tipo;
+            if(tipo === 'dia') document.getElementById('filtro-mes').value = '';
+            else document.getElementById('filtro-data').value = '';
             renderizarCards();
         }
 
@@ -690,21 +655,15 @@
 
             } 
             /* ======================================================== */
-            /* ABA RELATÓRIO (Resumido - Diário ou Mensal) */
+            /* ABA RELATÓRIO */
             /* ======================================================== */
             else if (abaAtual === 'relatorio') {
                 const valData = document.getElementById('filtro-data').value;
                 const valMes = document.getElementById('filtro-mes').value;
-
                 filtrados = todosPedidos.filter(p => {
                     if (p.status !== 'Pago') return false;
-                    if (!p.dataCriacao) return false;
-
-                    if (tipoFiltroRelatorio === 'dia') {
-                        return valData ? p.dataCriacao === valData : true;
-                    } else if (tipoFiltroRelatorio === 'mes') {
-                        return valMes ? p.dataCriacao.startsWith(valMes) : true;
-                    }
+                    if (tipoFiltroRelatorio === 'dia' && valData) return p.dataCriacao === valData;
+                    if (tipoFiltroRelatorio === 'mes' && valMes) return p.dataCriacao && p.dataCriacao.startsWith(valMes);
                     return true;
                 });
 
@@ -737,7 +696,7 @@
                 } else {
                     arrayRanking.forEach((prod, index) => {
                         let divRank = document.createElement('div');
-                        divRank.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800";
+                        divRank.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800";
                         divRank.innerHTML = `<span><strong class="text-amber-600 dark:text-amber-400">#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span><span class="text-emerald-600 dark:text-emerald-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>`;
                         rankingLista.appendChild(divRank);
                     });
@@ -745,6 +704,41 @@
                 contadorTxt.innerText = `Painel de Faturamento`;
                 document.getElementById('icone-vazio').innerText = "📊";
                 document.getElementById('texto-vazio').innerText = "Nenhum fechamento registrado.";
+
+                if (filtrados.length === 0) { msgVazia.classList.remove('hidden'); return; }
+                else { msgVazia.classList.add('hidden'); }
+
+                filtrados.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
+
+                filtrados.forEach((pedido) => {
+                    let itensTexto = pedido.pedido || "";
+                    let blocoAbatimentoRelatorio = `
+                        <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                            <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100">
+                                <span>VALOR TOTAL PAGO:</span>
+                                <span class="text-emerald-500">${pedido.total || 'R$ 0,00'}</span>
+                            </div>
+                        </div>
+                    `;
+                    let botoesHtml = `${blocoAbatimentoRelatorio}<div class="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-800 text-xs text-zinc-500 flex justify-between"><span>Status: <strong class="text-emerald-600 dark:text-emerald-400">Pago</strong></span><span class="font-mono">${pedido.dataCriacao || ''}</span></div>`;
+
+                    let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${pedido.atendente}</span>` : '';
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
+                    card.innerHTML = `
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
+                        <div>
+                            <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
+                                <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${pedido.mesa}</h2><div class="mt-1">${badgeAtendente}</div></div>
+                                <div class="flex flex-col items-end gap-1.5"><span class="text-zinc-400 text-[11px] font-mono">${pedido.horario || '--:--'}</span></div>
+                            </div>
+                            <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${itensTexto.replace(/\n/g, '<br>')}</div>
+                        </div>
+                        ${botoesHtml}
+                    `;
+                    container.appendChild(card);
+                });
             }
         }
 
@@ -764,12 +758,12 @@
             } catch(e) { alert("Erro ao abater valor."); }
         }
 
-        // Função para Salvar em PDF / Imprimir Relatório Resumido
-        window.salvarRelatorioPDF = function() {
-            let dataAtual = new Date().toLocaleString('pt-BR');
-            let tipoPeriodo = tipoFiltroRelatorio === 'dia' ? `Data: ${document.getElementById('filtro-data').value}` : `Mês: ${document.getElementById('filtro-mes').value}`;
-            document.getElementById('pdf-data-geracao').innerText = `Período: ${tipoPeriodo} | Gerado em: ${dataAtual}`;
-            window.print();
+        window.enviarRelatorioWhatsApp = function() {
+            let totalTxt = document.getElementById('valor-total-filtro').innerText;
+            let qtdTxt = document.getElementById('qtd-pedidos-filtro').innerText;
+            let periodo = tipoFiltroRelatorio === 'dia' ? `do dia ${document.getElementById('filtro-data').value}` : `do mês ${document.getElementById('filtro-mes').value}`;
+            let mensagem = `📊 *Fechamento Point Derico* (${periodo})\n\n💰 *Faturamento Total:* ${totalTxt}\n🧾 *Comandas Finalizadas:* ${qtdTxt}\n\n🔥 Sistema Point Derico`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
         }
 
         window.mudarStatus = async function(id, novoStatus) {
