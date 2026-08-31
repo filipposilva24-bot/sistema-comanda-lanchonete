@@ -259,7 +259,7 @@
         let mesaSelecionada = "";
         let abaAtiva = 'salao';
         let mesasFixas = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Mesa 7", "Mesa 8", "Balcão"];
-        let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras') || "[]");
+        let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras'] || "[]");
         let mesasDetalhesMap = {};
         let cardapioLista = [];
         let itensCarrinho = [];
@@ -377,7 +377,7 @@
             snapshot.forEach(docSnap => {
                 let p = { id: docSnap.id, ...docSnap.data() };
 
-                if(mesaUrl && p.mesa === mesaUrl && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
+                if(mesaUrl && p.mesa && p.mesa.trim().toLowerCase() === mesaUrl.trim().toLowerCase() && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
                     meusPedidosMesa.push(p);
                 }
 
@@ -464,7 +464,7 @@
             let media = qtdPendentes > 0 ? Math.floor(somaTempo / qtdPendentes) : 0;
             document.getElementById('tempo-cozinha-badge').innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
 
-            if(!mesaUrl) renderizarMesas();
+            renderizarMesas();
             if(abaAtiva === 'caixa') renderizarCaixaMesas();
         });
 
@@ -559,13 +559,15 @@
 
         window.renderizarMesas = function() {
             const container = document.getElementById('container-mesas');
+            if(!container) return;
             container.innerHTML = '';
             let todasAsMesas = [...mesasFixas, ...mesasExtras];
 
             todasAsMesas.forEach(mesa => {
                 const isSelected = mesaSelecionada === mesa;
-                const dadosMesa = mesasDetalhesMap[mesa.trim()];
-                const isOccupied = !!dadosMesa;
+                // Busca a mesa de forma case-insensitive e trimmed
+                const mesaKeyEncontrada = Object.keys(mesasDetalhesMap).find(k => k.trim().toLowerCase() === mesa.trim().toLowerCase());
+                const isOccupied = !!mesaKeyEncontrada;
 
                 const wrapper = document.createElement('div');
                 wrapper.className = "relative flex";
@@ -580,7 +582,7 @@
                 btn.innerText = mesa + (isOccupied ? " 🔴" : "");
                 
                 btn.onclick = () => {
-                    if(isOccupied) abrirModalMesaDetalhes(mesa);
+                    if(isOccupied) abrirModalMesaDetalhes(mesaKeyEncontrada);
                     else { mesaSelecionada = mesa; renderizarMesas(); }
                 };
                 wrapper.appendChild(btn);
@@ -627,6 +629,7 @@
         window.renderizarCaixaMesas = function() {
             const container = document.getElementById('lista-caixa-mesas');
             const contador = document.getElementById('caixa-contador');
+            if(!container) return;
             container.innerHTML = '';
             
             let mesasOcupadas = Object.keys(mesasDetalhesMap);
@@ -723,9 +726,9 @@
         }
 
         let mesaAtualDetalhe = null;
-        window.abrirModalMesaDetalhes = function(mesa) {
-            mesaAtualDetalhe = mesa;
-            const info = mesasDetalhesMap[mesa.trim()];
+        window.abrirModalMesaDetalhes = function(mesaKey) {
+            mesaAtualDetalhe = mesaKey;
+            const info = mesasDetalhesMap[mesaKey];
             if(!info) return;
 
             let extratoCombinado = info.pedidosLista.join('<br>--<br>');
@@ -950,7 +953,7 @@
         }
 
         verificarLogin();
-        if(!mesaUrl) renderizarMesas();
+        renderizarMesas();
     </script>
 </body>
 </html>
