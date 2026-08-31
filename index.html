@@ -20,6 +20,7 @@
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 pb-24 select-none transition-colors duration-200">
 
+    <!-- TELA DE LOGIN / ESCOLHA DO ACESSO -->
     <div id="modal-login" class="fixed inset-0 bg-black/80 dark:bg-black/95 backdrop-blur-md z-50 flex justify-center items-center p-4">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl">
             <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
@@ -45,6 +46,7 @@
         </div>
     </div>
 
+    <!-- TELA PRINCIPAL DE COMANDA -->
     <div class="max-w-md mx-auto bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800/80 min-h-screen shadow-2xl p-4 flex flex-col justify-between rounded-b-3xl transition-colors duration-200">
         <div>
             <header class="mb-3 text-center relative border-b border-zinc-200 dark:border-zinc-800 pb-3">
@@ -75,7 +77,11 @@
                 </div>
             </header>
             
+            <!-- VIEW SALÃO -->
             <div id="view-salao">
+                <!-- PAINEL DE STATUS EM TEMPO REAL PARA O CLIENTE QR -->
+                <div id="painel-status-cliente" class="mb-3 hidden"></div>
+
                 <div class="mb-3" id="bloco-selecao-mesas">
                     <div class="flex justify-between items-center mb-1.5">
                         <label class="block text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider">Mesa / Local:</label>
@@ -116,6 +122,7 @@
                 </div>
             </div>
 
+            <!-- VIEW CAIXA -->
             <div id="view-caixa" class="hidden">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-xs font-black text-amber-500 uppercase tracking-wider">Mesas Aguardando Fechamento</h2>
@@ -138,6 +145,7 @@
         </div>
     </div>
 
+    <!-- MODAL CARRINHO -->
     <div id="carrinho-flutuante" onclick="abrirModalCarrinho()" class="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-amber-500 text-zinc-950 p-3 rounded-2xl shadow-2xl flex justify-between items-center z-40 hidden tap-scale cursor-pointer border border-amber-400">
         <div class="flex items-center gap-2">
             <span class="text-base">🛒</span>
@@ -163,6 +171,7 @@
         </div>
     </div>
 
+    <!-- TECLADO NUMÉRICO -->
     <div id="modal-numpad" class="fixed inset-0 bg-black/95 z-[60] flex flex-col justify-center items-center hidden p-4">
         <div class="w-full max-w-xs p-6 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl">
             <p class="text-amber-500 text-center font-bold text-xs uppercase tracking-widest mb-2">Alterar Quantidade</p>
@@ -184,6 +193,7 @@
         </div>
     </div>
 
+    <!-- MODAL PIX -->
     <div id="modal-pix-atendente" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
             <button onclick="fecharModalPixAtendente()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -201,6 +211,7 @@
         </div>
     </div>
 
+    <!-- MODAL DETALHES DA MESA -->
     <div id="modal-mesa-detalhes" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-5 shadow-2xl relative">
             <button onclick="fecharModalMesaDetalhes()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold">✕</button>
@@ -298,7 +309,6 @@
             const btnPix = document.getElementById('btn-pix-atendente');
             if (btnPix) btnPix.style.display = 'none';
             
-            // Ocultar aba de Caixa/Mesas e botão de trocar operador para o Cliente QR
             const containerAbas = document.getElementById('container-abas-navegacao');
             if (containerAbas) containerAbas.style.display = 'none';
             const btnTrocarOp = document.getElementById('btn-trocar-operador');
@@ -362,11 +372,16 @@
             let somaTempo = 0;
             let qtdPendentes = 0;
             let agora = Date.now();
+            let meuPedidoAtivo = null;
 
             snapshot.forEach(docSnap => {
                 let p = { id: docSnap.id, ...docSnap.data() };
 
-                // Apenas alerta se NÃO estiver no modo QR code do cliente
+                // Acompanhamento em tempo real para o Cliente QR
+                if(mesaUrl && p.mesa === mesaUrl && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
+                    meuPedidoAtivo = p;
+                }
+
                 if(!mesaUrl && p.status === 'Entregue' && !pedidosAlertados.has(p.id)) {
                     pedidosAlertados.add(p.id);
                     let nomeMesaAlerta = p.mesa.startsWith('Mesa') || p.mesa.startsWith('Balcão') ? p.mesa : `Mesa ${p.mesa}`;
@@ -379,18 +394,52 @@
                     somaTempo += Math.floor((agora - p.timestampCriacao) / 60000);
                 }
 
-                if(p.status === "Pendente" || p.status === "Entregue") {
+                // INCLUÍDO 'Preparando' PARA MANTER A MESA OCUPADA NA COR CORRETA
+                if(p.status === "Pendente" || p.status === "Preparando" || p.status === "Entregue") {
                     if(p.mesa) {
                         if(!mesasDetalhesMap[p.mesa]) {
                             mesasDetalhesMap[p.mesa] = { id: p.id, status: p.status, pedido: p.pedido, total: 0, pagoParcial: p.valorPagoParcial || 0, atendente: p.atendente || "Geral" };
                         }
-                        if(p.status === 'Pendente') mesasDetalhesMap[p.mesa].status = 'Pendente';
+                        if(p.status === 'Pendente' || p.status === 'Preparando') mesasDetalhesMap[p.mesa].status = p.status;
                         let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.'));
                         mesasDetalhesMap[p.mesa].total += (val || 0);
                         mesasDetalhesMap[p.mesa].pedido += `<br>--<br>${p.pedido}`;
                     }
                 }
             });
+
+            // Atualizar Banner de Status do Cliente QR
+            if(mesaUrl) {
+                const painelStatus = document.getElementById('painel-status-cliente');
+                if(meuPedidoAtivo) {
+                    painelStatus.classList.remove('hidden');
+                    let iconeStatus = '⏳';
+                    let textoStatus = 'Aguardando aceite da cozinha...';
+                    let corStatus = 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400';
+                    
+                    if(meuPedidoAtivo.status === 'Preparando') {
+                        iconeStatus = '👨‍🍳';
+                        textoStatus = 'Seu pedido está sendo preparado na cozinha!';
+                        corStatus = 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400';
+                    } else if(meuPedidoAtivo.status === 'Entregue') {
+                        iconeStatus = '🛎️';
+                        textoStatus = 'Seu pedido foi entregue / está pronto!';
+                        corStatus = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400';
+                    }
+
+                    painelStatus.innerHTML = `
+                        <div class="border ${corStatus} p-3 rounded-2xl flex items-center gap-3 shadow-sm">
+                            <span class="text-2xl animate-pulse">${iconeStatus}</span>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-wider opacity-80">Status do Pedido</p>
+                                <p class="text-xs font-black">${textoStatus}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    painelStatus.classList.add('hidden');
+                }
+            }
 
             let media = qtdPendentes > 0 ? Math.floor(somaTempo / qtdPendentes) : 0;
             document.getElementById('tempo-cozinha-badge').innerText = qtdPendentes > 0 ? `${media} min` : "Livre";
@@ -468,7 +517,6 @@
                     let btn = document.createElement('button');
                     let estilo = obterEstiloCategoria(cat);
                     
-                    // Formatação automática para pastéis (garante "Pastel de [Sabor]")
                     let nomeExibicao = prod.nome;
                     let catUpper = cat.toUpperCase();
                     if ((catUpper.includes('PASTEL') || catUpper.includes('PASTÉIS')) && !prod.nome.toLowerCase().includes('pastel')) {
