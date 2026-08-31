@@ -228,7 +228,7 @@
                 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">💰 2. Caixa / Mesas em Aberto</strong>
-                    • Mostra todas as mesas ativas.<br>
+                    • Mostra todas las mesas ativas.<br>
                     • Permite abater valores parciais, cobrar via Pix ou fechar a mesa quando o cliente for embora.
                 </div>
 
@@ -278,7 +278,7 @@
                 <img id="qrcode-img" src="" alt="QR Code Pix" class="w-40 h-40 mx-auto">
             </div>
             <p class="text-[10px] text-zinc-500 dark:text-zinc-400 mb-4 font-mono" id="aviso-chave-pix">Chave configurada</p>
-            <button onclick="confirmarPixEnivarPedido()" class="tap-scale w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-2xl text-xs transition shadow-lg">✅ Pix Pago - Enviar Pedido</button>
+            <button id="btn-confirmar-pix-modal" onclick="confirmarPixEnivarPedido()" class="tap-scale w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-2xl text-xs transition shadow-lg">✅ Pix Pago - Enviar Pedido</button>
         </div>
     </div>
 
@@ -336,6 +336,7 @@
         let itensCarrinho = [];
         let numpadCallbackIndex = null;
         let pedidosAlertados = new Set();
+        let modalPixContext = { type: 'salao', ids: [] };
 
         function normalizarNomeMesa(nome) {
             if (!nome) return "";
@@ -875,6 +876,9 @@
 
             let payloadPix = criarPayloadPix(CHAVE_PIX_FIXA, NOME_PIX_FIXO, "SAO PAULO", valorRestante.toFixed(2));
             document.getElementById('qrcode-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
+            
+            modalPixContext = { type: 'caixa', ids: info.ids, mesaName: info.mesaNome };
+            document.getElementById('btn-confirmar-pix-modal').innerText = "✅ Pix Pago - Faturar Mesa";
             document.getElementById('modal-pix-atendente').classList.remove('hidden');
         }
 
@@ -1068,6 +1072,9 @@
             let valorNum = totalStr.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
             let payloadPix = criarPayloadPix(CHAVE_PIX_FIXA, NOME_PIX_FIXO, "SAO PAULO", (parseFloat(valorNum) || 0).toFixed(2));
             document.getElementById('qrcode-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(payloadPix)}`;
+            
+            modalPixContext = { type: 'salao' };
+            document.getElementById('btn-confirmar-pix-modal').innerText = "✅ Pix Pago - Enviar Pedido";
             document.getElementById('modal-pix-atendente').classList.remove('hidden');
         }
 
@@ -1075,9 +1082,23 @@
             document.getElementById('modal-pix-atendente').classList.add('hidden');
         }
 
-        window.confirmarPixEnivarPedido = function() {
+        window.confirmarPixEnivarPedido = async function() {
             fecharModalPixAtendente();
-            enviarPedido('PagoNaHora'); 
+            if (modalPixContext.type === 'salao') {
+                enviarPedido('PagoNaHora'); 
+            } else if (modalPixContext.type === 'caixa') {
+                try {
+                    let hoje = new Date().toISOString().split('T')[0];
+                    let promessas = modalPixContext.ids.map(id => updateDoc(doc(db, "pedidos", id), {
+                        status: 'Pago',
+                        dataCriacao: hoje
+                    }));
+                    await Promise.all(promessas);
+                    mostrarToast(`${modalPixContext.mesaName} faturada via Pix com sucesso!`);
+                } catch(e) {
+                    alert("Erro ao faturar mesa.");
+                }
+            }
         }
 
         window.enviarPedido = async function(tipoEnvio) {
