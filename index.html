@@ -393,15 +393,33 @@
                     somaTempo += Math.floor((agora - p.timestampCriacao) / 60000);
                 }
 
+                // UNIFICAÇÃO DOS PEDIDOS DA MESMA MESA NO CAIXA
                 if(p.status === "Pendente" || p.status === "Preparando" || p.status === "Entregue") {
                     if(p.mesa) {
-                        if(!mesasDetalhesMap[p.mesa]) {
-                            mesasDetalhesMap[p.mesa] = { id: p.id, status: p.status, pedido: p.pedido, total: 0, pagoParcial: p.valorPagoParcial || 0, atendente: p.atendente || "Geral" };
+                        let mesaKey = p.mesa.trim();
+                        let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
+                        let pagoPart = p.valorPagoParcial || 0;
+
+                        if(!mesasDetalhesMap[mesaKey]) {
+                            mesasDetalhesMap[mesaKey] = {
+                                ids: [p.id],
+                                mesaNome: p.mesa,
+                                status: p.status,
+                                pedidosLista: [p.pedido],
+                                total: 0,
+                                pagoParcial: 0,
+                                atendente: p.atendente || "Geral"
+                            };
+                        } else {
+                            mesasDetalhesMap[mesaKey].ids.push(p.id);
+                            mesasDetalhesMap[mesaKey].pedidosLista.push(p.pedido);
                         }
-                        if(p.status === 'Pendente' || p.status === 'Preparando') mesasDetalhesMap[p.mesa].status = p.status;
-                        let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.'));
-                        mesasDetalhesMap[p.mesa].total += (val || 0);
-                        mesasDetalhesMap[p.mesa].pedido += `<br>--<br>${p.pedido}`;
+
+                        if(p.status === 'Pendente' || p.status === 'Preparando') {
+                            mesasDetalhesMap[mesaKey].status = p.status;
+                        }
+                        mesasDetalhesMap[mesaKey].total += val;
+                        mesasDetalhesMap[mesaKey].pagoParcial += pagoPart;
                     }
                 }
             });
@@ -541,7 +559,7 @@
 
             todasAsMesas.forEach(mesa => {
                 const isSelected = mesaSelecionada === mesa;
-                const dadosMesa = mesasDetalhesMap[mesa];
+                const dadosMesa = mesasDetalhesMap[mesa.trim()];
                 const isOccupied = !!dadosMesa;
 
                 const wrapper = document.createElement('div');
@@ -614,19 +632,21 @@
                 return;
             }
 
-            mesasOcupadas.forEach(mesa => {
-                const info = mesasDetalhesMap[mesa];
+            mesasOcupadas.forEach(mesaKey => {
+                const info = mesasDetalhesMap[mesaKey];
                 let valorRestante = info.total - info.pagoParcial;
+                let extratoCombinado = info.pedidosLista.join('<br>--<br>');
+                let idsStr = encodeURIComponent(JSON.stringify(info.ids));
 
                 let card = document.createElement('div');
                 card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 shadow-sm";
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-2">
-                        <span class="font-black text-amber-500 text-sm">${mesa}</span>
+                        <span class="font-black text-amber-500 text-sm">${info.mesaNome}</span>
                         <span class="text-[10px] bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-zinc-400 font-bold">👤 ${info.atendente}</span>
                     </div>
-                    <div class="bg-zinc-50 dark:bg-zinc-950 p-2.5 rounded-xl text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-2 max-h-20 overflow-y-auto">
-                        ${info.pedido}
+                    <div class="bg-zinc-50 dark:bg-zinc-950 p-2.5 rounded-xl text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-2 max-h-24 overflow-y-auto">
+                        ${extratoCombinado}
                     </div>
                     <div class="space-y-1 mb-3 text-xs">
                         <div class="flex justify-between text-zinc-400">
@@ -644,19 +664,19 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-1.5">
-                        <button onclick="abrirPixMesaCaixa('${mesa}')" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">📱 Pix</button>
-                        <button onclick="abrirAbaterCaixa('${mesa}')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">💸 Abater</button>
-                        <button onclick="fecharMesaCaixa('${info.id}', '${mesa}')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">✅ Fechar</button>
+                        <button onclick="abrirPixMesaCaixa('${mesaKey}')" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">📱 Pix</button>
+                        <button onclick="abrirAbaterCaixa('${mesaKey}')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">💸 Abater</button>
+                        <button onclick="fecharMesaCaixa('${idsStr}', '${info.mesaNome}')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-[11px] shadow">✅ Fechar</button>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        window.abrirPixMesaCaixa = function(mesa) {
-            const info = mesasDetalhesMap[mesa];
+        window.abrirPixMesaCaixa = function(mesaKey) {
+            const info = mesasDetalhesMap[mesaKey];
             let valorRestante = info.total - info.pagoParcial;
-            document.getElementById('modal-mesa-titulo').innerText = `${mesa} - Pix`;
+            document.getElementById('modal-mesa-titulo').innerText = `${info.mesaNome} - Pix`;
             document.getElementById('modal-valor-total').innerText = `R$ ${valorRestante.toFixed(2).replace('.',',')}`;
             document.getElementById('aviso-chave-pix').innerText = `Chave: ${CHAVE_PIX_FIXA}`;
 
@@ -665,30 +685,34 @@
             document.getElementById('modal-pix-atendente').classList.remove('hidden');
         }
 
-        window.abrirAbaterCaixa = async function(mesa) {
-            let valorStr = prompt(`Valor pago agora para a ${mesa} (Ex: 10.00):`);
+        window.abrirAbaterCaixa = async function(mesaKey) {
+            let valorStr = prompt(`Valor pago agora para a mesa (Ex: 10.00):`);
             if(!valorStr) return;
             let val = parseFloat(valorStr.replace(',','.'));
             if(isNaN(val) || val <= 0) return alert("Valor inválido!");
             
             try {
-                let info = mesasDetalhesMap[mesa];
-                let pRef = doc(db, "pedidos", info.id);
-                let atualPago = info.pagoParcial || 0;
+                let info = mesasDetalhesMap[mesaKey];
+                let primaryId = info.ids[0];
+                let pRef = doc(db, "pedidos", primaryId);
+                let pSnap = await getDoc(pRef);
+                let atualPago = pSnap.exists() ? (pSnap.data().valorPagoParcial || 0) : 0;
                 await updateDoc(pRef, { valorPagoParcial: atualPago + val });
                 mostrarToast(`R$ ${val.toFixed(2)} abatido com sucesso!`);
             } catch(e) { alert("Erro ao abater valor."); }
         }
 
-        // CORRIGIDO: Agora atualiza o status para 'Pago' em vez de apagar o pedido, contabilizando no relatório!
-        window.fecharMesaCaixa = async function(idPedido, mesa) {
-            if(confirm(`Deseja realmente fechar e quitar a ${mesa}?`)) {
+        window.fecharMesaCaixa = async function(idsStr, mesaNome) {
+            if(confirm(`Deseja realmente fechar e quitar a ${mesaNome}?`)) {
                 try {
-                    await updateDoc(doc(db, "pedidos", idPedido), {
+                    let ids = JSON.parse(decodeURIComponent(idsStr));
+                    let hoje = new Date().toISOString().split('T')[0];
+                    let promessas = ids.map(id => updateDoc(doc(db, "pedidos", id), {
                         status: 'Pago',
-                        dataCriacao: new Date().toISOString().split('T')[0]
-                    });
-                    mostrarToast(`${mesa} fechada com sucesso!`);
+                        dataCriacao: hoje
+                    }));
+                    await Promise.all(promessas);
+                    mostrarToast(`${mesaNome} fechada com sucesso!`);
                 } catch(e) { alert("Erro ao fechar mesa."); }
             }
         }
@@ -696,11 +720,12 @@
         let mesaAtualDetalhe = null;
         window.abrirModalMesaDetalhes = function(mesa) {
             mesaAtualDetalhe = mesa;
-            const info = mesasDetalhesMap[mesa];
+            const info = mesasDetalhesMap[mesa.trim()];
             if(!info) return;
 
-            document.getElementById('detalhe-mesa-nome').innerText = mesa;
-            document.getElementById('detalhe-mesa-extrato').innerHTML = info.pedido;
+            let extratoCombinado = info.pedidosLista.join('<br>--<br>');
+            document.getElementById('detalhe-mesa-nome').innerText = info.mesaNome;
+            document.getElementById('detalhe-mesa-extrato').innerHTML = extratoCombinado;
             document.getElementById('detalhe-mesa-orig').innerText = `R$ ${info.total.toFixed(2).replace('.',',')}`;
             document.getElementById('detalhe-mesa-pago').innerText = `- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}`;
             document.getElementById('detalhe-mesa-restante').innerText = `R$ ${(info.total - info.pagoParcial).toFixed(2).replace('.',',')}`;
@@ -718,9 +743,10 @@
             
             try {
                 let info = mesasDetalhesMap[mesaAtualDetalhe];
-                let pRef = doc(db, "pedidos", info.id);
+                let primaryId = info.ids[0];
+                let pRef = doc(db, "pedidos", primaryId);
                 let pSnap = await getDoc(pRef);
-                let atualPago = pSnap.data().valorPagoParcial || 0;
+                let atualPago = pSnap.exists() ? (pSnap.data().valorPagoParcial || 0) : 0;
                 await updateDoc(pRef, { valorPagoParcial: atualPago + val });
                 mostrarToast(`R$ ${val.toFixed(2)} abatido com sucesso!`);
                 fecharModalMesaDetalhes();
