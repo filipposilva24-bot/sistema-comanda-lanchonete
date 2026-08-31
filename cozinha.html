@@ -198,9 +198,18 @@
                 <input type="text" id="admin-nome" placeholder="Nome do Lanche/Bebida" class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500">
                 <div class="flex gap-2">
                     <input type="number" step="0.01" id="admin-preco" placeholder="Preço (Ex: 15.00)" class="w-1/2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500">
-                    <input type="text" id="admin-categoria" placeholder="Categoria (Ex: 🍔 Hambúrgueres)" class="w-1/2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500">
+                    <div class="w-1/2 relative">
+                        <select id="admin-categoria" onchange="verificarSelecaoCategoria(this)" class="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-amber-500 appearance-none">
+                            <option value="" disabled selected>Categoria</option>
+                        </select>
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-xs">▼</div>
+                    </div>
                 </div>
-                <button onclick="salvarNovoItemCardapio()" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs transition shadow">➕ Adicionar ao Cardápio</button>
+                <div class="flex justify-between items-center px-1 pt-0.5">
+                    <span class="text-[10px] text-zinc-400">Gerenciar categorias:</span>
+                    <button onclick="gerenciarCategorias()" class="tap-scale text-[10px] text-amber-600 dark:text-amber-400 font-bold hover:underline">⚙️ Remover Categoria</button>
+                </div>
+                <button onclick="salvarNovoItemCardapio()" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs transition shadow mt-1">➕ Adicionar ao Cardápio</button>
             </div>
 
             <h4 class="text-[10px] font-extrabold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Itens Atuais:</h4>
@@ -221,7 +230,7 @@
     </div>
 
     <div id="modal-config-pix" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
-        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative transition-colors duration-200">
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative transition-colors duration-200">
             <button onclick="fecharConfigPix()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
             <h3 class="text-base font-extrabold text-amber-600 dark:text-amber-400 mb-3">Configurar Chave Pix</h3>
             <div class="mb-3 text-left">
@@ -299,6 +308,9 @@
         let abaAtual = 'cozinha'; 
         let todosPedidos = []; 
         let pedidoSelecionadoIds = null;
+        let cardapioCache = [];
+        let categoriasPadrao = ["🍔 Hambúrgueres", "🍟 Porções", "🥟 Pastéis", "🥤 Bebidas", "🍺 Alcoólicas"];
+        let categoriasExtras = JSON.parse(localStorage.getItem('point_derico_categorias_extras') || "[]");
 
         const SENHA_HARD_RESET = "1234";
         const SENHA_CARDAPIO = "1234";
@@ -367,24 +379,92 @@
 
         window.fecharAdminCardapio = function() { document.getElementById('modal-admin-cardapio').classList.add('hidden'); }
 
+        function atualizarSelectCategorias() {
+            const select = document.getElementById('admin-categoria');
+            if(!select) return;
+
+            let catsDinamicas = [...categoriasPadrao, ...categoriasExtras];
+            cardapioCache.forEach(item => {
+                if(item.categoria && !catsDinamicas.includes(item.categoria)) {
+                    catsDinamicas.push(item.categoria);
+                }
+            });
+
+            select.innerHTML = '<option value="" disabled selected>Categoria</option>';
+            catsDinamicas.forEach(cat => {
+                let opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
+            });
+
+            let optNova = document.createElement('option');
+            optNova.value = "__nova__";
+            optNova.innerText = "➕ Adicionar Nova Categoria...";
+            select.appendChild(optNova);
+        }
+
+        window.verificarSelecaoCategoria = function(selectEl) {
+            if (selectEl.value === "__nova__") {
+                let novaCat = prompt("Digite o nome da nova categoria (ex: 🍕 Pizzas):");
+                if (novaCat && novaCat.trim() !== '') {
+                    let nomeFormatado = novaCat.trim();
+                    if (!categoriasExtras.includes(nomeFormatado) && !categoriasPadrao.includes(nomeFormatado)) {
+                        categoriasExtras.push(nomeFormatado);
+                        localStorage.setItem('point_derico_categorias_extras', JSON.stringify(categoriasExtras));
+                    }
+                    atualizarSelectCategorias();
+                    selectEl.value = nomeFormatado;
+                } else {
+                    selectEl.value = "";
+                }
+            }
+        }
+
+        window.gerenciarCategorias = function() {
+            let todasCats = [...categoriasPadrao, ...categoriasExtras];
+            cardapioCache.forEach(item => {
+                if(item.categoria && !todasCats.includes(item.categoria)) todasCats.push(item.categoria);
+            });
+
+            let escolha = prompt(`Categorias cadastradas:\n- ${todasCats.join('\n- ')}\n\nDigite o nome exato da categoria que deseja EXCLUÍ-LA:` );
+            if (escolha && escolha.trim() !== '') {
+                let catRemover = escolha.trim();
+                if (categoriasPadrao.includes(catRemover)) {
+                    alert("As categorias padrão do sistema não podem ser removidas.");
+                    return;
+                }
+                if (confirm(`Deseja remover a categoria "${catRemover}"?`)) {
+                    categoriasExtras = categoriasExtras.filter(c => c !== catRemover);
+                    localStorage.setItem('point_derico_categorias_extras', JSON.stringify(categoriasExtras));
+                    atualizarSelectCategorias();
+                    alert("Categoria removida com sucesso!");
+                }
+            }
+        }
+
         window.salvarNovoItemCardapio = async function() {
             const nome = document.getElementById('admin-nome').value.trim();
             const preco = document.getElementById('admin-preco').value.trim();
-            const categoria = document.getElementById('admin-categoria').value.trim() || "🍔 Hambúrgueres";
-            if(!nome || !preco) return alert("Preencha nome e preço!");
+            const categoria = document.getElementById('admin-categoria').value;
+            if(!nome || !preco || !categoria || categoria === "__nova__") return alert("Preencha o nome, o preço e selecione a categoria!");
+            
             await addDoc(collection(db, "cardapio"), { nome, preco: parseFloat(preco), categoria, ativo: true });
             document.getElementById('admin-nome').value = '';
             document.getElementById('admin-preco').value = '';
+            document.getElementById('admin-categoria').value = '';
             carregarAdminCardapio();
-            alert("Item adicionado!");
+            alert("Item adicionado com sucesso!");
         }
 
         async function carregarAdminCardapio() {
             const snapshot = await getDocs(collection(db, "cardapio"));
             const listaDiv = document.getElementById('lista-admin-cardapio');
             listaDiv.innerHTML = '';
+            cardapioCache = [];
             snapshot.forEach(docSnap => {
                 let item = { id: docSnap.id, ...docSnap.data() };
+                cardapioCache.push(item);
                 let div = document.createElement('div');
                 div.className = "flex justify-between items-center bg-zinc-50 dark:bg-zinc-950 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs";
                 div.innerHTML = `
@@ -396,6 +476,7 @@
                 `;
                 listaDiv.appendChild(div);
             });
+            atualizarSelectCategorias();
         }
 
         window.alternarStatusItem = async function(id, statusAtual) {
@@ -484,6 +565,12 @@
                 }
             }
         }
+
+        onSnapshot(collection(db, "cardapio"), (snapshot) => {
+            cardapioCache = [];
+            snapshot.forEach(docSnap => cardapioCache.push({ id: docSnap.id, ...docSnap.data() }));
+            atualizarSelectCategorias();
+        });
 
         onSnapshot(collection(db, "pedidos"), (snapshot) => {
             todosPedidos = [];
