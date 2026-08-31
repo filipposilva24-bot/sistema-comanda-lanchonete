@@ -271,7 +271,7 @@
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">📊 3. Relatórios PDF & WhatsApp</strong>
-                    • Selecione o dia ou mês desejado para gerar relatórios precisos, respeitando os dias em que a loja esteve fechada.
+                    • Altere a data ou o mês nos seletores para consultar qualquer período com precisão exata.
                 </div>
             </div>
 
@@ -696,7 +696,7 @@
 
             } 
             /* ======================================================== */
-            /* ABA RELATÓRIO (MENSAL + DIÁRIO SEGUINDO O FILTRO EXATO) */
+            /* ABA RELATÓRIO (Lendo estritamente os seletores) */
             /* ======================================================== */
             else if (abaAtual === 'relatorio') {
                 contadorTxt.innerText = `Painel de Faturamento`;
@@ -707,7 +707,7 @@
 
                 let pedidosPago = todosPedidos.filter(p => p.status === 'Pago' && p.dataCriacao);
 
-                // 1. Processar Mês (Respeitando estritamente o mês selecionado)
+                // 1. Processar Mês (Exato conforme o input de mês)
                 let filtradosMes = pedidosPago.filter(p => valMes ? p.dataCriacao.startsWith(valMes) : false);
                 let totalMes = 0;
                 let prodMes = {};
@@ -739,7 +739,7 @@
                     });
                 }
 
-                // 2. Processar Dia (Respeitando estritamente a data selecionada)
+                // 2. Processar Dia (Exato conforme o input de data)
                 let filtradosDia = pedidosPago.filter(p => valData ? p.dataCriacao === valData : false);
                 let totalDia = 0;
                 let prodDia = {};
@@ -771,7 +771,7 @@
                     });
                 }
 
-                // 3. Renderizar Lista Compacta de Comandas do Dia
+                // 3. Renderizar Lista Compacta de Comandas do Dia Selecionado
                 const listaComandasDiv = document.getElementById('lista-comandas-compacta');
                 listaComandasDiv.innerHTML = '';
                 if (filtradosDia.length === 0) {
