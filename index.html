@@ -283,7 +283,7 @@
             <h3 class="text-base font-extrabold text-amber-500 dark:text-amber-400 mb-1" id="detalhe-mesa-nome">Mesa</h3>
             <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">Gerenciamento de Consumo</p>
             
-            <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 mb-3 h-28 overflow-y-auto text-xs font-mono text-zinc-700 dark:text-zinc-300 shadow-inner" id="detalhe-mesa-extrato"></div>
+            <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 mb-3 h-32 overflow-y-auto text-xs font-mono text-zinc-700 dark:text-zinc-300 shadow-inner whitespace-pre-line" id="detalhe-mesa-extrato"></div>
             
             <div class="flex justify-between items-center mb-1 text-xs">
                 <span class="text-zinc-500 font-bold">Total Original:</span>
@@ -804,7 +804,7 @@
                 const info = mesasDetalhesMap[mesaKey];
                 let valorRestante = info.total - info.pagoParcial;
                 if(valorRestante < 0) valorRestante = 0;
-                let extratoCombinado = info.pedidosLista.join('<br>--<br>');
+                let extratoCombinado = info.pedidosLista.join('\n---\n');
                 let idsStr = encodeURIComponent(JSON.stringify(info.ids));
 
                 let card = document.createElement('div');
@@ -827,7 +827,7 @@
                             <span class="text-[10px] bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 rounded text-zinc-400 font-bold">👤 ${info.atendente}</span>
                         </div>
                         ${botaoEntregueHtml}
-                        <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-xl text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-3 max-h-28 overflow-y-auto">
+                        <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-xl text-xs font-mono text-zinc-700 dark:text-zinc-300 mb-3 max-h-28 overflow-y-auto whitespace-pre-line">
                             ${extratoCombinado}
                         </div>
                         <div class="space-y-1 mb-3 text-xs md:text-sm">
@@ -941,9 +941,9 @@
             let valorRestante = info.total - info.pagoParcial;
             if(valorRestante < 0) valorRestante = 0;
 
-            let extratoCombinado = info.pedidosLista.join('<br>--<br>');
+            let extratoCombinado = info.pedidosLista.join('\n---\n');
             document.getElementById('detalhe-mesa-nome').innerText = info.mesaNome;
-            document.getElementById('detalhe-mesa-extrato').innerHTML = extratoCombinado;
+            document.getElementById('detalhe-mesa-extrato').innerText = extratoCombinado;
             document.getElementById('detalhe-mesa-orig').innerText = `R$ ${info.total.toFixed(2).replace('.',',')}`;
             document.getElementById('detalhe-mesa-pago').innerText = `- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}`;
             document.getElementById('detalhe-mesa-restante').innerText = `R$ ${valorRestante.toFixed(2).replace('.',',')}`;
