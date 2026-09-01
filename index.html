@@ -228,7 +228,7 @@
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">💰 2. Caixa / Mesas em Aberto</strong>
                     • Mostra todas as mesas ativas.<br>
-                    • Toque em uma mesa para abrir o gerenciamento, onde você pode adicionar itens, abater valores ou <b>Rachar a Conta</b> diretamente.
+                    • Use o botão <b>"Rachar"</b> diretamente no card da mesa ou clique nela para gerenciar.
                 </div>
             </div>
 
@@ -276,7 +276,7 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHES DA MESA (COM BOTÃO DE RACHAR CONTA ADICIONADO) -->
+    <!-- MODAL DETALHES DA MESA -->
     <div id="modal-mesa-detalhes" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-5 shadow-2xl relative">
             <button onclick="fecharModalMesaDetalhes()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold">✕</button>
@@ -846,9 +846,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-3 gap-1.5">
+                    <div class="grid grid-cols-2 gap-1.5">
                         <button onclick="abrirPixMesaCaixa('${mesaKey}')" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-xs shadow">📱 Pix</button>
                         <button onclick="abrirAbaterCaixa('${mesaKey}')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-xs shadow">💸 Abater</button>
+                        <button onclick="abrirRachaCaixa direto('${mesaKey}')" onclick="abrirRachaCaixa('${mesaKey}')" class="tap-scale bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 px-1 rounded-xl text-xs shadow">➗ Rachar</button>
                         <button onclick="fecharMesaCaixa('${idsStr}', '${info.mesaNome}')" class="tap-scale bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-1 rounded-xl text-xs shadow">✅ Fechar</button>
                     </div>
                 `;
@@ -900,6 +901,22 @@
                 await updateDoc(pRef, { valorPagoParcial: atualPago + val });
                 mostrarToast(`R$ ${val.toFixed(2)} abatido com sucesso!`);
             } catch(e) { alert("Erro ao abater valor."); }
+        }
+
+        window.abrirRachaCaixa = function(mesaKey) {
+            const info = mesasDetalhesMap[mesaKey];
+            if(!info) return;
+            let total = info.total - info.pagoParcial;
+            if(total < 0) total = 0;
+            if(total <= 0) return alert("Esta mesa não possui saldo devedor!");
+
+            let pessoasStr = prompt(`Rachar Conta da ${info.mesaNome}\nRestante: R$ ${total.toFixed(2).replace('.',',')}\n\nDividir para quantas pessoas?`);
+            if (!pessoasStr) return;
+            let pessoas = parseInt(pessoasStr);
+            if (pessoas > 0) {
+                let calc = (total / pessoas).toFixed(2).replace('.',',');
+                alert(`➗ Divisão de Conta (${info.mesaNome}):\n\nRestante: R$ ${total.toFixed(2).replace('.',',')}\nPessoas: ${pessoas}\n\n👉 Fica R$ ${calc} para cada pessoa.`);
+            }
         }
 
         window.fecharMesaCaixa = async function(idsStr, mesaNome) {
@@ -1060,20 +1077,17 @@
             let total = 0;
             let origem = "";
 
-            // Se o modal de detalhes da mesa estiver aberto, prioriza o valor restante daquela mesa específica
             if (mesaAtualDetalhe && mesasDetalhesMap[mesaAtualDetalhe]) {
                 let infoMesa = mesasDetalhesMap[mesaAtualDetalhe];
                 total = infoMesa.total - infoMesa.pagoParcial;
                 if (total < 0) total = 0;
                 origem = `da ${infoMesa.mesaNome}`;
             } else {
-                // 1. Tenta pegar o valor do carrinho local (para calcular antes de enviar)
                 let totalCarrinho = itensCarrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
                 if (totalCarrinho > 0) {
                     total = totalCarrinho;
                     origem = "do carrinho atual";
                 } else {
-                    // 2. Senão, pega da mesa selecionada
                     let mesaAtiva = mesaUrl || mesaSelecionada;
                     if (mesaAtiva) {
                         let chaveEncontrada = Object.keys(mesasDetalhesMap).find(k => normalizarNomeMesa(k) === normalizarNomeMesa(mesaAtiva));
