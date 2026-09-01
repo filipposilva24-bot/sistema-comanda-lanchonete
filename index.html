@@ -314,7 +314,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
@@ -341,21 +341,26 @@
             return nome.toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
         }
 
-        // Função para emitir som de alerta (compatível com Android e iPhone/iOS)
+        // Função para emitir som de alerta garantido em navegadores móveis
         function tocarAlertaSonoro() {
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // Nota D5
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // Nota A5
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.2); // A5
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.4);
+                osc.stop(audioCtx.currentTime + 0.5);
             } catch(e) {
                 console.log("Áudio indisponível", e);
             }
@@ -485,7 +490,12 @@
             renderizarCardapio();
         });
 
+        // LISTENER EM TEMPO REAL DE PEDIDOS
         onSnapshot(collection(db, "pedidos"), (snapshot) => {
+            processarDadosSnapshot(snapshot);
+        });
+
+        function processarDadosSnapshot(snapshot) {
             try {
                 mesasDetalhesMap = {};
                 let somaTempo = 0;
@@ -497,23 +507,23 @@
                 snapshot.forEach(docSnap => {
                     let p = { id: docSnap.id, ...docSnap.data() };
 
-                    if(mesaUrl && p.mesa && normalizarNomeMesa(p.mesa) === normalizarNomeMesa(mesaUrl) && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue')) {
+                    if(mesaUrl && p.mesa && normalizarNomeMesa(p.mesa) === normalizarNomeMesa(mesaUrl) && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue' || p.status === 'Pronto')) {
                         meusPedidosMesa.push(p);
                     }
 
-                    if(!mesaUrl && p.status === 'Entregue' && !p.alertaVisto) {
+                    // Verifica se está pronto (compatível com 'Entregue' ou 'Pronto')
+                    let estaPronto = (p.status === 'Entregue' || p.status === 'Pronto');
+
+                    if(!mesaUrl && estaPronto && !p.alertaVisto) {
                         alertasProntosAtendente.push(p);
                         if(!pedidosAlertados.has(p.id)) {
                             pedidosAlertados.add(p.id);
                             let nomeMesaAlerta = p.mesa ? p.mesa : "Mesa";
                             mostrarToast(`${nomeMesaAlerta} está pronta na cozinha!`);
                             
-                            // Vibração (para celulares Android)
                             if(navigator.vibrate) {
-                                navigator.vibrate([300, 150, 300, 150, 500]);
+                                try { navigator.vibrate([400, 200, 400, 200, 600]); } catch(e) {}
                             }
-                            
-                            // Alerta sonoro (para celulares Android e iPhones/iOS)
                             tocarAlertaSonoro();
                         }
                     }
@@ -523,7 +533,7 @@
                         somaTempo += Math.floor((agora - p.timestampCriacao) / 60000);
                     }
 
-                    if(p.status === "Pendente" || p.status === "Preparando" || p.status === "Entregue") {
+                    if(p.status === "Pendente" || p.status === "Preparando" || estaPronto) {
                         if(p.mesa) {
                             let mesaKey = p.mesa.trim();
                             let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
@@ -542,7 +552,7 @@
                                     total: 0,
                                     pagoParcial: 0,
                                     atendente: p.atendente || "Geral",
-                                    temPronto: p.status === 'Entregue' && !p.alertaVisto,
+                                    temPronto: estaPronto && !p.alertaVisto,
                                     pagoOnline: p.pagoNaHora
                                 };
                             } else {
@@ -554,7 +564,7 @@
                             if(p.status === 'Pendente' || p.status === 'Preparando') {
                                 mesasDetalhesMap[mesaKey].status = p.status;
                             }
-                            if(p.status === 'Entregue' && !p.alertaVisto) {
+                            if(estaPronto && !p.alertaVisto) {
                                 mesasDetalhesMap[mesaKey].temPronto = true;
                             }
                             mesasDetalhesMap[mesaKey].total += val;
@@ -618,7 +628,7 @@
                                 iconeStatus = '👨‍🍳';
                                 textoStatus = 'Seu pedido está sendo preparado na cozinha!';
                                 corStatus = 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400';
-                            } else if(meuPedidoAtivo.status === 'Entregue') {
+                            } else if(meuPedidoAtivo.status === 'Entregue' || meuPedidoAtivo.status === 'Pronto') {
                                 iconeStatus = '🛎️';
                                 textoStatus = 'Seu pedido foi entregue / está pronto!';
                                 corStatus = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400';
@@ -653,7 +663,7 @@
             } catch (err) {
                 console.error("Erro no listener de pedidos:", err);
             }
-        });
+        }
 
         function obterEstiloCategoria(categoria) {
             let catLower = (categoria || "").toLowerCase();
@@ -942,7 +952,7 @@
             let pessoas = parseInt(pessoasStr);
             if (pessoas > 0) {
                 let calc = (total / pessoas).toFixed(2).replace('.',',');
-                alert(`➗ Divisão de Conta (${info.mesaNome}):\n\nRestante: R$ ${total.toFixed(2).replace('.',',')}\nPessoas: ${pessoas}\n\n👉 Fica R$ ${calc} para cada pessoa.`);
+                alert(`➗ Divisão de Conta (${info.mesaNome}):\n\nTotal: R$ ${total.toFixed(2).replace('.',',')}\nPessoas: ${pessoas}\n\n👉 Fica R$ ${calc} para cada pessoa.`);
             }
         }
 
@@ -1247,7 +1257,7 @@
         verificarLogin();
         renderizarMesas();
 
-        // DESPERTADOR AUTOMÁTICO (Anti-dorminhoco)
+        // ANTIDORMINHOCO & RECONEXÃO AUTOMÁTICA
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible") {
                 const statusEl = document.getElementById('status-conexao');
@@ -1256,7 +1266,7 @@
                     if (typeof renderizarMesas === "function") renderizarMesas(); 
                     if (typeof renderizarCaixaMesas === "function") renderizarCaixaMesas(); 
                     if(statusEl) statusEl.classList.remove('animate-spin');
-                }, 800);
+                }, 500);
             }
         });
     </script>
