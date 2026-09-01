@@ -212,7 +212,7 @@
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">➗ 3. Dividir a Conta</strong>
-                    • Use o botão <b>"Rachar Conta"</b> no resumo do pedido para calcular facilmente quanto fica para cada pessoa.
+                    • Use o botão <b>"Rachar Conta"</b> no resumo do pedido para calcular facilmente quanto fica para cada pessoa (funciona com o carrinho atual ou com o total consumido na mesa).
                 </div>
             </div>
 
@@ -1048,17 +1048,44 @@
             fecharNumpad();
         }
 
+        // ==========================================
+        // FUNÇÃO ATUALIZADA DE RACHAR CONTA
+        // ==========================================
         window.abrirRacha = function() {
-            let total = itensCarrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-            if(total <= 0) return alert("Adicione itens ao pedido primeiro!");
-            let pessoasStr = prompt("Dividir a conta para quantas pessoas?");
-            if(!pessoasStr) return;
-            let pessoas = parseInt(pessoasStr);
-            if(pessoas > 0) {
-                let calc = (total / pessoas).toFixed(2).replace('.',',');
-                alert(`Total: R$ ${total.toFixed(2).replace('.',',')}\n\nFica R$ ${calc} para cada um (${pessoas} pessoas)`);
+            let total = 0;
+            let origem = "";
+
+            // 1. Tenta pegar do carrinho atual (caso ainda não tenha enviado)
+            let totalCarrinho = itensCarrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+            if (totalCarrinho > 0) {
+                total = totalCarrinho;
+                origem = "do carrinho atual";
+            } else {
+                // 2. Se o carrinho estiver vazio, busca o consumo ativo da mesa (via QR Code ou selecionada)
+                let mesaAtiva = mesaUrl || mesaSelecionada;
+                if (mesaAtiva) {
+                    let chaveEncontrada = Object.keys(mesasDetalhesMap).find(k => normalizarNomeMesa(k) === normalizarNomeMesa(mesaAtiva));
+                    if (chaveEncontrada) {
+                        let infoMesa = mesasDetalhesMap[chaveEncontrada];
+                        total = infoMesa.total - infoMesa.pagoParcial;
+                        if (total < 0) total = 0;
+                        origem = `da mesa ${infoMesa.mesaNome}`;
+                    }
+                }
             }
-        }
+
+            if (total <= 0) {
+                return alert("Nenhum item no carrinho ou comanda ativa encontrada para rachar a conta!");
+            }
+
+            let pessoasStr = prompt(`Valor total (${origem}): R$ ${total.toFixed(2).replace('.',',')}\n\nDividir a conta para quantas pessoas?`);
+            if (!pessoasStr) return;
+            let pessoas = parseInt(pessoasStr);
+            if (pessoas > 0) {
+                let calc = (total / pessoas).toFixed(2).replace('.',',');
+                alert(`Total (${origem}): R$ ${total.toFixed(2).replace('.',',')}\n\nFica R$ ${calc} para cada um (${pessoas} pessoas)`);
+            }
+        };
 
         window.abrirPixAtendente = function() {
             if (!mesaSelecionada) return alert('Selecione uma Mesa!');
