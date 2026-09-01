@@ -341,6 +341,26 @@
             return nome.toString().trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
         }
 
+        // Função para emitir som de alerta (compatível com Android e iPhone/iOS)
+        function tocarAlertaSonoro() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // Nota D5
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // Nota A5
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } catch(e) {
+                console.log("Áudio indisponível", e);
+            }
+        }
+
         window.alternarTema = function() {
             const html = document.getElementById('html-root');
             const icone = document.getElementById('icone-tema');
@@ -487,7 +507,14 @@
                             pedidosAlertados.add(p.id);
                             let nomeMesaAlerta = p.mesa ? p.mesa : "Mesa";
                             mostrarToast(`${nomeMesaAlerta} está pronta na cozinha!`);
-                            if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                            
+                            // Vibração (para celulares Android)
+                            if(navigator.vibrate) {
+                                navigator.vibrate([300, 150, 300, 150, 500]);
+                            }
+                            
+                            // Alerta sonoro (para celulares Android e iPhones/iOS)
+                            tocarAlertaSonoro();
                         }
                     }
 
