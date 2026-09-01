@@ -325,7 +325,7 @@
         document.getElementById('filtro-data').value = hojeISO;
         document.getElementById('filtro-mes').value = hojeISO.slice(0, 7);
 
-        // Função robusta para padronizar qualquer formato de timestamp do banco para Milissegundos exatos
+        // Função robusta e blindada para padronizar qualquer formato de timestamp do banco
         function obterTimestampMs(ts) {
             if (!ts) return Date.now();
             if (typeof ts === 'object') {
@@ -334,7 +334,6 @@
             }
             let num = Number(ts);
             if (isNaN(num)) return Date.now();
-            // Se estiver em segundos (ex: menor que 10 bilhões), converte para milissegundos
             if (num < 10000000000) return num * 1000;
             return num;
         }
@@ -362,14 +361,18 @@
             document.getElementById('icone-tema').innerText = '🌙';
         }
 
-        // Cronômetro ultra-seguro (protegido contra valores negativos ou nulos)
+        // Cronômetro ultra-seguro (Blindado contra discrepâncias de relógio do PC e cache)
         setInterval(() => {
             if (abaAtual === 'cozinha') {
                 document.querySelectorAll('.cronometro-card').forEach(el => {
                     let timestamp = parseInt(el.getAttribute('data-timestamp'));
                     if (!isNaN(timestamp) && timestamp > 0) {
                         let diffSegundos = Math.floor((Date.now() - timestamp) / 1000);
-                        if (diffSegundos < 0) diffSegundos = 0; // Evita valores negativos se houver micro-diferença de relógio
+                        
+                        // Proteções contra relógio do PC adiantado/atrasado
+                        if (diffSegundos < 0) diffSegundos = 0;
+                        if (diffSegundos > 86400) diffSegundos = 0; 
+
                         let mins = Math.floor(diffSegundos / 60);
                         let secs = diffSegundos % 60;
                         el.innerText = `⏱️ ${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
