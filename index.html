@@ -137,11 +137,16 @@
 
             <!-- VIEW CAIXA -->
             <div id="view-caixa" class="hidden">
-                <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-xs md:text-sm font-black text-amber-500 uppercase tracking-wider">Mesas em Atendimento / Fechamento</h2>
-                    <span class="text-xs text-zinc-400 font-bold" id="caixa-contador">0 mesas</span>
+                <!-- CARD DE TOTAL GERAL A RECEBER -->
+                <div class="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-2xl mb-3 flex justify-between items-center shadow-sm">
+                    <div>
+                        <p class="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider">Total Geral a Receber</p>
+                        <p class="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400" id="caixa-total-geral">R$ 0,00</p>
+                    </div>
+                    <span class="text-xs bg-amber-500/20 text-amber-600 dark:text-amber-400 font-extrabold px-3 py-1.5 rounded-xl" id="caixa-contador">0 mesas</span>
                 </div>
-                <div id="lista-caixa-mesas" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1"></div>
+
+                <div id="lista-caixa-mesas" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[55vh] overflow-y-auto pr-1"></div>
             </div>
         </div>
     </div>
@@ -511,7 +516,6 @@
                         meusPedidosMesa.push(p);
                     }
 
-                    // Verifica se está pronto (compatível com 'Entregue' ou 'Pronto')
                     let estaPronto = (p.status === 'Entregue' || p.status === 'Pronto');
 
                     if(!mesaUrl && estaPronto && !p.alertaVisto) {
@@ -826,14 +830,18 @@
         window.renderizarCaixaMesas = function() {
             const container = document.getElementById('lista-caixa-mesas');
             const contador = document.getElementById('caixa-contador');
+            const totalGeralDisplay = document.getElementById('caixa-total-geral');
             if(!container) return;
             container.innerHTML = '';
             
             let mesasOcupadas = Object.keys(mesasDetalhesMap);
             if(contador) contador.innerText = `${mesasOcupadas.length} mesa(s)`;
 
+            let somaTotalGeral = 0;
+
             if(mesasOcupadas.length === 0) {
                 container.innerHTML = `<p class="text-center text-xs text-zinc-400 py-10 col-span-2">Nenhuma mesa em atendimento.</p>`;
+                if(totalGeralDisplay) totalGeralDisplay.innerText = "R$ 0,00";
                 return;
             }
 
@@ -841,6 +849,9 @@
                 const info = mesasDetalhesMap[mesaKey];
                 let valorRestante = info.total - info.pagoParcial;
                 if(valorRestante < 0) valorRestante = 0;
+                
+                somaTotalGeral += valorRestante;
+
                 let extratoCombinado = info.pedidosLista.join('\n---\n');
                 let idsStr = encodeURIComponent(JSON.stringify(info.ids));
 
@@ -892,6 +903,10 @@
                 `;
                 container.appendChild(card);
             });
+
+            if(totalGeralDisplay) {
+                totalGeralDisplay.innerText = `R$ ${somaTotalGeral.toFixed(2).replace('.', ',')}`;
+            }
         }
 
         window.marcarPedidoEntregue = async function(idsStr) {
@@ -952,7 +967,7 @@
             let pessoas = parseInt(pessoasStr);
             if (pessoas > 0) {
                 let calc = (total / pessoas).toFixed(2).replace('.',',');
-                alert(`➗ Divisão de Conta (${info.mesaNome}):\n\nTotal: R$ ${total.toFixed(2).replace('.',',')}\nPessoas: ${pessoas}\n\n👉 Fica R$ ${calc} para cada pessoa.`);
+                alert(`➗ Divisão de Conta (${info.mesaNome}):\n\nRestante: R$ ${total.toFixed(2).replace('.',',')}\nPessoas: ${pessoas}\n\n👉 Fica R$ ${calc} para cada pessoa.`);
             }
         }
 
