@@ -155,7 +155,7 @@
         <span id="flutuante-total" class="text-sm md:text-base font-black">R$ 0,00</span>
     </div>
 
-    <!-- BOTÕES FIXOS NA BASE DA TELA COM BOTÃO DE RACHAR CONTA -->
+    <!-- BOTÕES FIXOS NA BASE DA TELA -->
     <div id="painel-botoes-acao" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 p-3 z-30 shadow-2xl">
         <div class="max-w-md md:max-w-3xl lg:max-w-4xl mx-auto flex gap-2">
             <button id="btn-enviar-pedido" onclick="enviarPedido('Pendente')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3.5 px-2 rounded-2xl transition shadow-lg text-xs md:text-sm flex items-center justify-center gap-1">
@@ -189,7 +189,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE AJUDA DINÂMICO -->
+    <!-- MODAL DE AJUDA -->
     <div id="modal-ajuda" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
             <button onclick="fecharModalAjuda()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
@@ -213,7 +213,7 @@
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">➗ 3. Dividir a Conta</strong>
-                    • Use o botão <b>"Rachar Conta"</b> no resumo do pedido ou na barra inferior para calcular facilmente quanto fica para cada pessoa (calcula tanto o carrinho atual quanto os pedidos já feitos na mesa).
+                    • Use o botão <b>"Rachar Conta"</b> para calcular facilmente quanto fica para cada pessoa.
                 </div>
             </div>
 
@@ -222,19 +222,13 @@
                     <strong class="text-amber-500 block mb-1">🏠 1. Lançar Pedidos (Salão)</strong>
                     • Selecione a Mesa ou Balcão no topo.<br>
                     • Toque nos itens do cardápio para adicionar.<br>
-                    • <b>Enviar Pedido:</b> Envia a comanda direto para a tela da cozinha preparar.<br>
-                    • <b>Pagar Pix Agora:</b> Gera o QR Code Pix na hora para o cliente quitar antecipadamente.
+                    • <b>Enviar Pedido:</b> Envia a comanda direto para a tela da cozinha preparar.
                 </div>
                 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">💰 2. Caixa / Mesas em Aberto</strong>
                     • Mostra todas as mesas ativas.<br>
-                    • Permite abater valores parciais, cobrar via Pix ou fechar a mesa quando o cliente for embora.
-                </div>
-
-                <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                    <strong class="text-amber-500 block mb-1">➗ Rachar Conta</strong>
-                    • Botão para calcular rapidamente quanto fica para cada pessoa dividir a conta.
+                    • Toque em uma mesa para abrir o gerenciamento, onde você pode adicionar itens, abater valores ou <b>Rachar a Conta</b> diretamente.
                 </div>
             </div>
 
@@ -282,7 +276,7 @@
         </div>
     </div>
 
-    <!-- MODAL DETALHES DA MESA -->
+    <!-- MODAL DETALHES DA MESA (COM BOTÃO DE RACHAR CONTA ADICIONADO) -->
     <div id="modal-mesa-detalhes" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-5 shadow-2xl relative">
             <button onclick="fecharModalMesaDetalhes()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold">✕</button>
@@ -304,10 +298,13 @@
                 <span class="text-base font-black text-amber-600 dark:text-amber-400" id="detalhe-mesa-restante">R$ 0,00</span>
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-2 gap-2 mb-2">
                 <button onclick="continuarAtendimentoMesa()" class="tap-scale bg-amber-500 text-zinc-950 font-black py-3 rounded-xl text-xs shadow">➕ Adicionar Itens</button>
                 <button onclick="abrirPagamentoParcial()" class="tap-scale bg-blue-600 text-white font-black py-3 rounded-xl text-xs shadow">💸 Abater Valor</button>
             </div>
+            <button onclick="abrirRacha()" class="tap-scale w-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-amber-600 dark:text-amber-400 border border-amber-500/40 font-extrabold py-3 rounded-xl text-xs shadow flex items-center justify-center gap-1.5">
+                ➗ Rachar Conta desta Mesa
+            </button>
         </div>
     </div>
 
@@ -337,6 +334,7 @@
         let numpadCallbackIndex = null;
         let pedidosAlertados = new Set();
         let modalPixContext = { type: 'salao', ids: [] };
+        let mesaAtualDetalhe = null;
 
         function normalizarNomeMesa(nome) {
             if (!nome) return "";
@@ -919,7 +917,6 @@
             }
         }
 
-        let mesaAtualDetalhe = null;
         window.abrirModalMesaDetalhes = function(mesaKey) {
             mesaAtualDetalhe = mesaKey;
             const info = mesasDetalhesMap[mesaKey];
@@ -936,7 +933,10 @@
 
             document.getElementById('modal-mesa-detalhes').classList.remove('hidden');
         }
-        window.fecharModalMesaDetalhes = function() { document.getElementById('modal-mesa-detalhes').classList.add('hidden'); }
+        window.fecharModalMesaDetalhes = function() { 
+            document.getElementById('modal-mesa-detalhes').classList.add('hidden'); 
+            mesaAtualDetalhe = null;
+        }
         window.continuarAtendimentoMesa = function() { mesaSelecionada = mesaAtualDetalhe; fecharModalMesaDetalhes(); }
 
         window.abrirPagamentoParcial = async function() {
@@ -1060,27 +1060,35 @@
             let total = 0;
             let origem = "";
 
-            // 1. Tenta pegar o valor do carrinho local (para calcular antes de enviar)
-            let totalCarrinho = itensCarrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-            if (totalCarrinho > 0) {
-                total = totalCarrinho;
-                origem = "do carrinho atual";
+            // Se o modal de detalhes da mesa estiver aberto, prioriza o valor restante daquela mesa específica
+            if (mesaAtualDetalhe && mesasDetalhesMap[mesaAtualDetalhe]) {
+                let infoMesa = mesasDetalhesMap[mesaAtualDetalhe];
+                total = infoMesa.total - infoMesa.pagoParcial;
+                if (total < 0) total = 0;
+                origem = `da ${infoMesa.mesaNome}`;
             } else {
-                // 2. Se o carrinho estiver vazio, pega o valor consumido acumulado da mesa
-                let mesaAtiva = mesaUrl || mesaSelecionada;
-                if (mesaAtiva) {
-                    let chaveEncontrada = Object.keys(mesasDetalhesMap).find(k => normalizarNomeMesa(k) === normalizarNomeMesa(mesaAtiva));
-                    if (chaveEncontrada) {
-                        let infoMesa = mesasDetalhesMap[chaveEncontrada];
-                        total = infoMesa.total - infoMesa.pagoParcial;
-                        if (total < 0) total = 0;
-                        origem = `da mesa ${infoMesa.mesaNome}`;
+                // 1. Tenta pegar o valor do carrinho local (para calcular antes de enviar)
+                let totalCarrinho = itensCarrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+                if (totalCarrinho > 0) {
+                    total = totalCarrinho;
+                    origem = "do carrinho atual";
+                } else {
+                    // 2. Senão, pega da mesa selecionada
+                    let mesaAtiva = mesaUrl || mesaSelecionada;
+                    if (mesaAtiva) {
+                        let chaveEncontrada = Object.keys(mesasDetalhesMap).find(k => normalizarNomeMesa(k) === normalizarNomeMesa(mesaAtiva));
+                        if (chaveEncontrada) {
+                            let infoMesa = mesasDetalhesMap[chaveEncontrada];
+                            total = infoMesa.total - infoMesa.pagoParcial;
+                            if (total < 0) total = 0;
+                            origem = `da mesa ${infoMesa.mesaNome}`;
+                        }
                     }
                 }
             }
 
             if (total <= 0) {
-                return alert("Nenhum item adicionado no carrinho ou comanda ativa nesta mesa!");
+                return alert("Nenhum item ou valor restante encontrado para rachar a conta!");
             }
 
             let pessoasStr = prompt(`Calculadora de Rachar Conta\nTotal (${origem}): R$ ${total.toFixed(2).replace('.',',')}\n\nDividir para quantas pessoas?`);
