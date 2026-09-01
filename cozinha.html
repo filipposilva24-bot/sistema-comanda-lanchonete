@@ -325,6 +325,20 @@
         document.getElementById('filtro-data').value = hojeISO;
         document.getElementById('filtro-mes').value = hojeISO.slice(0, 7);
 
+        // Função robusta para padronizar qualquer formato de timestamp do banco para Milissegundos exatos
+        function obterTimestampMs(ts) {
+            if (!ts) return Date.now();
+            if (typeof ts === 'object') {
+                if (typeof ts.toMillis === 'function') return ts.toMillis();
+                if (ts.seconds) return ts.seconds * 1000;
+            }
+            let num = Number(ts);
+            if (isNaN(num)) return Date.now();
+            // Se estiver em segundos (ex: menor que 10 bilhões), converte para milissegundos
+            if (num < 10000000000) return num * 1000;
+            return num;
+        }
+
         window.alternarTema = function() {
             const html = document.getElementById('html-root');
             const icone = document.getElementById('icone-tema');
@@ -348,12 +362,14 @@
             document.getElementById('icone-tema').innerText = '🌙';
         }
 
+        // Cronômetro ultra-seguro (protegido contra valores negativos ou nulos)
         setInterval(() => {
             if (abaAtual === 'cozinha') {
                 document.querySelectorAll('.cronometro-card').forEach(el => {
                     let timestamp = parseInt(el.getAttribute('data-timestamp'));
-                    if (timestamp) {
+                    if (!isNaN(timestamp) && timestamp > 0) {
                         let diffSegundos = Math.floor((Date.now() - timestamp) / 1000);
+                        if (diffSegundos < 0) diffSegundos = 0; // Evita valores negativos se houver micro-diferença de relógio
                         let mins = Math.floor(diffSegundos / 60);
                         let secs = diffSegundos % 60;
                         el.innerText = `⏱️ ${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
@@ -610,7 +626,8 @@
                 if (filtrados.length === 0) { msgVazia.classList.remove('hidden'); return; }
                 else { msgVazia.classList.add('hidden'); }
 
-                filtrados.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
+                // Ordenação segura usando a função normalizada
+                filtrados.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
 
                 filtrados.forEach((pedido) => {
                     let itensTexto = pedido.pedido || "";
@@ -621,7 +638,7 @@
                         obsTexto = partes[1].trim();
                     }
 
-                    let totalNum = parseFloat((pedido.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.'));
+                    let totalNum = parseFloat((pedido.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
                     let pagoParcial = pedido.valorPagoParcial || 0;
                     if (pedido.pagoNaHora) { pagoParcial += totalNum; }
                     
@@ -665,7 +682,9 @@
 
                     let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO NO PIX ONLINE</span></div>` : '';
                     let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${pedido.atendente}</span>` : '';
-                    let ts = pedido.timestampCriacao || Date.now();
+                    
+                    // Uso correto da função robusta de timestamp para o cronômetro
+                    let ts = obterTimestampMs(pedido.timestampCriacao);
                     let badgeCronometro = `<span class="cronometro-card bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs px-2.5 py-1 rounded-xl font-mono font-bold shadow-inner" data-timestamp="${ts}">⏱️ 0m 00s</span>`;
 
                     let corFaixa = pedido.status === 'Pendente' ? 'bg-amber-500' : 'bg-blue-500';
@@ -883,7 +902,7 @@
                 if (filtradosDia.length === 0) {
                     listaComandasDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma comanda paga neste dia.</p>';
                 } else {
-                    filtradosDia.sort((a, b) => (b.timestampCriacao || 0) - (a.timestampCriacao || 0));
+                    filtradosDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
                     filtradosDia.forEach(p => {
                         let div = document.createElement('div');
                         div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[11px]";
