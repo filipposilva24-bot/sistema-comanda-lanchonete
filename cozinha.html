@@ -65,7 +65,7 @@
                 <button id="btn-som" onclick="ativarSom()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2 py-1.5 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-zinc-300 transition shadow-sm">
                     🔇
                 </button>
-                <button onclick="alternarTema()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2 py-1.5 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-zinc-300 transition shadow-sm" title="Mudar Tema">
+                <button onclick="alternarTema()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-zinc-300 transition shadow-sm" title="Mudar Tema">
                     <span id="icone-tema">🌙</span>
                 </button>
             </div>
@@ -321,7 +321,14 @@
         let qtdPendentesAnterior = 0;
         let intervaloAlarme = null;
 
-        const hojeISO = new Date().toISOString().split('T')[0];
+        // Função para garantir a data correta no fuso de Brasília (vira às 00h)
+        function obterDataCaixa() {
+            let data = new Date();
+            data.setHours(data.getHours() - 3); 
+            return data.toISOString().split('T')[0];
+        }
+
+        const hojeISO = obterDataCaixa();
         document.getElementById('filtro-data').value = hojeISO;
         document.getElementById('filtro-mes').value = hojeISO.slice(0, 7);
 
@@ -595,7 +602,7 @@
             todosPedidos = [];
             snapshot.forEach(docSnap => {
                 const dados = docSnap.data();
-                if(!dados.dataCriacao) dados.dataCriacao = new Date().toISOString().split('T')[0];
+                if(!dados.dataCriacao) dados.dataCriacao = obterDataCaixa();
                 todosPedidos.push({ id: docSnap.id, ...dados });
             });
 
@@ -686,7 +693,6 @@
                     let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO NO PIX ONLINE</span></div>` : '';
                     let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${pedido.atendente}</span>` : '';
                     
-                    // Uso correto da função robusta de timestamp para o cronômetro
                     let ts = obterTimestampMs(pedido.timestampCriacao);
                     let badgeCronometro = `<span class="cronometro-card bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs px-2.5 py-1 rounded-xl font-mono font-bold shadow-inner" data-timestamp="${ts}">⏱️ 0m 00s</span>`;
 
@@ -1013,7 +1019,7 @@
             try {
                 const pedidoRef = doc(db, "pedidos", id);
                 let dados = { status: novoStatus };
-                if (novoStatus === 'Pago') dados.dataCriacao = new Date().toISOString().split('T')[0];
+                if (novoStatus === 'Pago') dados.dataCriacao = obterDataCaixa();
                 await updateDoc(pedidoRef, dados);
                 fecharModalPix();
             } catch (e) { alert("Erro ao atualizar."); }
@@ -1041,7 +1047,7 @@
         
         window.confirmarPagamentoPix = async function() { 
             if (pedidoSelecionadoIds && pedidoSelecionadoIds.length > 0) {
-                let hoje = new Date().toISOString().split('T')[0];
+                let hoje = obterDataCaixa();
                 let promessas = pedidoSelecionadoIds.map(id => updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje }));
                 await Promise.all(promessas);
                 fecharModalPix();
@@ -1051,7 +1057,7 @@
         window.fecharMesaMulti = async function(idsStr, mesaNome) {
             if(confirm(`Deseja realmente fechar e quitar a ${mesaNome}?`)) {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
-                let hoje = new Date().toISOString().split('T')[0];
+                let hoje = obterDataCaixa();
                 let promessas = ids.map(id => updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje }));
                 await Promise.all(promessas);
             }
