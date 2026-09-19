@@ -328,7 +328,7 @@
                     <strong class="text-amber-500 block mb-1">👨‍🍳 1. Aba Cozinha</strong>
                     • Mostra o cronômetro de espera de cada pedido.<br>
                     • <b>Aceitar / Preparar:</b> Move o pedido para o status de preparo.<br>
-                    • <b>Entregar:</b> Envia automaticamente a comanda para a aba do Caixa. (Se for consumo de funcionário, finaliza separado).
+                    • <b>Entregar / Finalizar Consumo:</b> Envia a comanda para o caixa ou finaliza o consumo interno separado.
                 </div>
                 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
@@ -695,14 +695,14 @@
                     if (itensTexto.includes("\nObs:")) {
                         const partes = itensTexto.split("\nObs:");
                         itensTexto = partes[0].trim();
-                        obsTexto = partes.trim();
+                        obsTexto = partes.slice(1).join("\nObs:").trim();
                     }
 
                     let respInterno = "";
                     if (itensTexto.includes("\nResp:")) {
                         const partes = itensTexto.split("\nResp:");
                         itensTexto = partes[0].trim();
-                        respInterno = partes.trim();
+                        respInterno = partes.slice(1).join("\nResp:").trim();
                     }
 
                     let isConsumo = (pedido.tipoPedido === 'Consumo');
@@ -735,7 +735,7 @@
 
                     let tipoPedidoStr = pedido.tipoPedido || 'Normal';
                     let botoesHtml = "";
-                    let textoBotaoEntregar = isConsumo ? "👩‍🍳 Finalizar Consumo Interno" : "🛎️ Entregar";
+                    let textoBotaoEntregar = isConsumo ? "👩‍🍳 Finalizar Consumo" : "🛎️ Entregar";
 
                     if (pedido.status === 'Pendente') {
                         botoesHtml = `
