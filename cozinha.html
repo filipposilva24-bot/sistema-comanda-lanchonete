@@ -112,18 +112,28 @@
 
                 <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
                     <div>
-                        <span class="text-[10px] text-blue-700 dark:text-blue-400 font-extrabold uppercase tracking-wider">Total do Mês:</span>
+                        <span class="text-[10px] text-blue-700 dark:text-blue-400 font-extrabold uppercase tracking-wider">Total Faturado (Mês):</span>
                         <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-pedidos-mes">0 comandas pagas</p>
                     </div>
                     <span class="text-xl font-black text-blue-600 dark:text-blue-400" id="valor-total-mes">R$ 0,00</span>
                 </div>
 
+                <!-- Caixinha Vermelha: Desperdícios -->
                 <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
                     <div>
-                        <span class="text-[10px] text-red-700 dark:text-red-400 font-extrabold uppercase tracking-wider">Perdas / Consumo (Mês):</span>
-                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-perdas-mes">0 itens registrados</p>
+                        <span class="text-[10px] text-red-700 dark:text-red-400 font-extrabold uppercase tracking-wider">⚠️ Desperdícios (Mês):</span>
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-desperdicio-mes">0 itens perdidos</p>
                     </div>
-                    <span class="text-xl font-black text-red-600 dark:text-red-400" id="valor-perdas-mes">R$ 0,00</span>
+                    <span class="text-xl font-black text-red-600 dark:text-red-400" id="valor-desperdicio-mes">R$ 0,00</span>
+                </div>
+
+                <!-- Caixinha Azul: Refeição Funcionários -->
+                <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
+                    <div>
+                        <span class="text-[10px] text-blue-700 dark:text-blue-400 font-extrabold uppercase tracking-wider">👩‍🍳 Refeição Funcionários (Mês):</span>
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-refeicao-mes">0 refeiçoes</p>
+                    </div>
+                    <span class="text-xl font-black text-blue-600 dark:text-blue-400" id="valor-refeicao-mes">R$ 0,00</span>
                 </div>
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
@@ -157,18 +167,28 @@
 
                 <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
                     <div>
-                        <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider">Total do Dia:</span>
+                        <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider">Total Faturado (Dia):</span>
                         <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-pedidos-dia">0 comandas pagas</p>
                     </div>
                     <span class="text-xl font-black text-emerald-600 dark:text-emerald-400" id="valor-total-dia">R$ 0,00</span>
                 </div>
 
+                <!-- Caixinha Vermelha: Desperdícios (Dia) -->
                 <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
                     <div>
-                        <span class="text-[10px] text-red-700 dark:text-red-400 font-extrabold uppercase tracking-wider">Perdas / Consumo (Dia):</span>
-                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-perdas-dia">0 itens registrados</p>
+                        <span class="text-[10px] text-red-700 dark:text-red-400 font-extrabold uppercase tracking-wider">⚠️ Desperdícios (Dia):</span>
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-desperdicio-dia">0 itens perdidos</p>
                     </div>
-                    <span class="text-xl font-black text-red-600 dark:text-red-400" id="valor-perdas-dia">R$ 0,00</span>
+                    <span class="text-xl font-black text-red-600 dark:text-red-400" id="valor-desperdicio-dia">R$ 0,00</span>
+                </div>
+
+                <!-- Caixinha Azul: Refeição Funcionários (Dia) -->
+                <div class="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
+                    <div>
+                        <span class="text-[10px] text-blue-700 dark:text-blue-400 font-extrabold uppercase tracking-wider">👩‍🍳 Refeição Funcionários (Dia):</span>
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-refeicao-dia">0 refeiçoes</p>
+                    </div>
+                    <span class="text-xl font-black text-blue-600 dark:text-blue-400" id="valor-refeicao-dia">R$ 0,00</span>
                 </div>
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full mb-3">
@@ -185,10 +205,18 @@
                     </div>
                 </div>
 
-                <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
-                    <h3 class="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-wider mb-2">🗑️ Lista de Desperdícios / Consumo (Dia)</h3>
-                    <div id="lista-perdas-dia" class="space-y-1.5 text-xs max-h-40 overflow-y-auto font-mono">
-                        <p class="text-zinc-400 italic">Nenhum registro de perda hoje.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
+                    <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3">
+                        <h3 class="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-wider mb-2">⚠️ Lista de Desperdícios (Dia)</h3>
+                        <div id="lista-desperdicio-dia" class="space-y-1.5 text-xs max-h-40 overflow-y-auto font-mono">
+                            <p class="text-zinc-400 italic">Nenhum desperdício.</p>
+                        </div>
+                    </div>
+                    <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3">
+                        <h3 class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2">👩‍🍳 Refeições Funcionários (Dia)</h3>
+                        <div id="lista-refeicao-dia" class="space-y-1.5 text-xs max-h-40 overflow-y-auto font-mono">
+                            <p class="text-zinc-400 italic">Nenhuma refeição registrada.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -300,25 +328,22 @@
                     <strong class="text-amber-500 block mb-1">👨‍🍳 1. Aba Cozinha</strong>
                     • Mostra o cronômetro de espera de cada pedido.<br>
                     • <b>Aceitar / Preparar:</b> Move o pedido para o status de preparo.<br>
-                    • <b>Entregar:</b> Envia automaticamente a comanda para a aba do Caixa aguardar a saída do cliente. (Se for um consumo de funcionário, finaliza automaticamente sem ir pro Caixa).
+                    • <b>Entregar:</b> Envia automaticamente a comanda para a aba do Caixa. (Se for consumo de funcionário, finaliza separado).
                 </div>
                 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">💲 2. Aba Caixa</strong>
-                    • Agrupa todos os pedidos entregues da mesa.<br>
-                    • Se o cliente já pagou via QR Code online, o valor restante zera automaticamente e aparece o botão verde de <b>"Cliente Saiu - Fechar Mesa"</b>.<br>
-                    • Permite gerar Pix na hora ou abater pagamentos parciais (dinheiro, cartão, etc.).
+                    • Agrupa todos os pedidos entregues da mesa para fechamento.
                 </div>
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">📓 3. Aba Fiados</strong>
-                    • Gerencia as contas que os clientes pediram para pendurar (anotar).<br>
-                    • Você pode abater pagamentos parciais e quitar a conta a qualquer momento.
+                    • Gerencia contas penduradas, abatimentos e quitação.
                 </div>
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                    <strong class="text-amber-500 block mb-1">📊 4. Relatórios PDF & WhatsApp</strong>
-                    • Altere a data ou o mês nos seletores para consultar qualquer período com precisão exata. Desperdícios e consumos internos são contabilizados de forma separada para não misturar com os lucros.
+                    <strong class="text-amber-500 block mb-1">📊 4. Relatórios Separados</strong>
+                    • Desperdícios (prejuízo) ficam em caixa vermelha separados das Refeições de Funcionários (custo operacional azul).
                 </div>
             </div>
 
@@ -670,14 +695,14 @@
                     if (itensTexto.includes("\nObs:")) {
                         const partes = itensTexto.split("\nObs:");
                         itensTexto = partes[0].trim();
-                        obsTexto = partes[1].trim();
+                        obsTexto = partes.trim();
                     }
 
                     let respInterno = "";
                     if (itensTexto.includes("\nResp:")) {
                         const partes = itensTexto.split("\nResp:");
                         itensTexto = partes[0].trim();
-                        respInterno = partes[1].trim();
+                        respInterno = partes.trim();
                     }
 
                     let isConsumo = (pedido.tipoPedido === 'Consumo');
@@ -909,7 +934,7 @@
                 clientesFiados.forEach(cliente => {
                     let info = fiadosMap[cliente];
                     let restante = info.totalNum - info.pagoParcial;
-                    if (restante <= 0) restante = 0; // Se pagou tudo e ficou, deveria ter sido quitado
+                    if (restante <= 0) restante = 0;
 
                     let extratoCombinado = info.pedidosLista.join('<br>--<br>');
                     let idsStr = encodeURIComponent(JSON.stringify(info.ids));
@@ -966,7 +991,8 @@
                 const valMes = document.getElementById('filtro-mes').value;
 
                 let pedidosPago = todosPedidos.filter(p => p.status === 'Pago' && p.dataCriacao);
-                let pedidosEspeciais = todosPedidos.filter(p => p.status === 'Desperdicio' || p.status === 'ConsumoFinalizado');
+                let pedidosDesperdicio = todosPedidos.filter(p => p.status === 'Desperdicio');
+                let pedidosRefeicao = todosPedidos.filter(p => p.status === 'ConsumoFinalizado');
 
                 // ----------------------------------------------------
                 // 1. Processar Mês (Exato conforme o input de mês)
@@ -988,18 +1014,25 @@
                 document.getElementById('valor-total-mes').innerText = `R$ ${totalMes.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-mes').innerText = `${filtradosMes.length} comanda(s) finalizada(s)`;
 
-                // Processar Perdas Mês
-                let filtradosEspeciaisMes = pedidosEspeciais.filter(p => valMes && p.dataCriacao ? p.dataCriacao.startsWith(valMes) : false);
-                let totalPerdasMes = 0;
-                let qtdItensPerdasMes = 0;
-                filtradosEspeciaisMes.forEach(p => {
-                    if (p.total) totalPerdasMes += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
-                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) {
-                        p.itensBrutos.forEach(i => { qtdItensPerdasMes += i.qtd; });
-                    }
+                // Processar Desperdício Mês
+                let despMes = pedidosDesperdicio.filter(p => valMes && p.dataCriacao ? p.dataCriacao.startsWith(valMes) : false);
+                let valDespMes = 0, qtdDespMes = 0;
+                despMes.forEach(p => {
+                    if (p.total) valDespMes += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
+                    if (p.itensBrutos) p.itensBrutos.forEach(i => qtdDespMes += i.qtd);
                 });
-                document.getElementById('valor-perdas-mes').innerText = `R$ ${totalPerdasMes.toFixed(2).replace('.', ',')}`;
-                document.getElementById('qtd-perdas-mes').innerText = `${qtdItensPerdasMes} itens registrados`;
+                document.getElementById('valor-desperdicio-mes').innerText = `R$ ${valDespMes.toFixed(2).replace('.', ',')}`;
+                document.getElementById('qtd-desperdicio-mes').innerText = `${qtdDespMes} itens perdidos`;
+
+                // Processar Refeição Mês
+                let refMes = pedidosRefeicao.filter(p => valMes && p.dataCriacao ? p.dataCriacao.startsWith(valMes) : false);
+                let valRefMes = 0, qtdRefMes = 0;
+                refMes.forEach(p => {
+                    if (p.total) valRefMes += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
+                    if (p.itensBrutos) p.itensBrutos.forEach(i => qtdRefMes += i.qtd);
+                });
+                document.getElementById('valor-refeicao-mes').innerText = `R$ ${valRefMes.toFixed(2).replace('.', ',')}`;
+                document.getElementById('qtd-refeicao-mes').innerText = `${qtdRefMes} itens consumidos`;
 
                 const rankingMes = document.getElementById('ranking-produtos-mes');
                 rankingMes.innerHTML = '';
@@ -1035,18 +1068,25 @@
                 document.getElementById('valor-total-dia').innerText = `R$ ${totalDia.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-dia').innerText = `${filtradosDia.length} comanda(s) finalizada(s)`;
 
-                // Processar Perdas Dia
-                let filtradosEspeciaisDia = pedidosEspeciais.filter(p => valData && p.dataCriacao ? p.dataCriacao === valData : false);
-                let totalPerdasDia = 0;
-                let qtdItensPerdasDia = 0;
-                filtradosEspeciaisDia.forEach(p => {
-                    if (p.total) totalPerdasDia += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
-                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) {
-                        p.itensBrutos.forEach(i => { qtdItensPerdasDia += i.qtd; });
-                    }
+                // Processar Desperdício Dia
+                let despDia = pedidosDesperdicio.filter(p => valData && p.dataCriacao ? p.dataCriacao === valData : false);
+                let valDespDia = 0, qtdDespDia = 0;
+                despDia.forEach(p => {
+                    if (p.total) valDespDia += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
+                    if (p.itensBrutos) p.itensBrutos.forEach(i => qtdDespDia += i.qtd);
                 });
-                document.getElementById('valor-perdas-dia').innerText = `R$ ${totalPerdasDia.toFixed(2).replace('.', ',')}`;
-                document.getElementById('qtd-perdas-dia').innerText = `${qtdItensPerdasDia} itens registrados`;
+                document.getElementById('valor-desperdicio-dia').innerText = `R$ ${valDespDia.toFixed(2).replace('.', ',')}`;
+                document.getElementById('qtd-desperdicio-dia').innerText = `${qtdDespDia} itens perdidos`;
+
+                // Processar Refeição Dia
+                let refDia = pedidosRefeicao.filter(p => valData && p.dataCriacao ? p.dataCriacao === valData : false);
+                let valRefDia = 0, qtdRefDia = 0;
+                refDia.forEach(p => {
+                    if (p.total) valRefDia += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
+                    if (p.itensBrutos) p.itensBrutos.forEach(i => qtdRefDia += i.qtd);
+                });
+                document.getElementById('valor-refeicao-dia').innerText = `R$ ${valRefDia.toFixed(2).replace('.', ',')}`;
+                document.getElementById('qtd-refeicao-dia').innerText = `${qtdRefDia} itens consumidos`;
 
                 const rankingDia = document.getElementById('ranking-produtos-dia');
                 rankingDia.innerHTML = '';
@@ -1080,22 +1120,39 @@
                     });
                 }
 
-                // 4. Renderizar Lista Compacta de Perdas do Dia
-                const listaPerdasDiv = document.getElementById('lista-perdas-dia');
-                listaPerdasDiv.innerHTML = '';
-                if (filtradosEspeciaisDia.length === 0) {
-                    listaPerdasDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhum registro de perda ou consumo neste dia.</p>';
+                // 4. Renderizar Lista Desperdício Dia
+                const listaDespDiv = document.getElementById('lista-desperdicio-dia');
+                listaDespDiv.innerHTML = '';
+                if (despDia.length === 0) {
+                    listaDespDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhum desperdício registrado.</p>';
                 } else {
-                    filtradosEspeciaisDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
-                    filtradosEspeciaisDia.forEach(p => {
+                    despDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
+                    despDia.forEach(p => {
                         let div = document.createElement('div');
-                        let isDesperdicio = p.status === 'Desperdicio';
-                        div.className = `flex justify-between items-center ${isDesperdicio ? 'bg-red-50 dark:bg-red-950/20' : 'bg-blue-50 dark:bg-blue-950/20'} p-2 rounded-xl border ${isDesperdicio ? 'border-red-200 dark:border-red-900/40' : 'border-blue-200 dark:border-blue-900/40'} text-[11px]`;
+                        div.className = "flex justify-between items-center bg-red-50 dark:bg-red-950/20 p-2 rounded-xl border border-red-200 dark:border-red-900/40 text-[11px]";
                         div.innerHTML = `
-                            <div><strong class="${isDesperdicio ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}">${p.mesa}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
-                            <span class="${isDesperdicio ? 'text-red-600' : 'text-blue-600'} font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
+                            <div><strong class="text-red-600 dark:text-red-400">${p.mesa}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
+                            <span class="text-red-600 font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
                         `;
-                        listaPerdasDiv.appendChild(div);
+                        listaDespDiv.appendChild(div);
+                    });
+                }
+
+                // 5. Renderizar Lista Refeição Funcionários Dia
+                const listaRefDiv = document.getElementById('lista-refeicao-dia');
+                listaRefDiv.innerHTML = '';
+                if (refDia.length === 0) {
+                    listaRefDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma refeição registrada.</p>';
+                } else {
+                    refDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
+                    refDia.forEach(p => {
+                        let div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-blue-50 dark:bg-blue-950/20 p-2 rounded-xl border border-blue-200 dark:border-blue-900/40 text-[11px]";
+                        div.innerHTML = `
+                            <div><strong class="text-blue-600 dark:text-blue-400">${p.mesa}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
+                            <span class="text-blue-600 font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
+                        `;
+                        listaRefDiv.appendChild(div);
                     });
                 }
             }
@@ -1105,7 +1162,8 @@
             let mesVal = document.getElementById('filtro-mes').value;
             let totalTxt = document.getElementById('valor-total-mes').innerText;
             let qtdTxt = document.getElementById('qtd-pedidos-mes').innerText;
-            let perdasTxt = document.getElementById('valor-perdas-mes').innerText;
+            let despTxt = document.getElementById('valor-desperdicio-mes').innerText;
+            let refTxt = document.getElementById('valor-refeicao-mes').innerText;
             let rankingHtml = document.getElementById('ranking-produtos-mes').innerHTML;
 
             let area = document.getElementById('area-impressao');
@@ -1120,10 +1178,14 @@
                         <p style="font-size: 11px; color: #555; margin: 5px 0 0 0;">${qtdTxt}</p>
                     </div>
 
-                    <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca;">
-                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #b91c1c;">Custo de Desperdício/Consumo</h3>
-                        <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin: 0;">${perdasTxt}</p>
-                        <p style="font-size: 11px; color: #7f1d1d; margin: 5px 0 0 0;">* Não contabiliza no lucro</p>
+                    <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #fecaca;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #b91c1c;">Custo de Desperdício (Prejuízo)</h3>
+                        <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin: 0;">${despTxt}</p>
+                    </div>
+
+                    <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bfdbfe;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #1d4ed8;">Custo de Refeição Funcionários</h3>
+                        <p style="font-size: 18px; font-weight: bold; color: #2563eb; margin: 0;">${refTxt}</p>
                     </div>
 
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🏆 Ranking de Produtos do Mês</h3>
@@ -1139,10 +1201,12 @@
             let dataVal = document.getElementById('filtro-data').value;
             let totalTxt = document.getElementById('valor-total-dia').innerText;
             let qtdTxt = document.getElementById('qtd-pedidos-dia').innerText;
-            let perdasTxt = document.getElementById('valor-perdas-dia').innerText;
+            let despTxt = document.getElementById('valor-desperdicio-dia').innerText;
+            let refTxt = document.getElementById('valor-refeicao-dia').innerText;
             let rankingHtml = document.getElementById('ranking-produtos-dia').innerHTML;
             let comandasHtml = document.getElementById('lista-comandas-compacta').innerHTML;
-            let perdasHtml = document.getElementById('lista-perdas-dia').innerHTML;
+            let despHtml = document.getElementById('lista-desperdicio-dia').innerHTML;
+            let refHtml = document.getElementById('lista-refeicao-dia').innerHTML;
 
             let area = document.getElementById('area-impressao');
             area.innerHTML = `
@@ -1156,10 +1220,14 @@
                         <p style="font-size: 11px; color: #555; margin: 5px 0 0 0;">${qtdTxt}</p>
                     </div>
 
-                    <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca;">
-                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #b91c1c;">Custo de Desperdício/Consumo</h3>
-                        <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin: 0;">${perdasTxt}</p>
-                        <p style="font-size: 11px; color: #7f1d1d; margin: 5px 0 0 0;">* Não contabiliza no lucro</p>
+                    <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #fecaca;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #b91c1c;">Custo de Desperdício (Prejuízo)</h3>
+                        <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin: 0;">${despTxt}</p>
+                    </div>
+
+                    <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bfdbfe;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #1d4ed8;">Custo de Refeição Funcionários</h3>
+                        <p style="font-size: 18px; font-weight: bold; color: #2563eb; margin: 0;">${refTxt}</p>
                     </div>
 
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🏆 Ranking do Dia</h3>
@@ -1168,8 +1236,11 @@
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🧾 Lista de Comandas Pagas</h3>
                     <div style="font-size: 11px; margin-bottom: 20px;">${comandasHtml}</div>
 
-                    <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🗑️ Perdas e Consumo</h3>
-                    <div style="font-size: 11px;">${perdasHtml}</div>
+                    <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">⚠️ Desperdícios do Dia</h3>
+                    <div style="font-size: 11px; margin-bottom: 20px;">${despHtml}</div>
+
+                    <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">👩‍🍳 Refeição Funcionários do Dia</h3>
+                    <div style="font-size: 11px;">${refHtml}</div>
                 </div>
             `;
             area.classList.remove('hidden');
@@ -1227,14 +1298,16 @@
                 let dataVal = document.getElementById('filtro-data').value;
                 let totalTxt = document.getElementById('valor-total-dia').innerText;
                 let qtdTxt = document.getElementById('qtd-pedidos-dia').innerText;
-                let perdasTxt = document.getElementById('valor-perdas-dia').innerText;
-                mensagem = `📊 *Fechamento Diário - Point Derico*\n📅 Data: ${dataVal}\n\n💰 *Faturamento:* ${totalTxt}\n🧾 *Comandas:* ${qtdTxt}\n\n⚠️ *Perdas/Consumo Interno:* ${perdasTxt}\n\n🔥 Sistema Point Derico`;
+                let despTxt = document.getElementById('valor-desperdicio-dia').innerText;
+                let refTxt = document.getElementById('valor-refeicao-dia').innerText;
+                mensagem = `📊 *Fechamento Diário - Point Derico*\n📅 Data: ${dataVal}\n\n💰 *Faturamento:* ${totalTxt}\n🧾 *Comandas:* ${qtdTxt}\n\n⚠️ *Desperdícios:* ${despTxt}\n👩‍🍳 *Refeição Funcionários:* ${refTxt}\n\n🔥 Sistema Point Derico`;
             } else {
                 let mesVal = document.getElementById('filtro-mes').value;
                 let totalTxt = document.getElementById('valor-total-mes').innerText;
                 let qtdTxt = document.getElementById('qtd-pedidos-mes').innerText;
-                let perdasTxt = document.getElementById('valor-perdas-mes').innerText;
-                mensagem = `📊 *Fechamento Mensal - Point Derico*\n📅 Mês: ${mesVal}\n\n💰 *Faturamento:* ${totalTxt}\n🧾 *Comandas:* ${qtdTxt}\n\n⚠️ *Perdas/Consumo Interno:* ${perdasTxt}\n\n🔥 Sistema Point Derico`;
+                let despTxt = document.getElementById('valor-desperdicio-mes').innerText;
+                let refTxt = document.getElementById('valor-refeicao-mes').innerText;
+                mensagem = `📊 *Fechamento Mensal - Point Derico*\n📅 Mês: ${mesVal}\n\n💰 *Faturamento:* ${totalTxt}\n🧾 *Comandas:* ${qtdTxt}\n\n⚠️ *Desperdícios:* ${despTxt}\n👩‍🍳 *Refeição Funcionários:* ${refTxt}\n\n🔥 Sistema Point Derico`;
             }
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
         }
@@ -1244,8 +1317,6 @@
                 const pedidoRef = doc(db, "pedidos", id);
                 let statusFinal = novoStatus;
                 
-                // Lógica de isolamento do Consumo Interno:
-                // Se a cozinha terminar de fazer o consumo da funcionária, ele morre aqui e não vai pro Caixa cobrar.
                 if (novoStatus === 'Entregue' && tipoPedido === 'Consumo') {
                     statusFinal = 'ConsumoFinalizado';
                 }
@@ -1310,7 +1381,6 @@
             return payload + (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
         }
 
-        // DESPERTADOR AUTOMÁTICO (Anti-dorminhoco)
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible") {
                 const statusEl = document.getElementById('contador');
