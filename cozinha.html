@@ -75,6 +75,7 @@
             <div class="flex gap-1 flex-grow overflow-x-auto">
                 <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 px-2 text-[11px] rounded-xl transition shadow text-center whitespace-nowrap">👨‍🍳 Cozinha</button>
                 <button onclick="mudarAba('caixa')" id="tab-caixa" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap">💲 Caixa</button>
+                <button onclick="mudarAba('fiado')" id="tab-fiado" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap">📓 Fiados</button>
                 <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap">📊 Relatórios</button>
             </div>
             <button onclick="abrirModalReset()" class="tap-scale bg-red-100 dark:bg-red-950/40 border border-red-300 dark:border-red-900/60 text-red-600 dark:text-red-400 px-2.5 py-2 rounded-xl text-xs font-extrabold hover:bg-red-200 dark:hover:bg-red-950 transition ml-1 flex-shrink-0" title="Hard Reset">
@@ -117,6 +118,14 @@
                     <span class="text-xl font-black text-blue-600 dark:text-blue-400" id="valor-total-mes">R$ 0,00</span>
                 </div>
 
+                <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
+                    <div>
+                        <span class="text-[10px] text-red-700 dark:text-red-400 font-extrabold uppercase tracking-wider">Perdas / Consumo (Mês):</span>
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-perdas-mes">0 itens registrados</p>
+                    </div>
+                    <span class="text-xl font-black text-red-600 dark:text-red-400" id="valor-perdas-mes">R$ 0,00</span>
+                </div>
+
                 <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
                     <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">🏆 Ranking do Mês</h3>
                     <div id="ranking-produtos-mes" class="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300 max-h-36 overflow-y-auto">
@@ -154,6 +163,14 @@
                     <span class="text-xl font-black text-emerald-600 dark:text-emerald-400" id="valor-total-dia">R$ 0,00</span>
                 </div>
 
+                <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 p-3 rounded-2xl flex justify-between items-center shadow-inner w-full mb-3">
+                    <div>
+                        <span class="text-[10px] text-red-700 dark:text-red-400 font-extrabold uppercase tracking-wider">Perdas / Consumo (Dia):</span>
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium" id="qtd-perdas-dia">0 itens registrados</p>
+                    </div>
+                    <span class="text-xl font-black text-red-600 dark:text-red-400" id="valor-perdas-dia">R$ 0,00</span>
+                </div>
+
                 <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full mb-3">
                     <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">🏆 Ranking do Dia</h3>
                     <div id="ranking-produtos-dia" class="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300 max-h-36 overflow-y-auto">
@@ -161,11 +178,17 @@
                     </div>
                 </div>
 
-                <!-- Lista Compacta de Comandas do Dia -->
-                <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
+                <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full mb-3">
                     <h3 class="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">🧾 Lista de Comandas do Dia</h3>
                     <div id="lista-comandas-compacta" class="space-y-1.5 text-xs max-h-60 overflow-y-auto font-mono">
                         <p class="text-zinc-400 italic">Nenhuma comanda registrada.</p>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 w-full">
+                    <h3 class="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-wider mb-2">🗑️ Lista de Desperdícios / Consumo (Dia)</h3>
+                    <div id="lista-perdas-dia" class="space-y-1.5 text-xs max-h-40 overflow-y-auto font-mono">
+                        <p class="text-zinc-400 italic">Nenhum registro de perda hoje.</p>
                     </div>
                 </div>
             </div>
@@ -277,7 +300,7 @@
                     <strong class="text-amber-500 block mb-1">👨‍🍳 1. Aba Cozinha</strong>
                     • Mostra o cronômetro de espera de cada pedido.<br>
                     • <b>Aceitar / Preparar:</b> Move o pedido para o status de preparo.<br>
-                    • <b>Entregar:</b> Envia automaticamente a comanda para a aba do Caixa aguardar a saída do cliente.
+                    • <b>Entregar:</b> Envia automaticamente a comanda para a aba do Caixa aguardar a saída do cliente. (Se for um consumo de funcionário, finaliza automaticamente sem ir pro Caixa).
                 </div>
                 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
@@ -288,8 +311,14 @@
                 </div>
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                    <strong class="text-amber-500 block mb-1">📊 3. Relatórios PDF & WhatsApp</strong>
-                    • Altere a data ou o mês nos seletores para consultar qualquer período com precisão exata.
+                    <strong class="text-amber-500 block mb-1">📓 3. Aba Fiados</strong>
+                    • Gerencia as contas que os clientes pediram para pendurar (anotar).<br>
+                    • Você pode abater pagamentos parciais e quitar a conta a qualquer momento.
+                </div>
+
+                <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+                    <strong class="text-amber-500 block mb-1">📊 4. Relatórios PDF & WhatsApp</strong>
+                    • Altere a data ou o mês nos seletores para consultar qualquer período com precisão exata. Desperdícios e consumos internos são contabilizados de forma separada para não misturar com os lucros.
                 </div>
             </div>
 
@@ -321,7 +350,6 @@
         let qtdPendentesAnterior = 0;
         let intervaloAlarme = null;
 
-        // Função para garantir a data correta no fuso de Brasília (vira às 00h)
         function obterDataCaixa() {
             let data = new Date();
             data.setHours(data.getHours() - 3); 
@@ -332,7 +360,6 @@
         document.getElementById('filtro-data').value = hojeISO;
         document.getElementById('filtro-mes').value = hojeISO.slice(0, 7);
 
-        // Função robusta e blindada para padronizar qualquer formato de timestamp do banco
         function obterTimestampMs(ts) {
             if (!ts) return Date.now();
             if (typeof ts === 'object') {
@@ -368,15 +395,12 @@
             document.getElementById('icone-tema').innerText = '🌙';
         }
 
-        // Cronômetro ultra-seguro (Blindado contra discrepâncias de relógio do PC e cache)
         setInterval(() => {
             if (abaAtual === 'cozinha') {
                 document.querySelectorAll('.cronometro-card').forEach(el => {
                     let timestamp = parseInt(el.getAttribute('data-timestamp'));
                     if (!isNaN(timestamp) && timestamp > 0) {
                         let diffSegundos = Math.floor((Date.now() - timestamp) / 1000);
-                        
-                        // Proteções contra relógio do PC adiantado/atrasado
                         if (diffSegundos < 0) diffSegundos = 0;
                         if (diffSegundos > 86400) diffSegundos = 0; 
 
@@ -558,7 +582,9 @@
             abaAtual = aba;
             document.getElementById('tab-cozinha').className = aba === 'cozinha' ? "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 px-2 text-[11px] rounded-xl transition shadow text-center whitespace-nowrap" : "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap";
             document.getElementById('tab-caixa').className = aba === 'caixa' ? "tap-scale flex-1 bg-blue-500 text-zinc-950 font-extrabold py-2 px-2 text-[11px] rounded-xl transition shadow text-center whitespace-nowrap" : "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap";
+            document.getElementById('tab-fiado').className = aba === 'fiado' ? "tap-scale flex-1 bg-indigo-500 text-white font-extrabold py-2 px-2 text-[11px] rounded-xl transition shadow text-center whitespace-nowrap" : "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap";
             document.getElementById('tab-relatorio').className = aba === 'relatorio' ? "tap-scale flex-1 bg-emerald-500 text-zinc-950 font-extrabold py-2 px-2 text-[11px] rounded-xl transition shadow text-center whitespace-nowrap" : "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap";
+            
             document.getElementById('painel-filtro').classList.toggle('hidden', aba !== 'relatorio');
             renderizarCards();
         }
@@ -636,7 +662,6 @@
                 if (filtrados.length === 0) { msgVazia.classList.remove('hidden'); return; }
                 else { msgVazia.classList.add('hidden'); }
 
-                // Ordenação segura usando a função normalizada
                 filtrados.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
 
                 filtrados.forEach((pedido) => {
@@ -647,6 +672,15 @@
                         itensTexto = partes[0].trim();
                         obsTexto = partes[1].trim();
                     }
+
+                    let respInterno = "";
+                    if (itensTexto.includes("\nResp:")) {
+                        const partes = itensTexto.split("\nResp:");
+                        itensTexto = partes[0].trim();
+                        respInterno = partes[1].trim();
+                    }
+
+                    let isConsumo = (pedido.tipoPedido === 'Consumo');
 
                     let totalNum = parseFloat((pedido.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
                     let pagoParcial = pedido.valorPagoParcial || 0;
@@ -674,25 +708,29 @@
                         </div>
                     `;
 
+                    let tipoPedidoStr = pedido.tipoPedido || 'Normal';
                     let botoesHtml = "";
+                    let textoBotaoEntregar = isConsumo ? "👩‍🍳 Finalizar Consumo Interno" : "🛎️ Entregar";
+
                     if (pedido.status === 'Pendente') {
                         botoesHtml = `
                         <div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">
-                            <button onclick="mudarStatus('${pedido.id}', 'Preparando')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex items-center justify-center gap-1">👨‍🍳 Aceitar / Preparar</button>
-                            <button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Entregar</button>
+                            <button onclick="mudarStatus('${pedido.id}', 'Preparando', '${tipoPedidoStr}')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex items-center justify-center gap-1">👨‍🍳 Aceitar / Preparar</button>
+                            <button onclick="mudarStatus('${pedido.id}', 'Entregue', '${tipoPedidoStr}')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">${textoBotaoEntregar}</button>
                             <button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition shadow">🗑️</button>
                         </div>`;
                     } else { 
                         botoesHtml = `
                         <div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">
-                            <button onclick="mudarStatus('${pedido.id}', 'Entregue')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">🛎️ Marcar Entregue (Vai para o Caixa)</button>
+                            <button onclick="mudarStatus('${pedido.id}', 'Entregue', '${tipoPedidoStr}')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">${textoBotaoEntregar}</button>
                             <button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition shadow">🗑️</button>
                         </div>`;
                     }
 
                     let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO NO PIX ONLINE</span></div>` : '';
                     let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${pedido.atendente}</span>` : '';
-                    
+                    if (isConsumo) badgeAtendente = `<span class="bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👩‍🍳 Consumo Interno</span>`;
+
                     let ts = obterTimestampMs(pedido.timestampCriacao);
                     let badgeCronometro = `<span class="cronometro-card bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs px-2.5 py-1 rounded-xl font-mono font-bold shadow-inner" data-timestamp="${ts}">⏱️ 0m 00s</span>`;
 
@@ -700,6 +738,7 @@
                     let estiloFundoCard = pedido.status === 'Pendente' 
                         ? 'bg-amber-50/40 dark:bg-amber-950/10 border-amber-200/80 dark:border-amber-900/30' 
                         : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800';
+                    if (isConsumo) estiloFundoCard = 'bg-blue-50/40 dark:bg-blue-950/10 border-blue-200/80 dark:border-blue-900/30';
 
                     let badgeStatusCozinha = '';
                     if (pedido.status === 'Pendente') {
@@ -720,8 +759,9 @@
                             <div class="pl-2">${avisoPagoNaHora}</div>
                             <div class="pl-2">${badgeStatusCozinha}</div>
                             <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${itensTexto.replace(/\n/g, '<br>')}</div>
-                            <div class="pl-2">${blocoAbatimento}</div>
+                            ${!isConsumo ? `<div class="pl-2">${blocoAbatimento}</div>` : ''}
                             ${obsTexto ? `<div class="mb-2 pl-2"><span class="bg-red-100 dark:bg-red-950/80 border border-red-300 dark:border-red-900/60 text-red-800 dark:text-red-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg uppercase tracking-wider">Atenção</span><p class="text-red-700 dark:text-red-300 text-xs font-semibold mt-1 bg-red-50 dark:bg-red-950/30 p-2 rounded-xl border border-red-200 dark:border-red-900/40">"${obsTexto}"</p></div>` : ''}
+                            ${respInterno ? `<div class="mb-2 pl-2"><p class="text-blue-700 dark:text-blue-300 text-xs font-semibold mt-1 bg-blue-50 dark:bg-blue-950/30 p-2 rounded-xl border border-blue-200 dark:border-blue-900/40">Responsável: ${respInterno}</p></div>` : ''}
                         </div>
                         ${botoesHtml}
                     `;
@@ -762,7 +802,7 @@
                 let mesasOcupadas = Object.keys(caixaMap);
                 contadorTxt.innerText = `${mesasOcupadas.length} mesa(s) aguardando atendimento / saída`;
                 document.getElementById('icone-vazio').innerText = "💲";
-                document.getElementById('texto-vazio').innerText = "Nenhuma comanda pendente de pagamento!";
+                document.getElementById('texto-vazio').innerText = "Nenhuma comanda pendente no caixa!";
 
                 if (mesasOcupadas.length === 0) { msgVazia.classList.remove('hidden'); return; }
                 else { msgVazia.classList.add('hidden'); }
@@ -830,6 +870,92 @@
 
             } 
             /* ======================================================== */
+            /* ABA FIADOS (Contas Penduradas) */
+            /* ======================================================== */
+            else if (abaAtual === 'fiado') {
+                let fiadosMap = {};
+                todosPedidos.filter(p => p.status === 'Fiado').forEach(p => {
+                    let clienteKey = (p.clienteFiado || "Cliente Desconhecido").trim();
+                    let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
+                    
+                    let pagoPart = p.valorPagoParcial || 0;
+
+                    if (!fiadosMap[clienteKey]) {
+                        fiadosMap[clienteKey] = {
+                            ids: [p.id],
+                            cliente: clienteKey,
+                            pedidosLista: [p.pedido || ''],
+                            totalNum: 0,
+                            pagoParcial: 0,
+                            datas: [p.dataCriacao || p.horario || '']
+                        };
+                    } else {
+                        fiadosMap[clienteKey].ids.push(p.id);
+                        fiadosMap[clienteKey].pedidosLista.push(p.pedido || '');
+                        fiadosMap[clienteKey].datas.push(p.dataCriacao || p.horario || '');
+                    }
+                    fiadosMap[clienteKey].totalNum += val;
+                    fiadosMap[clienteKey].pagoParcial += pagoPart;
+                });
+
+                let clientesFiados = Object.keys(fiadosMap);
+                contadorTxt.innerText = `${clientesFiados.length} clientes com pendências`;
+                document.getElementById('icone-vazio').innerText = "📓";
+                document.getElementById('texto-vazio').innerText = "Nenhuma conta pendente!";
+
+                if (clientesFiados.length === 0) { msgVazia.classList.remove('hidden'); return; }
+                else { msgVazia.classList.add('hidden'); }
+
+                clientesFiados.forEach(cliente => {
+                    let info = fiadosMap[cliente];
+                    let restante = info.totalNum - info.pagoParcial;
+                    if (restante <= 0) restante = 0; // Se pagou tudo e ficou, deveria ter sido quitado
+
+                    let extratoCombinado = info.pedidosLista.join('<br>--<br>');
+                    let idsStr = encodeURIComponent(JSON.stringify(info.ids));
+
+                    let blocoAbatimento = `
+                        <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                            <div class="flex justify-between text-zinc-400">
+                                <span>Dívida Original Total:</span>
+                                <span>R$ ${info.totalNum.toFixed(2).replace('.',',')}</span>
+                            </div>
+                            ${info.pagoParcial > 0 ? `
+                            <div class="flex justify-between text-emerald-500 font-bold">
+                                <span>Já Pago / Abatido:</span>
+                                <span>- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}</span>
+                            </div>` : ''}
+                            <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-200 dark:border-zinc-800">
+                                <span>RESTA A PAGAR:</span>
+                                <span class="text-indigo-500">R$ ${restante.toFixed(2).replace('.',',')}</span>
+                            </div>
+                        </div>
+                    `;
+
+                    let botoesHtml = `
+                        <div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
+                            <button onclick="abaterFiado('${idsStr}')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">💸 Abater Pagamento</button>
+                            <button onclick="quitarFiado('${idsStr}', '${info.cliente}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Quitar Tudo</button>
+                        </div>`;
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
+                    card.innerHTML = `
+                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500"></div>
+                        <div>
+                            <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
+                                <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${info.cliente}</h2><div class="mt-1"><span class="bg-indigo-100 dark:bg-indigo-900 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">📓 Pendura</span></div></div>
+                                <div class="flex flex-col items-end gap-1.5"><span class="text-zinc-400 text-[10px] font-mono text-right max-w-[80px] break-words">${info.datas[0]}</span></div>
+                            </div>
+                            <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner max-h-32 overflow-y-auto">${extratoCombinado.replace(/\n/g, '<br>')}</div>
+                            <div class="pl-2">${blocoAbatimento}</div>
+                        </div>
+                        ${botoesHtml}
+                    `;
+                    container.appendChild(card);
+                });
+            }
+            /* ======================================================== */
             /* ABA RELATÓRIO (Lendo estritamente os seletores) */
             /* ======================================================== */
             else if (abaAtual === 'relatorio') {
@@ -840,8 +966,11 @@
                 const valMes = document.getElementById('filtro-mes').value;
 
                 let pedidosPago = todosPedidos.filter(p => p.status === 'Pago' && p.dataCriacao);
+                let pedidosEspeciais = todosPedidos.filter(p => p.status === 'Desperdicio' || p.status === 'ConsumoFinalizado');
 
+                // ----------------------------------------------------
                 // 1. Processar Mês (Exato conforme o input de mês)
+                // ----------------------------------------------------
                 let filtradosMes = pedidosPago.filter(p => valMes ? p.dataCriacao.startsWith(valMes) : false);
                 let totalMes = 0;
                 let prodMes = {};
@@ -859,6 +988,19 @@
                 document.getElementById('valor-total-mes').innerText = `R$ ${totalMes.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-mes').innerText = `${filtradosMes.length} comanda(s) finalizada(s)`;
 
+                // Processar Perdas Mês
+                let filtradosEspeciaisMes = pedidosEspeciais.filter(p => valMes && p.dataCriacao ? p.dataCriacao.startsWith(valMes) : false);
+                let totalPerdasMes = 0;
+                let qtdItensPerdasMes = 0;
+                filtradosEspeciaisMes.forEach(p => {
+                    if (p.total) totalPerdasMes += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
+                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) {
+                        p.itensBrutos.forEach(i => { qtdItensPerdasMes += i.qtd; });
+                    }
+                });
+                document.getElementById('valor-perdas-mes').innerText = `R$ ${totalPerdasMes.toFixed(2).replace('.', ',')}`;
+                document.getElementById('qtd-perdas-mes').innerText = `${qtdItensPerdasMes} itens registrados`;
+
                 const rankingMes = document.getElementById('ranking-produtos-mes');
                 rankingMes.innerHTML = '';
                 let arrayRankMes = Object.keys(prodMes).map(nome => ({ nome, ...prodMes[nome] })).sort((a, b) => b.qtd - a.qtd);
@@ -873,7 +1015,9 @@
                     });
                 }
 
+                // ----------------------------------------------------
                 // 2. Processar Dia (Exato conforme o input de data)
+                // ----------------------------------------------------
                 let filtradosDia = pedidosPago.filter(p => valData ? p.dataCriacao === valData : false);
                 let totalDia = 0;
                 let prodDia = {};
@@ -890,6 +1034,19 @@
 
                 document.getElementById('valor-total-dia').innerText = `R$ ${totalDia.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-dia').innerText = `${filtradosDia.length} comanda(s) finalizada(s)`;
+
+                // Processar Perdas Dia
+                let filtradosEspeciaisDia = pedidosEspeciais.filter(p => valData && p.dataCriacao ? p.dataCriacao === valData : false);
+                let totalPerdasDia = 0;
+                let qtdItensPerdasDia = 0;
+                filtradosEspeciaisDia.forEach(p => {
+                    if (p.total) totalPerdasDia += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
+                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) {
+                        p.itensBrutos.forEach(i => { qtdItensPerdasDia += i.qtd; });
+                    }
+                });
+                document.getElementById('valor-perdas-dia').innerText = `R$ ${totalPerdasDia.toFixed(2).replace('.', ',')}`;
+                document.getElementById('qtd-perdas-dia').innerText = `${qtdItensPerdasDia} itens registrados`;
 
                 const rankingDia = document.getElementById('ranking-produtos-dia');
                 rankingDia.innerHTML = '';
@@ -922,6 +1079,25 @@
                         listaComandasDiv.appendChild(div);
                     });
                 }
+
+                // 4. Renderizar Lista Compacta de Perdas do Dia
+                const listaPerdasDiv = document.getElementById('lista-perdas-dia');
+                listaPerdasDiv.innerHTML = '';
+                if (filtradosEspeciaisDia.length === 0) {
+                    listaPerdasDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhum registro de perda ou consumo neste dia.</p>';
+                } else {
+                    filtradosEspeciaisDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
+                    filtradosEspeciaisDia.forEach(p => {
+                        let div = document.createElement('div');
+                        let isDesperdicio = p.status === 'Desperdicio';
+                        div.className = `flex justify-between items-center ${isDesperdicio ? 'bg-red-50 dark:bg-red-950/20' : 'bg-blue-50 dark:bg-blue-950/20'} p-2 rounded-xl border ${isDesperdicio ? 'border-red-200 dark:border-red-900/40' : 'border-blue-200 dark:border-blue-900/40'} text-[11px]`;
+                        div.innerHTML = `
+                            <div><strong class="${isDesperdicio ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}">${p.mesa}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
+                            <span class="${isDesperdicio ? 'text-red-600' : 'text-blue-600'} font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
+                        `;
+                        listaPerdasDiv.appendChild(div);
+                    });
+                }
             }
         }
 
@@ -929,6 +1105,7 @@
             let mesVal = document.getElementById('filtro-mes').value;
             let totalTxt = document.getElementById('valor-total-mes').innerText;
             let qtdTxt = document.getElementById('qtd-pedidos-mes').innerText;
+            let perdasTxt = document.getElementById('valor-perdas-mes').innerText;
             let rankingHtml = document.getElementById('ranking-produtos-mes').innerHTML;
 
             let area = document.getElementById('area-impressao');
@@ -937,10 +1114,16 @@
                     <h2 style="color: #d97706; margin-bottom: 5px;">POINT DERICO - RELATÓRIO MENSAL</h2>
                     <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Mês Referência: <strong>${mesVal}</strong></p>
                     
-                    <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bfdbfe;">
-                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #1e40af;">Faturamento Total</h3>
+                    <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #bfdbfe;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #1e40af;">Faturamento Total (Entradas)</h3>
                         <p style="font-size: 22px; font-weight: bold; color: #2563eb; margin: 0;">${totalTxt}</p>
                         <p style="font-size: 11px; color: #555; margin: 5px 0 0 0;">${qtdTxt}</p>
+                    </div>
+
+                    <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #b91c1c;">Custo de Desperdício/Consumo</h3>
+                        <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin: 0;">${perdasTxt}</p>
+                        <p style="font-size: 11px; color: #7f1d1d; margin: 5px 0 0 0;">* Não contabiliza no lucro</p>
                     </div>
 
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🏆 Ranking de Produtos do Mês</h3>
@@ -956,8 +1139,10 @@
             let dataVal = document.getElementById('filtro-data').value;
             let totalTxt = document.getElementById('valor-total-dia').innerText;
             let qtdTxt = document.getElementById('qtd-pedidos-dia').innerText;
+            let perdasTxt = document.getElementById('valor-perdas-dia').innerText;
             let rankingHtml = document.getElementById('ranking-produtos-dia').innerHTML;
             let comandasHtml = document.getElementById('lista-comandas-compacta').innerHTML;
+            let perdasHtml = document.getElementById('lista-perdas-dia').innerHTML;
 
             let area = document.getElementById('area-impressao');
             area.innerHTML = `
@@ -965,17 +1150,26 @@
                     <h2 style="color: #d97706; margin-bottom: 5px;">POINT DERICO - RELATÓRIO DIÁRIO</h2>
                     <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Data: <strong>${dataVal}</strong></p>
                     
-                    <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;">
+                    <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #a7f3d0;">
                         <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #065f46;">Faturamento do Dia</h3>
                         <p style="font-size: 22px; font-weight: bold; color: #059669; margin: 0;">${totalTxt}</p>
                         <p style="font-size: 11px; color: #555; margin: 5px 0 0 0;">${qtdTxt}</p>
+                    </div>
+
+                    <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #b91c1c;">Custo de Desperdício/Consumo</h3>
+                        <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin: 0;">${perdasTxt}</p>
+                        <p style="font-size: 11px; color: #7f1d1d; margin: 5px 0 0 0;">* Não contabiliza no lucro</p>
                     </div>
 
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🏆 Ranking do Dia</h3>
                     <div style="font-size: 12px; margin-bottom: 20px;">${rankingHtml}</div>
 
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🧾 Lista de Comandas Pagas</h3>
-                    <div style="font-size: 11px;">${comandasHtml}</div>
+                    <div style="font-size: 11px; margin-bottom: 20px;">${comandasHtml}</div>
+
+                    <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🗑️ Perdas e Consumo</h3>
+                    <div style="font-size: 11px;">${perdasHtml}</div>
                 </div>
             `;
             area.classList.remove('hidden');
@@ -999,27 +1193,65 @@
             } catch(e) { alert("Erro ao abater valor."); }
         }
 
+        window.abaterFiado = async function(idsStr) {
+            let valorStr = prompt("Valor abatido da conta agora (Ex: 20.00):");
+            if(!valorStr) return;
+            let val = parseFloat(valorStr.replace(',','.'));
+            if(isNaN(val) || val <= 0) return alert("Valor inválido!");
+            
+            try {
+                let ids = JSON.parse(decodeURIComponent(idsStr));
+                let primaryId = ids[0];
+                let targetDoc = todosPedidos.find(p => p.id === primaryId);
+                let atualPago = targetDoc ? (targetDoc.valorPagoParcial || 0) : 0;
+                await updateDoc(doc(db, "pedidos", primaryId), { valorPagoParcial: atualPago + val });
+                alert(`R$ ${val.toFixed(2)} abatido da dívida com sucesso!`);
+            } catch(e) { alert("Erro ao abater valor."); }
+        }
+
+        window.quitarFiado = async function(idsStr, cliente) {
+            if(confirm(`Deseja realmente QUITAR e finalizar a conta de ${cliente}?\n\nIsso enviará o valor pendente para o faturamento de hoje.`)) {
+                try {
+                    let ids = JSON.parse(decodeURIComponent(idsStr));
+                    let hoje = obterDataCaixa();
+                    let promessas = ids.map(id => updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje }));
+                    await Promise.all(promessas);
+                    alert(`Conta de ${cliente} quitada com sucesso!`);
+                } catch (e) { alert("Erro ao quitar conta."); }
+            }
+        }
+
         window.enviarRelatorioWhatsApp = function(tipo) {
             let mensagem = "";
             if (tipo === 'dia') {
                 let dataVal = document.getElementById('filtro-data').value;
                 let totalTxt = document.getElementById('valor-total-dia').innerText;
                 let qtdTxt = document.getElementById('qtd-pedidos-dia').innerText;
-                mensagem = `📊 *Fechamento Diário - Point Derico*\n📅 Data: ${dataVal}\n\n💰 *Faturamento:* ${totalTxt}\n🧾 *Comandas:* ${qtdTxt}\n\n🔥 Sistema Point Derico`;
+                let perdasTxt = document.getElementById('valor-perdas-dia').innerText;
+                mensagem = `📊 *Fechamento Diário - Point Derico*\n📅 Data: ${dataVal}\n\n💰 *Faturamento:* ${totalTxt}\n🧾 *Comandas:* ${qtdTxt}\n\n⚠️ *Perdas/Consumo Interno:* ${perdasTxt}\n\n🔥 Sistema Point Derico`;
             } else {
                 let mesVal = document.getElementById('filtro-mes').value;
                 let totalTxt = document.getElementById('valor-total-mes').innerText;
                 let qtdTxt = document.getElementById('qtd-pedidos-mes').innerText;
-                mensagem = `📊 *Fechamento Mensal - Point Derico*\n📅 Mês: ${mesVal}\n\n💰 *Faturamento:* ${totalTxt}\n🧾 *Comandas:* ${qtdTxt}\n\n🔥 Sistema Point Derico`;
+                let perdasTxt = document.getElementById('valor-perdas-mes').innerText;
+                mensagem = `📊 *Fechamento Mensal - Point Derico*\n📅 Mês: ${mesVal}\n\n💰 *Faturamento:* ${totalTxt}\n🧾 *Comandas:* ${qtdTxt}\n\n⚠️ *Perdas/Consumo Interno:* ${perdasTxt}\n\n🔥 Sistema Point Derico`;
             }
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagem)}`, '_blank');
         }
 
-        window.mudarStatus = async function(id, novoStatus) {
+        window.mudarStatus = async function(id, novoStatus, tipoPedido = 'Normal') {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
-                let dados = { status: novoStatus };
-                if (novoStatus === 'Pago') dados.dataCriacao = obterDataCaixa();
+                let statusFinal = novoStatus;
+                
+                // Lógica de isolamento do Consumo Interno:
+                // Se a cozinha terminar de fazer o consumo da funcionária, ele morre aqui e não vai pro Caixa cobrar.
+                if (novoStatus === 'Entregue' && tipoPedido === 'Consumo') {
+                    statusFinal = 'ConsumoFinalizado';
+                }
+
+                let dados = { status: statusFinal };
+                if (statusFinal === 'Pago') dados.dataCriacao = obterDataCaixa();
                 await updateDoc(pedidoRef, dados);
                 fecharModalPix();
             } catch (e) { alert("Erro ao atualizar."); }
