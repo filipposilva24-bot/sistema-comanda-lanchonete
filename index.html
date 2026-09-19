@@ -1191,7 +1191,7 @@
             if (nomeResp) textoPedidoFormatado += `\nResp: ${nomeResp}`;
 
             let total = document.getElementById('valor-total').innerText;
-            let statusItem = tipo === 'Desperdicio' ? 'Desperdicio' : 'Pendente'; // Consumo vai pra cozinha
+            let statusItem = tipo === 'Desperdicio' ? 'Desperdicio' : 'ConsumoFinalizado'; // Consumo vai direto para o custo de refeição
             let labelMesa = tipo === 'Desperdicio' ? '[LIXEIRA] Desperdício' : `[CONSUMO] ${nomeResp || 'Funcionário'}`;
 
             try {
