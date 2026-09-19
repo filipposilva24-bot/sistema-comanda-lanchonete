@@ -333,7 +333,8 @@
                 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">💲 2. Aba Caixa</strong>
-                    • Agrupa todos os pedidos entregues da mesa para fechamento.
+                    • Agrupa todos os pedidos entregues da mesa para fechamento.<br>
+                    • <b>📓 Fiado:</b> Pendura a conta da mesa/balcão para um cliente específico na aba de Fiados.
                 </div>
 
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
@@ -865,13 +866,15 @@
 
                     let botoesHtml = "";
                     if (restante <= 0) {
-                        botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
-                            <button onclick="fecharMesaMulti('${idsStr}', '${info.mesa}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Cliente Saiu - Fechar Mesa</button>
+                        botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2 flex-wrap">
+                            <button onclick="jogarParaFiado('${idsStr}', '${info.mesa}')" class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📓 Fiado</button>
+                            <button onclick="fecharMesaMulti('${idsStr}', '${info.mesa}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Fechar Mesa</button>
                         </div>`;
                     } else {
-                        botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
-                            <button onclick="abrirModalPixMulti('${idsStr}', '${info.mesa}', 'R$ ${restante.toFixed(2).replace('.',',')}', '${encodeURIComponent(extratoCombinado)}')" class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix</button>
+                        botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2 flex-wrap">
+                            <button onclick="abrirModalPixMulti('${idsStr}', '${info.mesa}', 'R$ ${restante.toFixed(2).replace('.',',')}', '${encodeURIComponent(extratoCombinado)}')" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix</button>
                             <button onclick="abrirAbaterMulti('${idsStr}')" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button>
+                            <button onclick="jogarParaFiado('${idsStr}', '${info.mesa}')" class="tap-scale bg-indigo-700 hover:bg-indigo-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs transition shadow">📓 Fiado</button>
                             <button onclick="fecharMesaMulti('${idsStr}', '${info.mesa}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Fechar</button>
                         </div>`;
                     }
@@ -1247,6 +1250,24 @@
             window.print();
             area.classList.add('hidden');
         }
+
+        window.jogarParaFiado = async function(idsStr, mesaPadrao) {
+            let nomeCliente = prompt(`Nome do cliente para pendurar a conta (${mesaPadrao}):`, mesaPadrao);
+            if (!nomeCliente || nomeCliente.trim() === '') return;
+            nomeCliente = nomeCliente.trim();
+            
+            try {
+                let ids = JSON.parse(decodeURIComponent(idsStr));
+                let promessas = ids.map(id => updateDoc(doc(db, "pedidos", id), { 
+                    status: 'Fiado', 
+                    clienteFiado: nomeCliente 
+                }));
+                await Promise.all(promessas);
+                alert(`Conta enviada para Fiados no nome de "${nomeCliente}"!`);
+            } catch (e) {
+                alert("Erro ao jogar para fiado.");
+            }
+        };
 
         window.abrirAbaterMulti = async function(idsStr) {
             let valorStr = prompt("Valor pago agora (Ex: 10.00):");
