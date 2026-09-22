@@ -661,6 +661,10 @@
             itemEditandoReceitaId = itemId;
             let item = cardapioCache.find(c => c.id === itemId);
             if(!item) return;
+            
+            // Fecha a janela de gerenciamento de cardápio para não empilhar modais
+            document.getElementById('modal-admin-cardapio').classList.add('hidden');
+
             document.getElementById('receita-titulo-item').innerText = `Receita: ${item.nome}`;
             receitaAtualTemp = item.receita ? [...item.receita] : [];
             
@@ -717,6 +721,7 @@
             if(!itemEditandoReceitaId) return;
             await updateDoc(doc(db, "cardapio", itemEditandoReceitaId), { receita: receitaAtualTemp });
             document.getElementById('modal-receita').classList.add('hidden');
+            document.getElementById('modal-admin-cardapio').classList.remove('hidden'); // Reabre o cardápio atualizado
             alert("Receita salva com sucesso!");
             carregarAdminCardapio();
         }
