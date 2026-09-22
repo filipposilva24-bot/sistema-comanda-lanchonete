@@ -68,6 +68,9 @@
                 <button onclick="alternarTema()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-zinc-700 dark:text-zinc-300 transition shadow-sm" title="Mudar Tema">
                     <span id="icone-tema">🌙</span>
                 </button>
+                <button onclick="realizarLogout()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-red-600 dark:text-red-400 transition shadow-sm" title="Sair do Sistema">
+                    🚪
+                </button>
             </div>
         </div>
         
@@ -234,6 +237,26 @@
         </div>
     </main>
 
+    <!-- TELA DE LOGIN -->
+    <div id="modal-login" class="fixed inset-0 bg-zinc-950/95 backdrop-blur-md z-[100] flex justify-center items-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-2xl flex items-center justify-center mx-auto mb-4">🔥</div>
+            <h3 class="text-lg font-black text-amber-500 mb-1">POINT DERICO</h3>
+            <p class="text-xs text-zinc-400 mb-6">Acesse com o e-mail do sistema</p>
+            <div class="space-y-3 text-left mb-5">
+                <div>
+                    <label class="block text-[10px] text-zinc-500 uppercase font-bold mb-1">E-mail</label>
+                    <input type="email" id="login-email" placeholder="caixa@pointderico.com.br" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-200 outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-zinc-500 uppercase font-bold mb-1">Senha</label>
+                    <input type="password" id="login-senha" placeholder="••••••••" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-200 outline-none focus:border-amber-500">
+                </div>
+            </div>
+            <button onclick="realizarLogin()" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-3 rounded-2xl text-xs transition shadow">Entrar no Sistema</button>
+        </div>
+    </div>
+
     <!-- ÁREA OCULTA PARA IMPRESSÃO EM PDF DO RELATÓRIO -->
     <div id="area-impressao" class="hidden p-6 bg-white text-zinc-900 font-sans"></div>
 
@@ -355,10 +378,12 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         let abaAtual = 'cozinha'; 
         let todosPedidos = []; 
@@ -375,6 +400,8 @@
         let primeiroCarregamento = true;
         let qtdPendentesAnterior = 0;
         let intervaloAlarme = null;
+        let unsubCardapio = null;
+        let unsubPedidos = null;
 
         function obterDataCaixa() {
             let data = new Date();
@@ -644,30 +671,70 @@
             }
         }
 
-        onSnapshot(collection(db, "cardapio"), (snapshot) => {
-            cardapioCache = [];
-            snapshot.forEach(docSnap => cardapioCache.push({ id: docSnap.id, ...docSnap.data() }));
-            atualizarSelectCategorias();
-        });
+        function iniciarOuvintesFirestore() {
+            if (unsubCardapio) unsubCardapio();
+            if (unsubPedidos) unsubPedidos();
 
-        onSnapshot(collection(db, "pedidos"), (snapshot) => {
-            todosPedidos = [];
-            snapshot.forEach(docSnap => {
-                const dados = docSnap.data();
-                if(!dados.dataCriacao) dados.dataCriacao = obterDataCaixa();
-                todosPedidos.push({ id: docSnap.id, ...dados });
+            unsubCardapio = onSnapshot(collection(db, "cardapio"), (snapshot) => {
+                cardapioCache = [];
+                snapshot.forEach(docSnap => cardapioCache.push({ id: docSnap.id, ...docSnap.data() }));
+                atualizarSelectCategorias();
             });
 
-            const qtdPendentesAgora = todosPedidos.filter(p => p.status === 'Pendente').length;
-            
-            if (!primeiroCarregamento && qtdPendentesAgora > qtdPendentesAnterior && somAtivado) {
-                audioAlert.play().catch(()=>{});
-            }
-            qtdPendentesAnterior = qtdPendentesAgora;
-            primeiroCarregamento = false;
+            unsubPedidos = onSnapshot(collection(db, "pedidos"), (snapshot) => {
+                todosPedidos = [];
+                snapshot.forEach(docSnap => {
+                    const dados = docSnap.data();
+                    if(!dados.dataCriacao) dados.dataCriacao = obterDataCaixa();
+                    todosPedidos.push({ id: docSnap.id, ...dados });
+                });
 
-            verificarEAtivarAlarmeContínuo();
+                const qtdPendentesAgora = todosPedidos.filter(p => p.status === 'Pendente').length;
+                
+                if (!primeiroCarregamento && qtdPendentesAgora > qtdPendentesAnterior && somAtivado) {
+                    audioAlert.play().catch(()=>{});
+                }
+                qtdPendentesAnterior = qtdPendentesAgora;
+                primeiroCarregamento = false;
+
+                verificarEAtivarAlarmeContínuo();
+                renderizarCards();
+            });
+        }
+
+        function pararOuvintesFirestore() {
+            if (unsubCardapio) unsubCardapio();
+            if (unsubPedidos) unsubPedidos();
+            todosPedidos = [];
             renderizarCards();
+        }
+
+        window.realizarLogin = async function() {
+            const email = document.getElementById('login-email').value.trim();
+            const senha = document.getElementById('login-senha').value;
+            if(!email || !senha) return alert("Preencha e-mail e senha!");
+            try {
+                await signInWithEmailAndPassword(auth, email, senha);
+            } catch (e) {
+                alert("Erro ao entrar: verifique e-mail e senha.");
+            }
+        };
+
+        window.realizarLogout = function() {
+            signOut(auth);
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            const modalLogin = document.getElementById('modal-login');
+            if (user) {
+                modalLogin.classList.add('hidden');
+                document.getElementById('contador').innerText = "Sincronizado";
+                iniciarOuvintesFirestore();
+            } else {
+                modalLogin.classList.remove('hidden');
+                document.getElementById('contador').innerText = "Aguardando login...";
+                pararOuvintesFirestore();
+            }
         });
 
         function renderizarCards() {
