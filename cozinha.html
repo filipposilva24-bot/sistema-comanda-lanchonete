@@ -90,50 +90,25 @@
 
     <main class="p-4 flex-grow relative fade-in">
         
-        <!-- PAINEL DE ESTOQUE (NOVO) -->
+        <!-- PAINEL DE ESTOQUE DINÂMICO -->
         <div id="painel-estoque" class="hidden mb-4 space-y-4">
-            <!-- Header do Estoque -->
             <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-3xl shadow-xl transition-colors duration-200 flex flex-col gap-3">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">📦 Insumos & Bebidas</h2>
-                    <button onclick="abrirModalNotaIa()" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-3 py-2 rounded-xl text-xs transition shadow flex items-center gap-1.5">
-                        📸 Ler Nota Fiscal (IA)
-                    </button>
+                    <h2 class="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">📦 Insumos & Bebidas (Estoque Real)</h2>
+                    <div class="flex gap-2">
+                        <button onclick="abrirModalAdicionarInsumo()" class="tap-scale bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 text-zinc-800 dark:text-zinc-200 font-extrabold px-3 py-2 rounded-xl text-xs transition shadow">
+                            ➕ Novo Insumo
+                        </button>
+                        <button onclick="abrirModalNotaIa()" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold px-3 py-2 rounded-xl text-xs transition shadow flex items-center gap-1.5">
+                            📸 Ler Nota Fiscal (IA)
+                        </button>
+                    </div>
                 </div>
-                <p class="text-[10px] text-zinc-500 dark:text-zinc-400">Controle o que você compra. Os lanches vão descontar esses insumos automaticamente.</p>
+                <p class="text-[10px] text-zinc-500 dark:text-zinc-400">Controle o que você compra. Vendas descontam insumos ou bebidas do estoque automaticamente.</p>
             </div>
 
-            <!-- Lista Visual do Estoque Atual (Exemplo Estático por enquanto) -->
-            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-                <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3 rounded-2xl shadow">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-2xl">🍔</span>
-                        <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Em Baixa</span>
-                    </div>
-                    <h3 class="text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1">Pão de Hambúrguer</h3>
-                    <p class="text-lg font-black text-amber-500">12 <span class="text-xs text-zinc-400 font-medium">un</span></p>
-                </div>
-                <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3 rounded-2xl shadow">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-2xl">🥩</span>
-                        <span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 text-[9px] font-bold px-1.5 py-0.5 rounded">OK</span>
-                    </div>
-                    <h3 class="text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1">Carne Bovina 56g</h3>
-                    <p class="text-lg font-black text-emerald-500">45 <span class="text-xs text-zinc-400 font-medium">un</span></p>
-                </div>
-                <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3 rounded-2xl shadow">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-2xl">🥤</span>
-                        <span class="bg-red-100 dark:bg-red-900/40 text-red-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Crítico</span>
-                    </div>
-                    <h3 class="text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1">Coca-Cola Lata 350ml</h3>
-                    <p class="text-lg font-black text-red-500">2 <span class="text-xs text-zinc-400 font-medium">un</span></p>
-                </div>
-                <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3 rounded-2xl shadow flex flex-col justify-center items-center border-dashed cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition">
-                    <span class="text-zinc-400 text-xl mb-1">➕</span>
-                    <h3 class="text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Adicionar Insumo Manual</h3>
-                </div>
-            </div>
+            <!-- Grid Dinâmico do Firestore -->
+            <div id="grid-estoque" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3"></div>
         </div>
 
         <!-- PAINEL DE RELATÓRIO -->
@@ -284,12 +259,60 @@
         </div>
     </main>
 
-    <!-- NOVO MODAL: LEITURA DE NOTA POR IA -->
+    <!-- MODAL NOVO INSUMO MANUAL -->
+    <div id="modal-novo-insumo" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
+            <button onclick="document.getElementById('modal-novo-insumo').classList.add('hidden')" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold">✕</button>
+            <h3 class="text-base font-extrabold text-blue-600 dark:text-blue-400 mb-3">➕ Adicionar Insumo</h3>
+            <div class="space-y-3 text-xs mb-4">
+                <div>
+                    <label class="block text-[10px] text-zinc-500 font-bold mb-1">Nome (ex: Pão de Hambúrguer / Coca-Cola Lata):</label>
+                    <input type="text" id="insumo-nome" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 outline-none">
+                </div>
+                <div class="flex gap-2">
+                    <div class="w-1/2">
+                        <label class="block text-[10px] text-zinc-500 font-bold mb-1">Qtd Atual:</label>
+                        <input type="number" id="insumo-qtd" value="10" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 outline-none font-bold">
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-[10px] text-zinc-500 font-bold mb-1">Unidade:</label>
+                        <input type="text" id="insumo-un" value="un" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] text-zinc-500 font-bold mb-1">Limite p/ Crítico / Baixa:</label>
+                    <input type="number" id="insumo-min" value="5" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 outline-none">
+                </div>
+            </div>
+            <button onclick="salvarInsumoManual()" class="tap-scale w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-3 rounded-2xl text-xs transition">Salvar Insumo</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE COMPOSIÇÃO / RECEITA DO ITEM DO CARDÁPIO -->
+    <div id="modal-receita" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <button onclick="document.getElementById('modal-receita').classList.add('hidden')" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold">✕</button>
+            <h3 class="text-base font-extrabold text-amber-500 mb-1" id="receita-titulo-item">Receita: X-Bacon</h3>
+            <p class="text-xs text-zinc-400 mb-3">Defina quais insumos do estoque esse item desconta ao ser vendido.</p>
+            
+            <div id="receita-lista-ingredientes" class="space-y-2 overflow-y-auto max-h-56 mb-3 p-1"></div>
+
+            <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 mb-3 flex gap-2 items-center">
+                <select id="receita-sel-insumo" class="flex-grow bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2 text-xs outline-none"></select>
+                <input type="number" id="receita-qtd-insumo" value="1" step="0.1" class="w-16 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2 text-xs text-center font-bold">
+                <button onclick="adicionarIngredienteReceita()" class="tap-scale bg-amber-500 text-zinc-950 font-bold px-3 py-2 rounded-xl text-xs">➕</button>
+            </div>
+
+            <button onclick="salvarReceitaItem()" class="tap-scale w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-2xl text-xs transition shadow mt-auto">Salvar Receita</button>
+        </div>
+    </div>
+
+    <!-- MODAL: LEITURA DE NOTA POR IA -->
     <div id="modal-nota-ia" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-[60] flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative transition-colors duration-200 max-h-[90vh] flex flex-col">
             <button onclick="fecharModalNotaIa()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
             <h3 class="text-base font-extrabold text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-2">📸 Leitor de Nota Fiscal (IA)</h3>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Tire foto do cupom do mercado/adega. A IA vai ler os insumos, quantidades e preços automaticamente.</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Tire foto do cupom do mercado/adega. A IA lê e soma no estoque.</p>
             
             <div id="ia-etapa-1" class="flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-2xl p-6 mb-4">
                 <span class="text-4xl mb-3">🧾</span>
@@ -297,7 +320,6 @@
                     Tirar Foto ou Escolher Arquivo
                     <input type="file" accept="image/*" capture="environment" class="hidden" onchange="iniciarLeituraIa(this)">
                 </label>
-                <p class="text-[10px] text-zinc-400 text-center">Para testar o visual agora, clique no botão azul abaixo.</p>
             </div>
 
             <div id="ia-etapa-2" class="hidden flex flex-col items-center justify-center py-8">
@@ -307,62 +329,14 @@
 
             <div id="ia-etapa-3" class="hidden flex-grow overflow-hidden flex flex-col">
                 <div class="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 p-3 rounded-xl mb-3 text-[10px] text-blue-800 dark:text-blue-300">
-                    <strong>Sucesso!</strong> A IA encontrou 3 itens. Revise as quantidades antes de salvar no estoque.
+                    <strong>Sucesso!</strong> A IA encontrou itens. Confirme a entrada no estoque:
                 </div>
                 
-                <div class="overflow-y-auto max-h-60 mb-4 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-950">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-zinc-100 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-800">
-                            <tr>
-                                <th class="p-2 font-bold uppercase text-[9px]">Item Lido (IA)</th>
-                                <th class="p-2 font-bold uppercase text-[9px] w-16 text-center">Qtd</th>
-                                <th class="p-2 font-bold uppercase text-[9px] w-20">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800 text-zinc-700 dark:text-zinc-200">
-                            <tr>
-                                <td class="p-2">
-                                    <input type="text" value="PAO HAMB ARTE 10UN" class="w-full bg-transparent outline-none font-medium">
-                                    <div class="text-[9px] text-zinc-400">R$ 15,90 un</div>
-                                </td>
-                                <td class="p-2">
-                                    <input type="number" value="4" class="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-1 py-1 text-center font-bold text-blue-600">
-                                </td>
-                                <td class="p-2 text-center">
-                                    <button class="text-[9px] bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 px-2 py-1 rounded text-zinc-700 dark:text-zinc-300 font-bold w-full mb-1">🔗 Vincular</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="p-2">
-                                    <input type="text" value="B. BOV. SADIA 56G" class="w-full bg-transparent outline-none font-medium">
-                                    <div class="text-[9px] text-zinc-400">R$ 32,50 un</div>
-                                </td>
-                                <td class="p-2">
-                                    <input type="number" value="2" class="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-1 py-1 text-center font-bold text-blue-600">
-                                </td>
-                                <td class="p-2 text-center">
-                                    <button class="text-[9px] bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 px-2 py-1 rounded text-zinc-700 dark:text-zinc-300 font-bold w-full mb-1">🔗 Vincular</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="p-2">
-                                    <input type="text" value="COCA COLA LATA 350ML" class="w-full bg-transparent outline-none font-medium">
-                                    <div class="text-[9px] text-zinc-400">R$ 2,99 un</div>
-                                </td>
-                                <td class="p-2">
-                                    <input type="number" value="24" class="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-1 py-1 text-center font-bold text-blue-600">
-                                </td>
-                                <td class="p-2 text-center">
-                                    <span class="text-[9px] text-emerald-500 font-bold">✔ OK</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <div class="overflow-y-auto max-h-60 mb-4 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-950 p-2 space-y-2 text-xs" id="lista-ia-detectada"></div>
 
                 <div class="flex gap-2 mt-auto pt-2">
-                    <button onclick="resetarModalIa()" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 text-zinc-700 dark:text-zinc-300 font-bold py-3 rounded-xl text-xs transition">Cancelar</button>
-                    <button onclick="salvarEstoqueIa()" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-xs transition shadow flex justify-center items-center gap-1">✅ Salvar no Estoque</button>
+                    <button onclick="resetarModalIa()" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold py-3 rounded-xl text-xs">Cancelar</button>
+                    <button onclick="salvarEstoqueIa()" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-xs shadow">✅ Salvar no Estoque</button>
                 </div>
             </div>
 
@@ -395,12 +369,12 @@
     <!-- ÁREA OCULTA PARA IMPRESSÃO EM PDF DO RELATÓRIO -->
     <div id="area-impressao" class="hidden p-6 bg-white text-zinc-900 font-sans"></div>
 
-    <!-- MODAIS -->
+    <!-- MODAIS GERAIS -->
     <div id="modal-admin-cardapio" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto transition-colors duration-200">
             <button onclick="fecharAdminCardapio()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
-            <h3 class="text-base font-extrabold text-amber-600 dark:text-amber-400 mb-1">🍔 Gerenciar Cardápio</h3>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Adicione, edite ou altere preços instantaneamente.</p>
+            <h3 class="text-base font-extrabold text-amber-600 dark:text-amber-400 mb-1">🍔 Gerenciar Cardápio & Receitas</h3>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Gerencie preços e clique em "Receita" para vincular insumos do estoque.</p>
             
             <div class="bg-zinc-50 dark:bg-zinc-950 p-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 mb-4 space-y-2.5">
                 <h4 class="text-[10px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Novo Item</h4>
@@ -413,10 +387,6 @@
                         </select>
                         <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 text-xs">▼</div>
                     </div>
-                </div>
-                <div class="flex justify-between items-center px-1 pt-0.5">
-                    <span class="text-[10px] text-zinc-400">Gerenciar categorias:</span>
-                    <button onclick="gerenciarCategorias()" class="tap-scale text-[10px] text-amber-600 dark:text-amber-400 font-bold hover:underline">⚙️ Remover Categoria</button>
                 </div>
                 <button onclick="salvarNovoItemCardapio()" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs transition shadow mt-1">➕ Adicionar ao Cardápio</button>
             </div>
@@ -479,33 +449,14 @@
     <div id="modal-ajuda-cozinha" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
             <button onclick="fecharModalAjudaCozinha()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
-            <h3 class="text-base font-extrabold text-amber-500 mb-3 flex items-center gap-2">📖 Manual da Cozinha & Caixa</h3>
-            
+            <h3 class="text-base font-extrabold text-amber-500 mb-3 flex items-center gap-2">📖 Manual do Sistema & Estoque/Receita</h3>
             <div class="space-y-3 text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed text-left">
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                    <strong class="text-amber-500 block mb-1">👨‍🍳 1. Aba Cozinha</strong>
-                    • Mostra o cronômetro de espera de cada pedido.<br>
-                    • <b>Aceitar / Preparar:</b> Move o pedido para o status de preparo.<br>
-                    • <b>Entregar / Finalizar Consumo:</b> Envia a comanda para o caixa ou finaliza o consumo interno separado.
-                </div>
-                
-                <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                    <strong class="text-amber-500 block mb-1">💲 2. Aba Caixa</strong>
-                    • Agrupa todos os pedidos entregues da mesa para fechamento.<br>
-                    • <b>📓 Fiado:</b> Pendura a conta da mesa/balcão para um cliente específico na aba de Fiados.
-                </div>
-
-                <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                    <strong class="text-amber-500 block mb-1">📓 3. Aba Fiados</strong>
-                    • Gerencia contas penduradas, abatimentos e quitação.
-                </div>
-
-                <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                    <strong class="text-amber-500 block mb-1">📊 4. Relatórios Separados</strong>
-                    • Desperdícios (prejuízo) ficam em caixa vermelha separados das Refeições de Funcionários (custo operacional azul).
+                    <strong class="text-amber-500 block mb-1">📦 1. Estoque & Composição</strong>
+                    • Bebidas (ex: Coca-Cola) batem direto com o estoque.<br>
+                    • Lanches (ex: X-Bacon) usam <b>Composição (Receita)</b> cadastrada no cardápio para descontar insumos (pão, carne, bacon).
                 </div>
             </div>
-
             <button onclick="fecharModalAjudaCozinha()" class="tap-scale w-full bg-amber-500 text-zinc-950 font-black py-3 rounded-2xl text-xs mt-4 shadow">Entendi</button>
         </div>
     </div>
@@ -522,8 +473,11 @@
 
         let abaAtual = 'cozinha'; 
         let todosPedidos = []; 
-        let pedidoSelecionadoIds = null;
+        let estoqueCache = [];
         let cardapioCache = [];
+        let pedidoSelecionadoIds = null;
+        let itemEditandoReceitaId = null;
+        let receitaAtualTemp = [];
         let categoriasPadrao = ["🍔 Hambúrgueres", "🍟 Porções", "🥟 Pastéis", "🥤 Bebidas", "🍺 Alcoólicas"];
         let categoriasExtras = JSON.parse(localStorage.getItem('point_derico_categorias_extras') || "[]");
 
@@ -537,6 +491,7 @@
         let intervaloAlarme = null;
         let unsubCardapio = null;
         let unsubPedidos = null;
+        let unsubEstoque = null;
 
         function obterDataCaixa() {
             let data = new Date();
@@ -600,42 +555,218 @@
             }
         }, 1000);
 
-        // --- FUNÇÕES DA NOVA ABA ESTOQUE E IA ---
+        // --- ESTOQUE & INSUMOS ---
+        window.abrirModalAdicionarInsumo = function() {
+            document.getElementById('modal-novo-insumo').classList.remove('hidden');
+        }
+
+        window.salvarInsumoManual = async function() {
+            const nome = document.getElementById('insumo-nome').value.trim();
+            const qtd = parseFloat(document.getElementById('insumo-qtd').value) || 0;
+            const un = document.getElementById('insumo-un').value.trim() || 'un';
+            const min = parseFloat(document.getElementById('insumo-min').value) || 5;
+            if(!nome) return alert("Informe o nome do insumo!");
+            
+            await addDoc(collection(db, "estoque"), { nome, qtd, un, min, ativo: true });
+            document.getElementById('insumo-nome').value = '';
+            document.getElementById('modal-novo-insumo').classList.add('hidden');
+            renderizarEstoqueVisual();
+        }
+
+        function renderizarEstoqueVisual() {
+            const grid = document.getElementById('grid-estoque');
+            if(!grid) return;
+            grid.innerHTML = '';
+            if(estoqueCache.length === 0) {
+                grid.innerHTML = '<p class="text-xs text-zinc-400 col-span-full italic">Nenhum insumo cadastrado no estoque.</p>';
+                return;
+            }
+            estoqueCache.forEach(item => {
+                let qtd = Number(item.qtd) || 0;
+                let min = Number(item.min) || 5;
+                let statusBadge = '<span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 text-[9px] font-bold px-1.5 py-0.5 rounded">OK</span>';
+                if(qtd <= 0) {
+                    statusBadge = '<span class="bg-red-100 dark:bg-red-900/40 text-red-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Crítico</span>';
+                } else if(qtd <= min) {
+                    statusBadge = '<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Em Baixa</span>';
+                }
+
+                let card = document.createElement('div');
+                card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3 rounded-2xl shadow flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xl">📦</span>
+                            ${statusBadge}
+                        </div>
+                        <h3 class="text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1">${item.nome}</h3>
+                    </div>
+                    <div class="flex justify-between items-end mt-2">
+                        <span class="text-lg font-black text-blue-600 dark:text-blue-400">${qtd} <span class="text-xs text-zinc-400 font-medium">${item.un || 'un'}</span></span>
+                        <button onclick="ajustarQtdEstoque('${item.id}', ${qtd})" class="text-[10px] bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 px-2 py-1 rounded-lg font-bold">Ajustar</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        window.ajustarQtdEstoque = async function(id, qtdAtual) {
+            let novaVal = prompt("Nova quantidade no estoque:", qtdAtual);
+            if(novaVal !== null) {
+                let n = parseFloat(novaVal);
+                if(!isNaN(n)) {
+                    await updateDoc(doc(db, "estoque", id), { qtd: n });
+                }
+            }
+        }
+
+        // --- DESCONTO AUTOMÁTICO INTELIGENTE POR VENDA/CONSUMO ---
+        async function descontarEstoquePorVenda(textoPedido) {
+            if(!textoPedido) return;
+            // Tenta identificar linhas ou palavras de produtos
+            let linhas = textoPedido.split('\n');
+            for(let linha of linhas) {
+                let limpa = linha.trim();
+                if(!limpa || limpa.includes('Obs:') || limpa.includes('Resp:')) continue;
+                // Exemplo de formato: "2x X-Bacon" ou "1x Coca-Cola Lata"
+                let match = limpa.match(/^(\d+)x\s+(.+)$/i);
+                let qtdVenda = match ? parseInt(match) : 1;
+                let nomeProdVendido = match ? match.trim() : limpa;
+
+                // 1. Verificar se bate direto no estoque (Ex: Bebida exata)
+                let itemEstoqueDireto = estoqueCache.find(e => e.nome.toLowerCase() === nomeProdVendido.toLowerCase());
+                if(itemEstoqueDireto) {
+                    let novaQtd = (Number(itemEstoqueDireto.qtd) || 0) - qtdVenda;
+                    await updateDoc(doc(db, "estoque", itemEstoqueDireto.id), { qtd: novaQtd });
+                    continue;
+                }
+
+                // 2. Procurar se o item do cardápio tem Receita vinculada
+                let itemCardapio = cardapioCache.find(c => c.nome.toLowerCase() === nomeProdVendido.toLowerCase());
+                if(itemCardapio && itemCardapio.receita && Array.isArray(itemCardapio.receita)) {
+                    for(let ing of itemCardapio.receita) {
+                        let ins = estoqueCache.find(e => e.id === ing.insumoId || e.nome === ing.insumoNome);
+                        if(ins) {
+                            let qtdConsumida = (Number(ing.qtd) || 1) * qtdVenda;
+                            let novaQtd = (Number(ins.qtd) || 0) - qtdConsumida;
+                            await updateDoc(doc(db, "estoque", ins.id), { qtd: novaQtd });
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- RECEITA / COMPOSIÇÃO DE CARDÁPIO ---
+        window.abrirReceitaItem = function(itemId) {
+            itemEditandoReceitaId = itemId;
+            let item = cardapioCache.find(c => c.id === itemId);
+            if(!item) return;
+            document.getElementById('receita-titulo-item').innerText = `Receita: ${item.nome}`;
+            receitaAtualTemp = item.receita ? [...item.receita] : [];
+            
+            // Popular select de insumos
+            let sel = document.getElementById('receita-sel-insumo');
+            sel.innerHTML = '<option value="" disabled selected>Selecionar Insumo...</option>';
+            estoqueCache.forEach(i => {
+                let opt = document.createElement('option');
+                opt.value = i.id;
+                opt.innerText = `${i.nome} (${i.un || 'un'})`;
+                sel.appendChild(opt);
+            });
+
+            renderizarListaIngredientesTemp();
+            document.getElementById('modal-receita').classList.remove('hidden');
+        }
+
+        function renderizarListaIngredientesTemp() {
+            let div = document.getElementById('receita-lista-ingredientes');
+            div.innerHTML = '';
+            if(receitaAtualTemp.length === 0) {
+                div.innerHTML = '<p class="text-xs text-zinc-400 italic">Nenhum insumo vinculado a esta receita ainda.</p>';
+                return;
+            }
+            receitaAtualTemp.forEach((r, idx) => {
+                let el = document.createElement('div');
+                el.className = "flex justify-between items-center bg-zinc-50 dark:bg-zinc-950 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs";
+                el.innerHTML = `
+                    <span><strong>${r.qtd}x</strong> ${r.insumoNome}</span>
+                    <button onclick="removerIngredienteReceita(${idx})" class="text-red-500 font-bold px-2">✕</button>
+                `;
+                div.appendChild(el);
+            });
+        }
+
+        window.adicionarIngredienteReceita = function() {
+            let sel = document.getElementById('receita-sel-insumo');
+            let qtd = parseFloat(document.getElementById('receita-qtd-insumo').value) || 1;
+            let insId = sel.value;
+            if(!insId) return alert("Selecione um insumo!");
+            let insObj = estoqueCache.find(e => e.id === insId);
+            if(!insObj) return;
+
+            receitaAtualTemp.push({ insumoId: insObj.id, insumoNome: insObj.nome, qtd: qtd });
+            renderizarListaIngredientesTemp();
+        }
+
+        window.removerIngredienteReceita = function(idx) {
+            receitaAtualTemp.splice(idx, 1);
+            renderizarListaIngredientesTemp();
+        }
+
+        window.salvarReceitaItem = async function() {
+            if(!itemEditandoReceitaId) return;
+            await updateDoc(doc(db, "cardapio", itemEditandoReceitaId), { receita: receitaAtualTemp });
+            document.getElementById('modal-receita').classList.add('hidden');
+            alert("Receita salva com sucesso!");
+            carregarAdminCardapio();
+        }
+
+        // --- IA LEITURA DE NOTA ---
         window.abrirModalNotaIa = function() {
             resetarModalIa();
             document.getElementById('modal-nota-ia').classList.remove('hidden');
         }
-
-        window.fecharModalNotaIa = function() {
-            document.getElementById('modal-nota-ia').classList.add('hidden');
-        }
-
+        window.fecharModalNotaIa = function() { document.getElementById('modal-nota-ia').classList.add('hidden'); }
         window.resetarModalIa = function() {
             document.getElementById('ia-etapa-1').classList.remove('hidden');
             document.getElementById('ia-etapa-2').classList.add('hidden');
             document.getElementById('ia-etapa-3').classList.add('hidden');
             document.getElementById('btn-simular-ia').classList.remove('hidden');
         }
-
-        window.iniciarLeituraIa = function(input) {
-            if(input.files && input.files[0]) {
-                simularLeituraIA();
-            }
-        }
-
+        window.iniciarLeituraIa = function(input) { if(input.files && input.files[0]) simularLeituraIA(); }
         window.simularLeituraIA = function() {
             document.getElementById('ia-etapa-1').classList.add('hidden');
             document.getElementById('btn-simular-ia').classList.add('hidden');
             document.getElementById('ia-etapa-2').classList.remove('hidden');
-
             setTimeout(() => {
                 document.getElementById('ia-etapa-2').classList.add('hidden');
                 document.getElementById('ia-etapa-3').classList.remove('hidden');
-            }, 2500);
+                let listaIa = document.getElementById('lista-ia-detectada');
+                listaIa.innerHTML = `
+                    <div class="flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                        <span>Pão de Hambúrguer (+40)</span>
+                        <input type="number" id="ia-qtd-0" value="40" class="w-16 bg-zinc-100 dark:bg-zinc-800 rounded px-2 py-1 text-center font-bold">
+                    </div>
+                    <div class="flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                        <span>Coca-Cola Lata 350ml (+12)</span>
+                        <input type="number" id="ia-qtd-1" value="12" class="w-16 bg-zinc-100 dark:bg-zinc-800 rounded px-2 py-1 text-center font-bold">
+                    </div>
+                `;
+            }, 2000);
         }
-
-        window.salvarEstoqueIa = function() {
-            alert("Sucesso! Os insumos foram somados ao seu estoque.");
+        window.salvarEstoqueIa = async function() {
+            let qtd0 = parseInt(document.getElementById('ia-qtd-0')?.value) || 0;
+            let qtd1 = parseInt(document.getElementById('ia-qtd-1')?.value) || 0;
+            // Exemplo de somar no primeiro e segundo item correspondente se existir
+            if(estoqueCache.length > 0) {
+                let first = estoqueCache[0];
+                await updateDoc(doc(db, "estoque", first.id), { qtd: (Number(first.qtd)||0) + qtd0 });
+            }
+            if(estoqueCache.length > 1) {
+                let second = estoqueCache;
+                await updateDoc(doc(db, "estoque", second.id), { qtd: (Number(second.qtd)||0) + qtd1 });
+            }
+            alert("Itens da nota somados ao estoque real!");
             fecharModalNotaIa();
         }
 
@@ -659,14 +790,10 @@
         function atualizarSelectCategorias() {
             const select = document.getElementById('admin-categoria');
             if(!select) return;
-
             let catsDinamicas = [...categoriasPadrao, ...categoriasExtras];
             cardapioCache.forEach(item => {
-                if(item.categoria && !catsDinamicas.includes(item.categoria)) {
-                    catsDinamicas.push(item.categoria);
-                }
+                if(item.categoria && !catsDinamicas.includes(item.categoria)) catsDinamicas.push(item.categoria);
             });
-
             select.innerHTML = '<option value="" disabled selected>Categoria</option>';
             catsDinamicas.forEach(cat => {
                 let opt = document.createElement('option');
@@ -674,7 +801,6 @@
                 opt.innerText = cat;
                 select.appendChild(opt);
             });
-
             let optNova = document.createElement('option');
             optNova.value = "__nova__";
             optNova.innerText = "➕ Adicionar Nova Categoria...";
@@ -703,19 +829,15 @@
             cardapioCache.forEach(item => {
                 if(item.categoria && !todasCats.includes(item.categoria)) todasCats.push(item.categoria);
             });
-
             let escolha = prompt(`Categorias cadastradas:\n- ${todasCats.join('\n- ')}\n\nDigite o nome exato da categoria que deseja EXCLUÍ-LA:` );
             if (escolha && escolha.trim() !== '') {
                 let catRemover = escolha.trim();
-                if (categoriasPadrao.includes(catRemover)) {
-                    alert("As categorias padrão do sistema não podem ser removidas.");
-                    return;
-                }
+                if (categoriasPadrao.includes(catRemover)) return alert("As categorias padrão do sistema não podem ser removidas.");
                 if (confirm(`Deseja remover a categoria "${catRemover}"?`)) {
                     categoriasExtras = categoriasExtras.filter(c => c !== catRemover);
                     localStorage.setItem('point_derico_categorias_extras', JSON.stringify(categoriasExtras));
                     atualizarSelectCategorias();
-                    alert("Categoria removida com sucesso!");
+                    alert("Categoria removida!");
                 }
             }
         }
@@ -724,14 +846,13 @@
             const nome = document.getElementById('admin-nome').value.trim();
             const preco = document.getElementById('admin-preco').value.trim();
             const categoria = document.getElementById('admin-categoria').value;
-            if(!nome || !preco || !categoria || categoria === "__nova__") return alert("Preencha o nome, o preço e selecione a categoria!");
-            
-            await addDoc(collection(db, "cardapio"), { nome, preco: parseFloat(preco), categoria, ativo: true });
+            if(!nome || !preco || !categoria || categoria === "__nova__") return alert("Preencha nome, preço e categoria!");
+            await addDoc(collection(db, "cardapio"), { nome, preco: parseFloat(preco), categoria, ativo: true, receita: [] });
             document.getElementById('admin-nome').value = '';
             document.getElementById('admin-preco').value = '';
             document.getElementById('admin-categoria').value = '';
             carregarAdminCardapio();
-            alert("Item adicionado com sucesso!");
+            alert("Item adicionado!");
         }
 
         async function carregarAdminCardapio() {
@@ -742,12 +863,17 @@
             snapshot.forEach(docSnap => {
                 let item = { id: docSnap.id, ...docSnap.data() };
                 cardapioCache.push(item);
+                let qtdRec = item.receita ? item.receita.length : 0;
                 let div = document.createElement('div');
                 div.className = "flex justify-between items-center bg-zinc-50 dark:bg-zinc-950 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs";
                 div.innerHTML = `
-                    <div><strong class="text-zinc-800 dark:text-zinc-200">${item.nome}</strong> - <span class="text-amber-600 dark:text-amber-400 font-bold">R$ ${Number(item.preco).toFixed(2).replace('.', ',')}</span> <span class="text-zinc-400 text-[10px]">(${item.categoria})</span></div>
-                    <div class="flex gap-1.5">
-                        <button onclick="alternarStatusItem('${item.id}', ${item.ativo !== false})" class="tap-scale px-2 py-1 rounded-lg text-[10px] font-extrabold ${item.ativo !== false ? 'bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-950 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300'}">${item.ativo !== false ? 'Ativo' : 'Inativo'}</button>
+                    <div>
+                        <strong class="text-zinc-800 dark:text-zinc-200">${item.nome}</strong> - <span class="text-amber-600 dark:text-amber-400 font-bold">R$ ${Number(item.preco).toFixed(2).replace('.', ',')}</span>
+                        <div class="text-[10px] text-zinc-400">Receita: ${qtdRec} insumos vinculados</div>
+                    </div>
+                    <div class="flex gap-1.5 items-center">
+                        <button onclick="abrirReceitaItem('${item.id}')" class="tap-scale bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold px-2 py-1 rounded-lg text-[10px]">🍳 Receita</button>
+                        <button onclick="alternarStatusItem('${item.id}', ${item.ativo !== false})" class="tap-scale px-2 py-1 rounded-lg text-[10px] font-extrabold ${item.ativo !== false ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700' : 'bg-red-100 text-red-700'}">${item.ativo !== false ? 'Ativo' : 'Inativo'}</button>
                         <button onclick="excluirItemCardapio('${item.id}')" class="tap-scale bg-red-600 text-white px-2 py-1 rounded-lg text-[10px]">🗑️</button>
                     </div>
                 `;
@@ -850,11 +976,18 @@
         function iniciarOuvintesFirestore() {
             if (unsubCardapio) unsubCardapio();
             if (unsubPedidos) unsubPedidos();
+            if (unsubEstoque) unsubEstoque();
 
             unsubCardapio = onSnapshot(collection(db, "cardapio"), (snapshot) => {
                 cardapioCache = [];
                 snapshot.forEach(docSnap => cardapioCache.push({ id: docSnap.id, ...docSnap.data() }));
                 atualizarSelectCategorias();
+            });
+
+            unsubEstoque = onSnapshot(collection(db, "estoque"), (snapshot) => {
+                estoqueCache = [];
+                snapshot.forEach(docSnap => estoqueCache.push({ id: docSnap.id, ...docSnap.data() }));
+                if(abaAtual === 'estoque') renderizarEstoqueVisual();
             });
 
             unsubPedidos = onSnapshot(collection(db, "pedidos"), (snapshot) => {
@@ -866,7 +999,6 @@
                 });
 
                 const qtdPendentesAgora = todosPedidos.filter(p => p.status === 'Pendente').length;
-                
                 if (!primeiroCarregamento && qtdPendentesAgora > qtdPendentesAnterior && somAtivado) {
                     audioAlert.play().catch(()=>{});
                 }
@@ -881,6 +1013,7 @@
         function pararOuvintesFirestore() {
             if (unsubCardapio) unsubCardapio();
             if (unsubPedidos) unsubPedidos();
+            if (unsubEstoque) unsubEstoque();
             todosPedidos = [];
             renderizarCards();
         }
@@ -896,9 +1029,7 @@
             }
         };
 
-        window.realizarLogout = function() {
-            signOut(auth);
-        };
+        window.realizarLogout = function() { signOut(auth); };
 
         onAuthStateChanged(auth, (user) => {
             const modalLogin = document.getElementById('modal-login');
@@ -918,16 +1049,18 @@
             const msgVazia = document.getElementById('mensagem-vazia');
             const contadorTxt = document.getElementById('contador');
             
-            if (abaAtual === 'estoque' || abaAtual === 'relatorio') {
+            if (abaAtual === 'estoque') {
                 container.innerHTML = '';
                 msgVazia.classList.add('hidden');
-                if (abaAtual === 'estoque') {
-                    contadorTxt.innerText = `Gestão de Estoque e Insumos`;
-                    return;
-                }
+                contadorTxt.innerText = `Gestão de Estoque e Insumos`;
+                renderizarEstoqueVisual();
+                return;
             }
 
-            if (abaAtual !== 'relatorio') {
+            if (abaAtual === 'relatorio') {
+                container.innerHTML = '';
+                msgVazia.classList.add('hidden');
+            } else {
                 container.innerHTML = '';
             }
             
@@ -962,11 +1095,9 @@
                     }
 
                     let isConsumo = (pedido.tipoPedido === 'Consumo');
-
                     let totalNum = parseFloat((pedido.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
                     let pagoParcial = pedido.valorPagoParcial || 0;
                     if (pedido.pagoNaHora) { pagoParcial += totalNum; }
-                    
                     let restante = totalNum - pagoParcial;
                     if (restante < 0) restante = 0;
                     let classeRestante = restante === 0 ? "text-emerald-500 font-black" : "text-amber-500";
@@ -1058,7 +1189,6 @@
                 todosPedidos.filter(p => p.status === 'Entregue').forEach(p => {
                     let mesaKey = (p.mesa || "Mesa").trim();
                     let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
-                    
                     let pagoPart = p.valorPagoParcial || 0;
                     if (p.pagoNaHora) { pagoPart += val; }
 
@@ -1097,7 +1227,6 @@
                     let idsStr = encodeURIComponent(JSON.stringify(info.ids));
 
                     let classeRestante = restante === 0 ? "text-emerald-500 font-black" : "text-amber-500";
-
                     let blocoAbatimento = `
                         <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
                             <div class="flex justify-between text-zinc-400">
@@ -1160,7 +1289,6 @@
                 todosPedidos.filter(p => p.status === 'Fiado').forEach(p => {
                     let clienteKey = (p.clienteFiado || "Cliente Desconhecido").trim();
                     let val = parseFloat((p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
-                    
                     let pagoPart = p.valorPagoParcial || 0;
 
                     if (!fiadosMap[clienteKey]) {
@@ -1239,7 +1367,7 @@
                 });
             }
             /* ======================================================== */
-            /* ABA RELATÓRIO (Lendo estritamente os seletores) */
+            /* ABA RELATÓRIO */
             /* ======================================================== */
             else if (abaAtual === 'relatorio') {
                 contadorTxt.innerText = `Painel de Faturamento`;
@@ -1252,9 +1380,6 @@
                 let pedidosDesperdicio = todosPedidos.filter(p => p.status === 'Desperdicio');
                 let pedidosRefeicao = todosPedidos.filter(p => p.status === 'ConsumoFinalizado');
 
-                // ----------------------------------------------------
-                // 1. Processar Mês (Exato conforme o input de mês)
-                // ----------------------------------------------------
                 let filtradosMes = pedidosPago.filter(p => valMes ? p.dataCriacao.startsWith(valMes) : false);
                 let totalMes = 0;
                 let prodMes = {};
@@ -1272,7 +1397,6 @@
                 document.getElementById('valor-total-mes').innerText = `R$ ${totalMes.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-mes').innerText = `${filtradosMes.length} comanda(s) finalizada(s)`;
 
-                // Processar Desperdício Mês
                 let despMes = pedidosDesperdicio.filter(p => valMes && p.dataCriacao ? p.dataCriacao.startsWith(valMes) : false);
                 let valDespMes = 0, qtdDespMes = 0;
                 despMes.forEach(p => {
@@ -1282,7 +1406,6 @@
                 document.getElementById('valor-desperdicio-mes').innerText = `R$ ${valDespMes.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-desperdicio-mes').innerText = `${qtdDespMes} itens perdidos`;
 
-                // Processar Refeição Mês
                 let refMes = pedidosRefeicao.filter(p => valMes && p.dataCriacao ? p.dataCriacao.startsWith(valMes) : false);
                 let valRefMes = 0, qtdRefMes = 0;
                 refMes.forEach(p => {
@@ -1306,9 +1429,6 @@
                     });
                 }
 
-                // ----------------------------------------------------
-                // 2. Processar Dia (Exato conforme o input de data)
-                // ----------------------------------------------------
                 let filtradosDia = pedidosPago.filter(p => valData ? p.dataCriacao === valData : false);
                 let totalDia = 0;
                 let prodDia = {};
@@ -1326,7 +1446,6 @@
                 document.getElementById('valor-total-dia').innerText = `R$ ${totalDia.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-dia').innerText = `${filtradosDia.length} comanda(s) finalizada(s)`;
 
-                // Processar Desperdício Dia
                 let despDia = pedidosDesperdicio.filter(p => valData && p.dataCriacao ? p.dataCriacao === valData : false);
                 let valDespDia = 0, qtdDespDia = 0;
                 despDia.forEach(p => {
@@ -1336,7 +1455,6 @@
                 document.getElementById('valor-desperdicio-dia').innerText = `R$ ${valDespDia.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-desperdicio-dia').innerText = `${qtdDespDia} itens perdidos`;
 
-                // Processar Refeição Dia
                 let refDia = pedidosRefeicao.filter(p => valData && p.dataCriacao ? p.dataCriacao === valData : false);
                 let valRefDia = 0, qtdRefDia = 0;
                 refDia.forEach(p => {
@@ -1360,7 +1478,6 @@
                     });
                 }
 
-                // 3. Renderizar Lista Compacta de Comandas do Dia Selecionado
                 const listaComandasDiv = document.getElementById('lista-comandas-compacta');
                 listaComandasDiv.innerHTML = '';
                 if (filtradosDia.length === 0) {
@@ -1378,7 +1495,6 @@
                     });
                 }
 
-                // 4. Renderizar Lista Desperdício Dia
                 const listaDespDiv = document.getElementById('lista-desperdicio-dia');
                 listaDespDiv.innerHTML = '';
                 if (despDia.length === 0) {
@@ -1396,7 +1512,6 @@
                     });
                 }
 
-                // 5. Renderizar Lista Refeição Funcionários Dia
                 const listaRefDiv = document.getElementById('lista-refeicao-dia');
                 listaRefDiv.innerHTML = '';
                 if (refDia.length === 0) {
@@ -1429,23 +1544,19 @@
                 <div style="font-family: sans-serif; padding: 20px; color: #111;">
                     <h2 style="color: #d97706; margin-bottom: 5px;">POINT DERICO - RELATÓRIO MENSAL</h2>
                     <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Mês Referência: <strong>${mesVal}</strong></p>
-                    
                     <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #bfdbfe;">
                         <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #1e40af;">Faturamento Total (Entradas)</h3>
                         <p style="font-size: 22px; font-weight: bold; color: #2563eb; margin: 0;">${totalTxt}</p>
                         <p style="font-size: 11px; color: #555; margin: 5px 0 0 0;">${qtdTxt}</p>
                     </div>
-
                     <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #fecaca;">
                         <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #b91c1c;">Custo de Desperdício (Prejuízo)</h3>
                         <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin: 0;">${despTxt}</p>
                     </div>
-
                     <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bfdbfe;">
                         <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #1d4ed8;">Custo de Refeição Funcionários</h3>
                         <p style="font-size: 18px; font-weight: bold; color: #2563eb; margin: 0;">${refTxt}</p>
                     </div>
-
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🏆 Ranking de Produtos do Mês</h3>
                     <div style="font-size: 12px;">${rankingHtml}</div>
                 </div>
@@ -1471,32 +1582,25 @@
                 <div style="font-family: sans-serif; padding: 20px; color: #111;">
                     <h2 style="color: #d97706; margin-bottom: 5px;">POINT DERICO - RELATÓRIO DIÁRIO</h2>
                     <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Data: <strong>${dataVal}</strong></p>
-                    
                     <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #a7f3d0;">
                         <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #065f46;">Faturamento do Dia</h3>
                         <p style="font-size: 22px; font-weight: bold; color: #059669; margin: 0;">${totalTxt}</p>
                         <p style="font-size: 11px; color: #555; margin: 5px 0 0 0;">${qtdTxt}</p>
                     </div>
-
                     <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #fecaca;">
                         <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #b91c1c;">Custo de Desperdício (Prejuízo)</h3>
                         <p style="font-size: 18px; font-weight: bold; color: #dc2626; margin: 0;">${despTxt}</p>
                     </div>
-
                     <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bfdbfe;">
                         <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #1d4ed8;">Custo de Refeição Funcionários</h3>
                         <p style="font-size: 18px; font-weight: bold; color: #2563eb; margin: 0;">${refTxt}</p>
                     </div>
-
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🏆 Ranking do Dia</h3>
                     <div style="font-size: 12px; margin-bottom: 20px;">${rankingHtml}</div>
-
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">🧾 Lista de Comandas Pagas</h3>
                     <div style="font-size: 11px; margin-bottom: 20px;">${comandasHtml}</div>
-
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">⚠️ Desperdícios do Dia</h3>
                     <div style="font-size: 11px; margin-bottom: 20px;">${despHtml}</div>
-
                     <h3 style="font-size: 14px; border-bottom: 2px solid #e4e4e7; padding-bottom: 5px; margin-bottom: 10px;">👩‍🍳 Refeição Funcionários do Dia</h3>
                     <div style="font-size: 11px;">${refHtml}</div>
                 </div>
@@ -1510,18 +1614,12 @@
             let nomeCliente = prompt(`Nome do cliente para pendurar a conta (${mesaPadrao}):`, mesaPadrao);
             if (!nomeCliente || nomeCliente.trim() === '') return;
             nomeCliente = nomeCliente.trim();
-            
             try {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
-                let promessas = ids.map(id => updateDoc(doc(db, "pedidos", id), { 
-                    status: 'Fiado', 
-                    clienteFiado: nomeCliente 
-                }));
+                let promessas = ids.map(id => updateDoc(doc(db, "pedidos", id), { status: 'Fiado', clienteFiado: nomeCliente }));
                 await Promise.all(promessas);
                 alert(`Conta enviada para Fiados no nome de "${nomeCliente}"!`);
-            } catch (e) {
-                alert("Erro ao jogar para fiado.");
-            }
+            } catch (e) { alert("Erro ao jogar para fiado."); }
         };
 
         window.abrirAbaterMulti = async function(idsStr) {
@@ -1529,7 +1627,6 @@
             if(!valorStr) return;
             let val = parseFloat(valorStr.replace(',','.'));
             if(isNaN(val) || val <= 0) return alert("Valor inválido!");
-            
             try {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
                 let primaryId = ids[0];
@@ -1545,7 +1642,6 @@
             if(!valorStr) return;
             let val = parseFloat(valorStr.replace(',','.'));
             if(isNaN(val) || val <= 0) return alert("Valor inválido!");
-            
             try {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
                 let primaryId = ids[0];
@@ -1592,14 +1688,18 @@
             try {
                 const pedidoRef = doc(db, "pedidos", id);
                 let statusFinal = novoStatus;
-                
                 if (novoStatus === 'Entregue' && tipoPedido === 'Consumo') {
                     statusFinal = 'ConsumoFinalizado';
                 }
-
                 let dados = { status: statusFinal };
                 if (statusFinal === 'Pago') dados.dataCriacao = obterDataCaixa();
                 await updateDoc(pedidoRef, dados);
+                
+                // Dispara desconto automático do estoque se finalizado/pago ou consumo finalizado
+                let targetDoc = todosPedidos.find(p => p.id === id);
+                if(targetDoc && (statusFinal === 'Pago' || statusFinal === 'ConsumoFinalizado')) {
+                    descontarEstoquePorVenda(targetDoc.pedido);
+                }
                 fecharModalPix();
             } catch (e) { alert("Erro ao atualizar."); }
         }
@@ -1627,7 +1727,11 @@
         window.confirmarPagamentoPix = async function() { 
             if (pedidoSelecionadoIds && pedidoSelecionadoIds.length > 0) {
                 let hoje = obterDataCaixa();
-                let promessas = pedidoSelecionadoIds.map(id => updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje }));
+                let promessas = pedidoSelecionadoIds.map(async id => {
+                    await updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje });
+                    let p = todosPedidos.find(x => x.id === id);
+                    if(p) descontarEstoquePorVenda(p.pedido);
+                });
                 await Promise.all(promessas);
                 fecharModalPix();
             }
@@ -1637,7 +1741,11 @@
             if(confirm(`Deseja realmente fechar e quitar a ${mesaNome}?`)) {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
                 let hoje = obterDataCaixa();
-                let promessas = ids.map(id => updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje }));
+                let promessas = ids.map(async id => {
+                    await updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje });
+                    let p = todosPedidos.find(x => x.id === id);
+                    if(p) descontarEstoquePorVenda(p.pedido);
+                });
                 await Promise.all(promessas);
             }
         }
