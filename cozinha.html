@@ -93,9 +93,12 @@
         <!-- PAINEL DE ESTOQUE DINÂMICO -->
         <div id="painel-estoque" class="hidden mb-4 space-y-4">
             <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-3xl shadow-xl transition-colors duration-200 flex flex-col gap-3">
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center flex-wrap gap-2">
                     <h2 class="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-wider">📦 Insumos & Bebidas (Estoque Real)</h2>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="popularInsumosBase()" class="tap-scale bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-zinc-700 dark:text-zinc-300 font-bold px-2.5 py-2 rounded-xl text-[10px] transition shadow">
+                            📥 Insumos Base (0)
+                        </button>
                         <button onclick="abrirModalAdicionarInsumo()" class="tap-scale bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 text-zinc-800 dark:text-zinc-200 font-extrabold px-3 py-2 rounded-xl text-xs transition shadow">
                             ➕ Novo Insumo
                         </button>
@@ -272,7 +275,7 @@
                 <div class="flex gap-2">
                     <div class="w-1/2">
                         <label class="block text-[10px] text-zinc-500 font-bold mb-1">Qtd Atual:</label>
-                        <input type="number" id="insumo-qtd" value="10" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 outline-none font-bold">
+                        <input type="number" id="insumo-qtd" value="0" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2.5 outline-none font-bold">
                     </div>
                     <div class="w-1/2">
                         <label class="block text-[10px] text-zinc-500 font-bold mb-1">Unidade:</label>
@@ -453,8 +456,9 @@
             <div class="space-y-3 text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed text-left">
                 <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
                     <strong class="text-amber-500 block mb-1">📦 1. Estoque & Composição</strong>
-                    • Bebidas (ex: Coca-Cola) batem direto com o estoque.<br>
-                    • Lanches (ex: X-Bacon) usam <b>Composição (Receita)</b> cadastrada no cardápio para descontar insumos (pão, carne, bacon).
+                    • Bebidas batem direto com o estoque.<br>
+                    • Lanches usam <b>Composição (Receita)</b> cadastrada no cardápio para descontar insumos (pão, carne, bacon).<br>
+                    • Clique em <b>🗑️ Excluir</b> no card do insumo caso queira remover o item.
                 </div>
             </div>
             <button onclick="fecharModalAjudaCozinha()" class="tap-scale w-full bg-amber-500 text-zinc-950 font-black py-3 rounded-2xl text-xs mt-4 shadow">Entendi</button>
@@ -573,12 +577,29 @@
             renderizarEstoqueVisual();
         }
 
+        window.popularInsumosBase = async function() {
+            if(!confirm("Deseja popular o estoque com insumos padrão zerados (pão, carne, bacon, refrigerantes)?")) return;
+            const baseItens = [
+                { nome: "Pão de Hambúrguer", qtd: 0, un: "un", min: 10 },
+                { nome: "Carne Bovina 56g", qtd: 0, un: "un", min: 15 },
+                { nome: "Fatias de Bacon", qtd: 0, un: "un", min: 10 },
+                { nome: "Coca-Cola Lata 350ml", qtd: 0, un: "un", min: 12 },
+                { nome: "Guaraná Lata 350ml", qtd: 0, un: "un", min: 10 },
+                { nome: "Copo Descartável 400ml", qtd: 0, un: "un", min: 20 },
+                { nome: "Gelo (Saco)", qtd: 0, un: "un", min: 3 }
+            ];
+            for(let item of baseItens) {
+                await addDoc(collection(db, "estoque"), item);
+            }
+            alert("Insumos base carregados!");
+        }
+
         function renderizarEstoqueVisual() {
             const grid = document.getElementById('grid-estoque');
             if(!grid) return;
             grid.innerHTML = '';
             if(estoqueCache.length === 0) {
-                grid.innerHTML = '<p class="text-xs text-zinc-400 col-span-full italic">Nenhum insumo cadastrado no estoque.</p>';
+                grid.innerHTML = '<p class="text-xs text-zinc-400 col-span-full italic">Nenhum insumo cadastrado no estoque. Clique em "Insumos Base (0)" ou "Novo Insumo".</p>';
                 return;
             }
             estoqueCache.forEach(item => {
@@ -597,13 +618,16 @@
                     <div>
                         <div class="flex justify-between items-start mb-2">
                             <span class="text-xl">📦</span>
-                            ${statusBadge}
+                            <div class="flex items-center gap-1">
+                                ${statusBadge}
+                                <button onclick="excluirInsumoEstoque('${item.id}', '${item.nome}')" class="text-red-500 hover:text-red-700 text-xs px-1 font-bold" title="Excluir Insumo">🗑️</button>
+                            </div>
                         </div>
                         <h3 class="text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1">${item.nome}</h3>
                     </div>
                     <div class="flex justify-between items-end mt-2">
                         <span class="text-lg font-black text-blue-600 dark:text-blue-400">${qtd} <span class="text-xs text-zinc-400 font-medium">${item.un || 'un'}</span></span>
-                        <button onclick="ajustarQtdEstoque('${item.id}', ${qtd})" class="text-[10px] bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 px-2 py-1 rounded-lg font-bold">Ajustar</button>
+                        <button onclick="ajustarQtdEstoque('${item.id}', ${qtd})" class="text-[10px] bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-2 py-1 rounded-lg font-bold">✏️ Ajustar</button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -620,20 +644,23 @@
             }
         }
 
+        window.excluirInsumoEstoque = async function(id, nome) {
+            if(confirm(`Deseja realmente EXCLUIR o insumo "${nome}" do estoque?`)) {
+                await deleteDoc(doc(db, "estoque", id));
+            }
+        }
+
         // --- DESCONTO AUTOMÁTICO INTELIGENTE POR VENDA/CONSUMO ---
         async function descontarEstoquePorVenda(textoPedido) {
             if(!textoPedido) return;
-            // Tenta identificar linhas ou palavras de produtos
             let linhas = textoPedido.split('\n');
             for(let linha of linhas) {
                 let limpa = linha.trim();
                 if(!limpa || limpa.includes('Obs:') || limpa.includes('Resp:')) continue;
-                // Exemplo de formato: "2x X-Bacon" ou "1x Coca-Cola Lata"
                 let match = limpa.match(/^(\d+)x\s+(.+)$/i);
                 let qtdVenda = match ? parseInt(match) : 1;
                 let nomeProdVendido = match ? match.trim() : limpa;
 
-                // 1. Verificar se bate direto no estoque (Ex: Bebida exata)
                 let itemEstoqueDireto = estoqueCache.find(e => e.nome.toLowerCase() === nomeProdVendido.toLowerCase());
                 if(itemEstoqueDireto) {
                     let novaQtd = (Number(itemEstoqueDireto.qtd) || 0) - qtdVenda;
@@ -641,7 +668,6 @@
                     continue;
                 }
 
-                // 2. Procurar se o item do cardápio tem Receita vinculada
                 let itemCardapio = cardapioCache.find(c => c.nome.toLowerCase() === nomeProdVendido.toLowerCase());
                 if(itemCardapio && itemCardapio.receita && Array.isArray(itemCardapio.receita)) {
                     for(let ing of itemCardapio.receita) {
@@ -661,14 +687,10 @@
             itemEditandoReceitaId = itemId;
             let item = cardapioCache.find(c => c.id === itemId);
             if(!item) return;
-            
-            // Fecha a janela de gerenciamento de cardápio para não empilhar modais
             document.getElementById('modal-admin-cardapio').classList.add('hidden');
-
             document.getElementById('receita-titulo-item').innerText = `Receita: ${item.nome}`;
             receitaAtualTemp = item.receita ? [...item.receita] : [];
             
-            // Popular select de insumos
             let sel = document.getElementById('receita-sel-insumo');
             sel.innerHTML = '<option value="" disabled selected>Selecionar Insumo...</option>';
             estoqueCache.forEach(i => {
@@ -721,7 +743,7 @@
             if(!itemEditandoReceitaId) return;
             await updateDoc(doc(db, "cardapio", itemEditandoReceitaId), { receita: receitaAtualTemp });
             document.getElementById('modal-receita').classList.add('hidden');
-            document.getElementById('modal-admin-cardapio').classList.remove('hidden'); // Reabre o cardápio atualizado
+            document.getElementById('modal-admin-cardapio').classList.remove('hidden');
             alert("Receita salva com sucesso!");
             carregarAdminCardapio();
         }
@@ -749,12 +771,12 @@
                 let listaIa = document.getElementById('lista-ia-detectada');
                 listaIa.innerHTML = `
                     <div class="flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                        <span>Pão de Hambúrguer (+40)</span>
-                        <input type="number" id="ia-qtd-0" value="40" class="w-16 bg-zinc-100 dark:bg-zinc-800 rounded px-2 py-1 text-center font-bold">
+                        <span>Pão de Hambúrguer (+20)</span>
+                        <input type="number" id="ia-qtd-0" value="20" class="w-16 bg-zinc-100 dark:bg-zinc-800 rounded px-2 py-1 text-center font-bold">
                     </div>
                     <div class="flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                        <span>Coca-Cola Lata 350ml (+12)</span>
-                        <input type="number" id="ia-qtd-1" value="12" class="w-16 bg-zinc-100 dark:bg-zinc-800 rounded px-2 py-1 text-center font-bold">
+                        <span>Coca-Cola Lata 350ml (+24)</span>
+                        <input type="number" id="ia-qtd-1" value="24" class="w-16 bg-zinc-100 dark:bg-zinc-800 rounded px-2 py-1 text-center font-bold">
                     </div>
                 `;
             }, 2000);
@@ -762,9 +784,8 @@
         window.salvarEstoqueIa = async function() {
             let qtd0 = parseInt(document.getElementById('ia-qtd-0')?.value) || 0;
             let qtd1 = parseInt(document.getElementById('ia-qtd-1')?.value) || 0;
-            // Exemplo de somar no primeiro e segundo item correspondente se existir
             if(estoqueCache.length > 0) {
-                let first = estoqueCache[0];
+                let first = estoqueCache;
                 await updateDoc(doc(db, "estoque", first.id), { qtd: (Number(first.qtd)||0) + qtd0 });
             }
             if(estoqueCache.length > 1) {
@@ -825,24 +846,6 @@
                     selectEl.value = nomeFormatado;
                 } else {
                     selectEl.value = "";
-                }
-            }
-        }
-
-        window.gerenciarCategorias = function() {
-            let todasCats = [...categoriasPadrao, ...categoriasExtras];
-            cardapioCache.forEach(item => {
-                if(item.categoria && !todasCats.includes(item.categoria)) todasCats.push(item.categoria);
-            });
-            let escolha = prompt(`Categorias cadastradas:\n- ${todasCats.join('\n- ')}\n\nDigite o nome exato da categoria que deseja EXCLUÍ-LA:` );
-            if (escolha && escolha.trim() !== '') {
-                let catRemover = escolha.trim();
-                if (categoriasPadrao.includes(catRemover)) return alert("As categorias padrão do sistema não podem ser removidas.");
-                if (confirm(`Deseja remover a categoria "${catRemover}"?`)) {
-                    categoriasExtras = categoriasExtras.filter(c => c !== catRemover);
-                    localStorage.setItem('point_derico_categorias_extras', JSON.stringify(categoriasExtras));
-                    atualizarSelectCategorias();
-                    alert("Categoria removida!");
                 }
             }
         }
@@ -1161,7 +1164,7 @@
                     if (pedido.status === 'Pendente') {
                         badgeStatusCozinha = `<div class="mb-2"><span class="bg-amber-100 dark:bg-amber-950 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">🔔 Novo Pedido - Aguardando Aceite</span></div>`;
                     } else if (pedido.status === 'Preparando') {
-                        badgeStatusCozinha = `<div class="mb-2"><span class="bg-blue-100 dark:bg-blue-950 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">👨‍🍳 Em Preparo na Cozinha</span></div>`;
+                        badgeStatusCozinha = `<div class="mb-2"><span class="bg-blue-100 dark:bg-amber-950 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">👨‍🍳 Em Preparo na Cozinha</span></div>`;
                     }
 
                     const card = document.createElement('div');
@@ -1700,7 +1703,6 @@
                 if (statusFinal === 'Pago') dados.dataCriacao = obterDataCaixa();
                 await updateDoc(pedidoRef, dados);
                 
-                // Dispara desconto automático do estoque se finalizado/pago ou consumo finalizado
                 let targetDoc = todosPedidos.find(p => p.id === id);
                 if(targetDoc && (statusFinal === 'Pago' || statusFinal === 'ConsumoFinalizado')) {
                     descontarEstoquePorVenda(targetDoc.pedido);
