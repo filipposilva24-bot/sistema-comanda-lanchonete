@@ -1982,6 +1982,54 @@
             return payload + (resultado & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
         }
 
+        window.abrirAssistenteComprasIA = async function() {
+        alert("🔍 A analisar o teu stock crítico e histórico de vendas dos últimos 7 dias...");
+
+        const estoqueInfo = estoqueCache.map(e => `- ${e.nome}: ${e.qtd} ${e.un} (mínimo: ${e.min})`).join('\n') || "Estoque vazio";
+        
+        const hoje = new Date();
+        const seteDiasAtras = new Date();
+        seteDiasAtras.setDate(hoje.getDate() - 7);
+        const str7d = seteDiasAtras.toISOString().split('T')[0];
+        
+        let vendasRecentes = todosPedidos.filter(p => (p.status === 'Pago' || p.status === 'ConsumoFinalizado') && (!p.dataCriacao || p.dataCriacao >= str7d));
+        let resumoVendas = {};
+        vendasRecentes.forEach(p => {
+            if(p.pedido) resumoVendas[p.pedido] = (resumoVendas[p.pedido] || 0) + 1;
+        });
+        let vendasInfo = Object.entries(resumoVendas).map(([k,v]) => `${v}x vendas de: ${k}`).join('\n') || "Sem histórico detalhado recente";
+
+        const diaSemana = hoje.toLocaleDateString('pt-PT', {weekday: 'long'});
+        const promptTexto = `És o assistente inteligente de gestão do Point Derico (lanchonete/bar). Hoje é ${diaSemana}. Analisa os dados abaixo e gera uma lista de compras inteligente e direta (estilo: "Vende muito X ao fim de semana, faltam poucos dias, tens Y, sugiro comprar Z").
+
+ESTOQUE ATUAL:
+${estoqueInfo}
+
+VENDAS RECENTES (últimos 7 dias):
+${vendasInfo}
+
+Responde de forma direta, curta e objetiva em português.`;
+
+        try {
+            const res = await fetch('/api/comprasIA', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: promptTexto, type: 'assistente_compras' })
+            });
+
+            if (!res.ok) throw new Error("Erro no servidor da IA");
+
+            const data = await res.json();
+            const respostaIa = data.candidates?.[0]?.content?.parts?.[0]?.text || data.resposta || JSON.stringify(data);
+
+            alert("🔮 SUGESTÃO DA IA PARA HOJE:\n\n" + respostaIa);
+
+        } catch (e) {
+            console.error("Erro no assistente de compras:", e);
+            alert("Não foi possível gerar a sugestão. Verifica se o teu endpoint /api/comprasIA aceita o payload de texto (prompt).");
+        }
+    }
+        
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible") {
                 const statusEl = document.getElementById('contador');
