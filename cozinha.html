@@ -786,7 +786,7 @@
             carregarAdminCardapio();
         }
 
-        // --- IA LEITURA DE NOTA (MÉTODO REAL VIA VERCEL) ---
+        // --- IA LEITURA DE NOTA (MÉTODO REAL VIA VERCEL COM COMPRESSÃO) ---
         window.abrirModalNotaIa = function() {
             resetarModalIa();
             document.getElementById('modal-nota-ia').classList.remove('hidden');
@@ -810,40 +810,81 @@
             document.getElementById('ia-etapa-2').classList.remove('hidden');
 
             try {
-                // 1. Converter imagem para Base64
-                const leitor = new FileReader();
-                leitor.readAsDataURL(arquivo);
-                
-                leitor.onload = async function () {
-                    const base64Image = leitor.result.split(',')[1];
-                    const mimeType = arquivo.type;
+                const img = new Image();
+                img.src = URL.createObjectURL(arquivo);
 
-                    // 2. Fazer requisição para o NOSSO PRÓPRIO BACKEND no Vercel
-                    // A chave de API agora fica escondida lá, e não mais no código do navegador
-                    const resposta = await fetch('/api/lerNota', {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ base64Image, mimeType })
-                    });
+                img.onload = async function() {
+                    // Cria um canvas para redimensionar e comprimir a imagem
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200; // Resolução máxima para a IA ler perfeitamente
+                    const MAX_HEIGHT = 1200;
+                    let width = img.width;
+                    let height = img.height;
 
-                    if (!resposta.ok) {
-                        const err = await resposta.json();
-                        throw new Error(err.error || "Erro no servidor Vercel");
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
                     }
 
-                    const dados = await resposta.json();
-                    
-                    let textoResposta = dados.candidates[0].content.parts[0].text;
-                    
-                    // Limpar formatação caso a IA teime em mandar markdown
-                    textoResposta = textoResposta.replace(/```json/g, '').replace(/```/g, '').trim();
-                    
-                    const itensIdentificados = JSON.parse(textoResposta);
-                    renderizarItensIA(itensIdentificados);
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Converte para JPEG com 70% de qualidade (reduz drasticamente o tamanho)
+                    const base64Completo = canvas.toDataURL('image/jpeg', 0.7);
+                    const base64Image = base64Completo.split(',')[1];
+                    const mimeType = 'image/jpeg';
+
+                    try {
+                        // Requisição para o Vercel com a imagem leve
+                        const resposta = await fetch('/api/lerNota', {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ base64Image, mimeType })
+                        });
+
+                        if (!resposta.ok) {
+                            const errText = await resposta.text();
+                            try {
+                                const errJson = JSON.parse(errText);
+                                throw new Error(errJson.error || "Erro no servidor Vercel");
+                            } catch(e) {
+                                throw new Error(errText || "Erro no servidor Vercel");
+                            }
+                        }
+
+                        const dados = await resposta.json();
+                        let textoResposta = dados.candidates[0].content.parts[0].text;
+                        
+                        // Limpa formatação residual da IA
+                        textoResposta = textoResposta.replace(/```json/g, '').replace(/```/g, '').trim();
+                        const itensIdentificados = JSON.parse(textoResposta);
+                        
+                        renderizarItensIA(itensIdentificados);
+
+                    } catch (erro) {
+                        console.error("Erro na leitura da IA (Fetch):", erro);
+                        alert("Erro de comunicação com o servidor. Verifique os logs no painel do Vercel.");
+                        resetarModalIa();
+                    }
                 };
+                
+                img.onerror = function() {
+                    alert("Não foi possível carregar a imagem selecionada.");
+                    resetarModalIa();
+                };
+
             } catch (erro) {
-                console.error("Erro na leitura da IA:", erro);
-                alert("Erro ao processar a nota fiscal. Verifique o console.");
+                console.error("Erro geral na IA:", erro);
+                alert("Erro ao processar a nota fiscal. Tente novamente.");
                 resetarModalIa();
             }
         }
