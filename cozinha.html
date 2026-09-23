@@ -269,7 +269,7 @@
     <div id="modal-novo-insumo" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
             <button onclick="document.getElementById('modal-novo-insumo').classList.add('hidden')" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold">✕</button>
-            <h3 class="text-base font-extrabold text-blue-600 dark:text-blue-400 mb-3">➕ Adicionar Insumo / Revenda</h3>
+            <h3 id="titulo-modal-insumo" class="text-base font-extrabold text-blue-600 dark:text-blue-400 mb-3">➕ Adicionar Insumo / Revenda</h3>
             <div class="space-y-3 text-xs mb-4">
                 <div>
                     <label class="block text-[10px] text-zinc-500 font-bold mb-1">Nome:</label>
@@ -489,6 +489,7 @@
         let receitaAtualTemp = [];
         let categoriasPadrao = ["🍔 Hambúrgueres", "🍟 Porções", "🥟 Pastéis", "🥤 Bebidas", "🍺 Alcoólicas"];
         let categoriasExtras = JSON.parse(localStorage.getItem('point_derico_categorias_extras') || "[]");
+        let idInsumoEditando = null;
 
         const SENHA_HARD_RESET = "1901";
         const SENHA_CARDAPIO = "1234";
@@ -566,6 +567,26 @@
 
         // --- ESTOQUE & INSUMOS ---
         window.abrirModalAdicionarInsumo = function() {
+            idInsumoEditando = null;
+            document.getElementById('titulo-modal-insumo').innerText = "➕ Adicionar Insumo / Revenda";
+            document.getElementById('insumo-nome').value = '';
+            document.getElementById('insumo-qtd').value = '0';
+            document.getElementById('insumo-un').value = 'un';
+            document.getElementById('insumo-min').value = '5';
+            document.getElementById('modal-novo-insumo').classList.remove('hidden');
+        }
+
+        window.abrirModalEditarInsumo = function(id) {
+            let item = estoqueCache.find(e => e.id === id);
+            if(!item) return;
+
+            idInsumoEditando = id;
+            document.getElementById('titulo-modal-insumo').innerText = "✏️ Editar Insumo / Revenda";
+            document.getElementById('insumo-nome').value = item.nome;
+            document.getElementById('insumo-qtd').value = item.qtd || 0;
+            document.getElementById('insumo-un').value = item.un || 'un';
+            document.getElementById('insumo-min').value = item.min || 5;
+
             document.getElementById('modal-novo-insumo').classList.remove('hidden');
         }
 
@@ -576,7 +597,15 @@
             const min = parseFloat(document.getElementById('insumo-min').value) || 5;
             if(!nome) return alert("Informe o nome do insumo!");
             
-            await addDoc(collection(db, "estoque"), { nome, qtd, un, min, ativo: true });
+            if (idInsumoEditando) {
+                // Atualiza o item existente
+                await updateDoc(doc(db, "estoque", idInsumoEditando), { nome, qtd, un, min });
+                idInsumoEditando = null;
+            } else {
+                // Cria um novo item
+                await addDoc(collection(db, "estoque"), { nome, qtd, un, min, ativo: true });
+            }
+
             document.getElementById('insumo-nome').value = '';
             document.getElementById('modal-novo-insumo').classList.add('hidden');
             renderizarEstoqueVisual();
@@ -663,21 +692,11 @@
                     </div>
                     <div class="flex justify-between items-end mt-2">
                         <span class="text-lg font-black text-blue-600 dark:text-blue-400">${qtd} <span class="text-xs text-zinc-400 font-medium">${item.un || 'un'}</span></span>
-                        <button onclick="ajustarQtdEstoque('${item.id}', ${qtd})" class="text-[10px] bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-2 py-1 rounded-lg font-bold">✏️ Ajustar</button>
+                        <button onclick="abrirModalEditarInsumo('${item.id}')" class="text-[10px] bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-2 py-1 rounded-lg font-bold">✏️ Editar</button>
                     </div>
                 `;
                 grid.appendChild(card);
             });
-        }
-
-        window.ajustarQtdEstoque = async function(id, qtdAtual) {
-            let novaVal = prompt("Nova quantidade no estoque:", qtdAtual);
-            if(novaVal !== null) {
-                let n = parseFloat(novaVal);
-                if(!isNaN(n)) {
-                    await updateDoc(doc(db, "estoque", id), { qtd: n });
-                }
-            }
         }
 
         window.excluirInsumoEstoque = async function(id, nome) {
