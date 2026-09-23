@@ -455,18 +455,44 @@
         </div>
     </div>
 
+    <!-- MODAL DE AJUDA / MANUAL -->
     <div id="modal-ajuda-cozinha" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
-        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
-            <button onclick="fecharModalAjudaCozinha()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
-            <h3 class="text-base font-extrabold text-amber-500 mb-3 flex items-center gap-2">📖 Manual do Sistema & Vínculo Real</h3>
-            <div class="space-y-3 text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed text-left">
-                <div class="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-                    <strong class="text-amber-500 block mb-1">🔗 Vínculo Cardápio x Estoque</strong>
-                    • Clique em <b>🔗 Sincronizar Cardápio (Revenda)</b> na aba Estoque para espelhar as bebidas/revendas do cardápio diretamente para o controle de estoque real.<br>
-                    • Lanches montados usam <b>Composição (Receita)</b>.
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto transition-colors duration-200">
+            <button onclick="fecharModalAjudaCozinha()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base transition-colors">✕</button>
+            <h3 class="text-lg font-extrabold text-amber-600 dark:text-amber-400 mb-4 flex items-center gap-2">📖 Manual do Sistema</h3>
+            
+            <div class="space-y-4 text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed text-left">
+                
+                <!-- Cardápio e Estoque -->
+                <div class="bg-zinc-50 dark:bg-zinc-950 p-3.5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                    <strong class="text-amber-600 dark:text-amber-400 block mb-2 text-[13px] flex items-center gap-1.5">🔗 Vínculo Cardápio & Estoque</strong>
+                    <ul class="space-y-2 ml-1">
+                        <li>• <b>Bebidas/Revenda:</b> Clica em <span class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-md font-bold">🔗 Sincronizar</span> na aba Estoque para espelhar os itens do cardápio direto no estoque real.</li>
+                        <li>• <b>Lanches/Porções:</b> No Admin do Cardápio, clica em <span class="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-md font-bold">🍳 Receita</span> para vincular os ingredientes. O sistema desconta do estoque automaticamente ao vender.</li>
+                    </ul>
                 </div>
+
+                <!-- Inteligência Artificial -->
+                <div class="bg-blue-50 dark:bg-blue-950/20 p-3.5 rounded-2xl border border-blue-200 dark:border-blue-900/40 shadow-sm">
+                    <strong class="text-blue-600 dark:text-blue-400 block mb-2 text-[13px] flex items-center gap-1.5">📸 Leitura de Notas (IA)</strong>
+                    <ul class="space-y-2 ml-1">
+                        <li>• Na aba Estoque, clica em <b>Ler Nota Fiscal (IA)</b>.</li>
+                        <li>• Tira uma foto do cupão do mercado/adega. A Inteligência Artificial vai extrair todos os produtos e quantidades para ti, facilitando a entrada no estoque!</li>
+                    </ul>
+                </div>
+
+                <!-- Caixa e Fiados -->
+                <div class="bg-indigo-50 dark:bg-indigo-950/20 p-3.5 rounded-2xl border border-indigo-200 dark:border-indigo-900/40 shadow-sm">
+                    <strong class="text-indigo-600 dark:text-indigo-400 block mb-2 text-[13px] flex items-center gap-1.5">💲 Caixa e 📓 Fiados</strong>
+                    <ul class="space-y-2 ml-1">
+                        <li>• <b>Abater:</b> O cliente pagou apenas uma parte? Usa o botão <b>💸 Abater</b> para descontar o valor parcial do total da mesa.</li>
+                        <li>• <b>Fiado:</b> Para pendurar uma conta, clica em <b>📓 Fiado</b>, insere o nome do cliente e a conta será movida para a aba de Fiados (onde podes abater o valor depois).</li>
+                        <li>• <b>Pix:</b> Usa o botão <b>📱 Pix</b> para gerar o QR Code com o valor exato que falta pagar.</li>
+                    </ul>
+                </div>
+
             </div>
-            <button onclick="fecharModalAjudaCozinha()" class="tap-scale w-full bg-amber-500 text-zinc-950 font-black py-3 rounded-2xl text-xs mt-4 shadow">Entendi</button>
+            <button onclick="fecharModalAjudaCozinha()" class="tap-scale w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black py-3.5 rounded-2xl text-xs mt-5 shadow-md transition">Entendido!</button>
         </div>
     </div>
 
