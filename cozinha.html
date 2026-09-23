@@ -313,42 +313,45 @@
         </div>
     </div>
 
-    <!-- MODAL: LEITURA DE NOTA POR IA -->
+    <!-- MODAL: LEITURA DE NOTA POR IA (REAL VIA VERCEL) -->
     <div id="modal-nota-ia" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-[60] flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative transition-colors duration-200 max-h-[90vh] flex flex-col">
             <button onclick="fecharModalNotaIa()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
             <h3 class="text-base font-extrabold text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-2">📸 Leitor de Nota Fiscal (IA)</h3>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Tire foto do cupom do mercado/adega. A IA lê e soma no estoque.</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Tire foto do cupom do mercado/adega. A IA extrai os produtos e quantidades.</p>
             
             <div id="ia-etapa-1" class="flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-2xl p-6 mb-4">
                 <span class="text-4xl mb-3">🧾</span>
-                <label class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2 px-4 rounded-xl text-xs cursor-pointer shadow mb-2">
-                    Tirar Foto ou Escolher Arquivo
-                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="iniciarLeituraIa(this)">
+                <label class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-3 px-5 rounded-xl text-xs cursor-pointer shadow mb-2 text-center w-full">
+                    📷 Tirar Foto ou Escolher Arquivo
+                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="iniciarLeituraIaReal(this)">
                 </label>
             </div>
 
             <div id="ia-etapa-2" class="hidden flex flex-col items-center justify-center py-8">
                 <span class="w-8 h-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin mb-3"></span>
                 <p class="text-xs font-bold text-blue-600 dark:text-blue-400 animate-pulse">Inteligência Artificial Lendo a Nota...</p>
+                <p class="text-[10px] text-zinc-500 mt-2">Isso pode levar alguns segundos.</p>
             </div>
 
             <div id="ia-etapa-3" class="hidden flex-grow overflow-hidden flex flex-col">
                 <div class="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 p-3 rounded-xl mb-3 text-[10px] text-blue-800 dark:text-blue-300">
-                    <strong>Sucesso!</strong> A IA encontrou itens. Confirme a entrada no estoque:
+                    <strong>Sucesso!</strong> Edite os nomes (se quiser que batam exato com seu estoque) e confirme as quantidades.
                 </div>
                 
-                <div class="overflow-y-auto max-h-60 mb-4 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-950 p-2 space-y-2 text-xs" id="lista-ia-detectada"></div>
+                <div class="overflow-y-auto max-h-60 mb-4 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-950 p-2 space-y-2 text-xs" id="lista-ia-detectada">
+                    <!-- Os itens aparecerão aqui -->
+                </div>
+
+                <div class="flex justify-between items-center mb-3">
+                     <button onclick="adicionarLinhaManualIa()" class="text-[10px] text-blue-600 font-bold hover:underline">➕ Adicionar item esquecido</button>
+                </div>
 
                 <div class="flex gap-2 mt-auto pt-2">
                     <button onclick="resetarModalIa()" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold py-3 rounded-xl text-xs">Cancelar</button>
-                    <button onclick="salvarEstoqueIa()" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-xs shadow">✅ Salvar no Estoque</button>
+                    <button onclick="salvarEstoqueIaReal()" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-xs shadow">✅ Salvar no Estoque</button>
                 </div>
             </div>
-
-            <button id="btn-simular-ia" onclick="simularLeituraIA()" class="mt-4 tap-scale w-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-800 font-bold py-2 rounded-xl text-[10px] transition">
-                🧪 Simular Leitura da Foto (Para Teste)
-            </button>
         </div>
     </div>
 
@@ -783,51 +786,140 @@
             carregarAdminCardapio();
         }
 
-        // --- IA LEITURA DE NOTA ---
+        // --- IA LEITURA DE NOTA (MÉTODO REAL VIA VERCEL) ---
         window.abrirModalNotaIa = function() {
             resetarModalIa();
             document.getElementById('modal-nota-ia').classList.remove('hidden');
         }
         window.fecharModalNotaIa = function() { document.getElementById('modal-nota-ia').classList.add('hidden'); }
+        
         window.resetarModalIa = function() {
             document.getElementById('ia-etapa-1').classList.remove('hidden');
             document.getElementById('ia-etapa-2').classList.add('hidden');
             document.getElementById('ia-etapa-3').classList.add('hidden');
-            document.getElementById('btn-simular-ia').classList.remove('hidden');
+            document.getElementById('lista-ia-detectada').innerHTML = '';
         }
-        window.iniciarLeituraIa = function(input) { if(input.files && input.files[0]) simularLeituraIA(); }
-        window.simularLeituraIA = function() {
+
+        window.iniciarLeituraIaReal = async function(input) {
+            if (!input.files || !input.files[0]) return;
+
+            const arquivo = input.files[0];
+            
+            // Avança para a etapa de carregamento
             document.getElementById('ia-etapa-1').classList.add('hidden');
-            document.getElementById('btn-simular-ia').classList.add('hidden');
             document.getElementById('ia-etapa-2').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('ia-etapa-2').classList.add('hidden');
-                document.getElementById('ia-etapa-3').classList.remove('hidden');
-                let listaIa = document.getElementById('lista-ia-detectada');
-                listaIa.innerHTML = `
-                    <div class="flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                        <span>Pão de Hambúrguer (+20)</span>
-                        <input type="number" id="ia-qtd-0" value="20" class="w-16 bg-zinc-100 dark:bg-zinc-800 rounded px-2 py-1 text-center font-bold">
-                    </div>
-                    <div class="flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                        <span>Coca-Cola Lata 350ml (+24)</span>
-                        <input type="number" id="ia-qtd-1" value="24" class="w-16 bg-zinc-100 dark:bg-zinc-800 rounded px-2 py-1 text-center font-bold">
-                    </div>
-                `;
-            }, 2000);
+
+            try {
+                // 1. Converter imagem para Base64
+                const leitor = new FileReader();
+                leitor.readAsDataURL(arquivo);
+                
+                leitor.onload = async function () {
+                    const base64Image = leitor.result.split(',')[1];
+                    const mimeType = arquivo.type;
+
+                    // 2. Fazer requisição para o NOSSO PRÓPRIO BACKEND no Vercel
+                    // A chave de API agora fica escondida lá, e não mais no código do navegador
+                    const resposta = await fetch('/api/lerNota', {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ base64Image, mimeType })
+                    });
+
+                    if (!resposta.ok) {
+                        const err = await resposta.json();
+                        throw new Error(err.error || "Erro no servidor Vercel");
+                    }
+
+                    const dados = await resposta.json();
+                    
+                    let textoResposta = dados.candidates[0].content.parts[0].text;
+                    
+                    // Limpar formatação caso a IA teime em mandar markdown
+                    textoResposta = textoResposta.replace(/```json/g, '').replace(/```/g, '').trim();
+                    
+                    const itensIdentificados = JSON.parse(textoResposta);
+                    renderizarItensIA(itensIdentificados);
+                };
+            } catch (erro) {
+                console.error("Erro na leitura da IA:", erro);
+                alert("Erro ao processar a nota fiscal. Verifique o console.");
+                resetarModalIa();
+            }
         }
-        window.salvarEstoqueIa = async function() {
-            let qtd0 = parseInt(document.getElementById('ia-qtd-0')?.value) || 0;
-            let qtd1 = parseInt(document.getElementById('ia-qtd-1')?.value) || 0;
-            if(estoqueCache.length > 0) {
-                let first = estoqueCache;
-                await updateDoc(doc(db, "estoque", first.id), { qtd: (Number(first.qtd)||0) + qtd0 });
+
+        function renderizarItensIA(itens) {
+            document.getElementById('ia-etapa-2').classList.add('hidden');
+            document.getElementById('ia-etapa-3').classList.remove('hidden');
+            const listaIa = document.getElementById('lista-ia-detectada');
+            listaIa.innerHTML = '';
+
+            if (itens.length === 0) {
+                listaIa.innerHTML = '<p class="text-zinc-500 italic p-2 text-center">Nenhum item encontrado. Adicione manualmente.</p>';
+            } else {
+                itens.forEach(item => adicionarLinhaHTMLIa(item.nome, item.qtd));
             }
-            if(estoqueCache.length > 1) {
-                let second = estoqueCache;
-                await updateDoc(doc(db, "estoque", second.id), { qtd: (Number(second.qtd)||0) + qtd1 });
+        }
+
+        window.adicionarLinhaManualIa = function() {
+            adicionarLinhaHTMLIa("", 1);
+        }
+
+        function adicionarLinhaHTMLIa(nome, qtd) {
+            const listaIa = document.getElementById('lista-ia-detectada');
+            const div = document.createElement('div');
+            div.className = "ia-item-row flex gap-2 items-center bg-white dark:bg-zinc-900 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800";
+            
+            // Tenta achar se o nome já existe no estoque para sugerir
+            let estiloNome = "text-zinc-800 dark:text-zinc-200";
+            let jaExiste = estoqueCache.find(e => e.nome.toLowerCase() === nome.toLowerCase());
+            if (jaExiste) estiloNome = "text-emerald-600 font-bold";
+
+            div.innerHTML = `
+                <input type="text" value="${nome}" class="ia-nome flex-grow bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-blue-500 ${estiloNome}" placeholder="Nome do Insumo">
+                <input type="number" step="0.1" value="${qtd}" class="ia-qtd w-16 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2 py-1.5 text-center font-bold text-xs outline-none focus:border-blue-500">
+                <button onclick="this.parentElement.remove()" class="text-red-500 font-bold px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-950/30">✕</button>
+            `;
+            listaIa.appendChild(div);
+        }
+
+        window.salvarEstoqueIaReal = async function() {
+            const linhas = document.querySelectorAll('.ia-item-row');
+            if (linhas.length === 0) return alert("Nenhum item para salvar.");
+
+            let atualizados = 0;
+            let criados = 0;
+
+            document.getElementById('ia-etapa-3').innerHTML = '<div class="py-10 text-center"><span class="w-6 h-6 rounded-full border-2 border-emerald-200 border-t-emerald-600 animate-spin inline-block mb-2"></span><p class="text-emerald-600 font-bold text-xs">Salvando no Banco de Dados...</p></div>';
+
+            for (let linha of linhas) {
+                let nomeInput = linha.querySelector('.ia-nome').value.trim();
+                let qtdInput = parseFloat(linha.querySelector('.ia-qtd').value) || 0;
+
+                if (!nomeInput || qtdInput <= 0) continue;
+
+                // Checa se o insumo já existe no estoque (ignorando maiúsculas/minúsculas)
+                let itemExistente = estoqueCache.find(e => e.nome.toLowerCase() === nomeInput.toLowerCase());
+
+                if (itemExistente) {
+                    let novaQtd = (Number(itemExistente.qtd) || 0) + qtdInput;
+                    await updateDoc(doc(db, "estoque", itemExistente.id), { qtd: novaQtd });
+                    atualizados++;
+                } else {
+                    // Se não existe, cria um novo item no estoque com a quantidade da nota
+                    await addDoc(collection(db, "estoque"), {
+                        nome: nomeInput,
+                        qtd: qtdInput,
+                        un: "un",
+                        min: 5,
+                        ativo: true,
+                        origem: 'nota_fiscal_ia'
+                    });
+                    criados++;
+                }
             }
-            alert("Itens da nota somados ao estoque real!");
+
+            alert(`✅ Nota Salva!\n\n${atualizados} item(ns) atualizaram quantidade.\n${criados} novo(s) item(ns) criado(s).`);
             fecharModalNotaIa();
         }
 
