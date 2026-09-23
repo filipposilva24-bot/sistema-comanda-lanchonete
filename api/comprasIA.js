@@ -1,52 +1,67 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido' });
-  }
+module.exports = async (req, res) => {
+    // Configura CORS básico se necessário
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  try {
-    const { estoque, resumoVendas } = req.body;
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const apiKey = process.env.GEMINI_API_KEY;
-
     if (!apiKey) {
-      return res.status(500).json({ error: 'GEMINI_API_KEY não configurada no Vercel' });
+        return res.status(500).json({ error: 'GEMINI_API_KEY não configurada na Vercel.' });
     }
 
-    const prompt = `Estás a atuar como o gestor inteligente de stock do "Point Derico" (snack bar / lanchonete).
-Analisa o stock atual (itens, quantidades, unidades e limites mínimos críticos):
-${JSON.stringify(estoque, null, 2)}
+    try {
+        const { base64Image, mimeType, prompt } = req.body;
+        let contents = [];
 
-E o histórico recente de vendas/comandas pagas:
-${JSON.stringify(resumoVendas, null, 2)}
+        if (base64Image) {
+            // Caso 1: Leitura de nota fiscal (Imagem Base64)
+            const base64Data = Array.isArray(base64Image) ? base64Image : base64Image;
+            contents = [{
+                parts: [
+                    {
+                        inlineData: {
+                            data: base64Data,
+                            mimeType: mimeType || 'image/jpeg'
+                        }
+                    },
+                    {
+                        text: "Analisa esta nota fiscal/cupom e devolve estritamente um JSON puro no formato array de objetos com campos nome e qtd: [{\"nome\": \"...\", \"qtd\": 1}]. Sem introduções, só o JSON limpo."
+                    }
+                ]
+            }];
+        } else if (prompt) {
+            // Caso 2: Assistente de compras (Texto/Prompt)
+            contents = [{
+                parts: [{ text: prompt }]
+            }];
+        } else {
+            return res.status(400).json({ error: 'Payload inválido: nem imagem nem prompt fornecidos.' });
+        }
 
-Hoje é um dia de análise operacional. Considera o dia da semana atual, picos de fim de semana e o risco de rutura de stock iminente (ingredientes críticos, pães, carnes, bebidas).
-Devolve uma resposta direta, em português, bem estruturada com:
-1. 🚨 **Urgente (Comprar Hoje)**: O que está crítico ou vai acabar no pico.
-2. 🛒 **Reposição Estratégica (Para o Fim de Semana/Próximos dias)**: Sugestão de quantidade exata baseada no histórico.
-3. 💡 **Dica do Gestor IA**: Um conselho rápido de otimização de stock.
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents })
+        });
 
-Usa formatação limpa (negritos, listas).`;
+        if (!response.ok) {
+            const errText = await response.text();
+            return res.status(response.status).json({ error: errText });
+        }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
-      }
-    );
+        const data = await response.json();
+        return res.status(200).json(data);
 
-    const data = await response.json();
-    if (!response.ok) {
-      return res.status(500).json({ error: data.error?.message || 'Erro na API do Gemini' });
+    } catch (error) {
+        console.error('Erro no /api/comprasIA:', error);
+        return res.status(500).json({ error: error.message });
     }
-
-    const textoRecomendacao = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sem resposta gerada pela IA.';
-    return res.status(200).json({ recomendacao: textoRecomendacao });
-
-  } catch (error) {
-    console.error('Erro em /api/comprasIA:', error);
-    return res.status(500).json({ error: error.message || 'Erro interno no servidor' });
-  }
-}
+};
