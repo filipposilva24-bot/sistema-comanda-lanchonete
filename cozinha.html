@@ -690,19 +690,29 @@
             estoqueCache.forEach(item => {
                 let qtd = Number(item.qtd) || 0;
                 let min = Number(item.min) || 5;
-                let statusBadge = '<span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 text-[9px] font-bold px-1.5 py-0.5 rounded">OK</span>';
+                
+                let statusBadge = '';
+                let cardStyle = '';
+
+                // Lógica de cores baseada na quantidade
                 if(qtd <= 0) {
-                    statusBadge = '<span class="bg-red-100 dark:bg-red-900/40 text-red-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Crítico</span>';
+                    statusBadge = '<span class="bg-red-200 dark:bg-red-900/60 text-red-700 dark:text-red-300 text-[9px] font-bold px-1.5 py-0.5 rounded">Crítico</span>';
+                    cardStyle = 'bg-red-50 dark:bg-red-950/20 border-red-400 dark:border-red-800/80 shadow-red-100 dark:shadow-none';
                 } else if(qtd <= min) {
-                    statusBadge = '<span class="bg-amber-100 dark:bg-amber-900/40 text-amber-600 text-[9px] font-bold px-1.5 py-0.5 rounded">Em Baixa</span>';
+                    statusBadge = '<span class="bg-amber-200 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 text-[9px] font-bold px-1.5 py-0.5 rounded">Em Baixa</span>';
+                    cardStyle = 'bg-amber-50 dark:bg-amber-950/20 border-amber-400 dark:border-amber-800/80 shadow-amber-100 dark:shadow-none';
+                } else {
+                    statusBadge = '<span class="bg-emerald-200 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-[9px] font-bold px-1.5 py-0.5 rounded">OK</span>';
+                    cardStyle = 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-400 dark:border-emerald-800/80 shadow-emerald-100 dark:shadow-none';
                 }
 
                 let badgeOrigem = item.origem === 'cardapio_revenda' 
-                    ? '<span class="text-[9px] text-blue-500 font-bold block mb-1">🔗 Revenda Cardápio</span>' 
+                    ? '<span class="text-[9px] text-blue-600 dark:text-blue-400 font-bold block mb-1">🔗 Revenda Cardápio</span>' 
                     : '';
 
                 let card = document.createElement('div');
-                card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3 rounded-2xl shadow flex flex-col justify-between";
+                // Adicionado border-2 para a cor da borda ficar mais grossa e visível
+                card.className = `border-2 p-3 rounded-2xl shadow-sm flex flex-col justify-between transition-colors duration-200 ${cardStyle}`;
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start mb-2">
@@ -713,11 +723,11 @@
                             </div>
                         </div>
                         ${badgeOrigem}
-                        <h3 class="text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1">${item.nome}</h3>
+                        <h3 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 mb-1">${item.nome}</h3>
                     </div>
                     <div class="flex justify-between items-end mt-2">
-                        <span class="text-lg font-black text-blue-600 dark:text-blue-400">${qtd} <span class="text-xs text-zinc-400 font-medium">${item.un || 'un'}</span></span>
-                        <button onclick="abrirModalEditarInsumo('${item.id}')" class="text-[10px] bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-2 py-1 rounded-lg font-bold">✏️ Editar</button>
+                        <span class="text-lg font-black text-zinc-800 dark:text-zinc-100">${qtd} <span class="text-xs text-zinc-600 dark:text-zinc-400 font-medium">${item.un || 'un'}</span></span>
+                        <button onclick="abrirModalEditarInsumo('${item.id}')" class="text-[10px] bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 px-2 py-1 rounded-lg font-bold shadow-sm">✏️ Editar</button>
                     </div>
                 `;
                 grid.appendChild(card);
