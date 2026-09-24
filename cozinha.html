@@ -79,7 +79,7 @@
                 <button onclick="mudarAba('cozinha')" id="tab-cozinha" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2 px-2 text-[11px] rounded-xl transition shadow text-center whitespace-nowrap">👨‍🍳 Cozinha</button>
                 <button onclick="mudarAba('caixa')" id="tab-caixa" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap">💲 Caixa</button>
                 <button onclick="mudarAba('fiado')" id="tab-fiado" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap">📓 Fiados</button>
-                <button onclick="mudarAba('estoque')" id="tab-estoque" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap">📦 Estoque</button>
+                <button onclick="verificarAcessoEstoque()" id="tab-estoque" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap">📦 Estoque</button>
                 <button onclick="mudarAba('relatorio')" id="tab-relatorio" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-extrabold py-2 px-2 text-[11px] rounded-xl transition text-center whitespace-nowrap">📊 Relatórios</button>
             </div>
             <button onclick="abrirModalReset()" class="tap-scale bg-red-100 dark:bg-red-950/40 border border-red-300 dark:border-red-900/60 text-red-600 dark:text-red-400 px-2.5 py-2 rounded-xl text-xs font-extrabold hover:bg-red-200 dark:hover:bg-red-950 transition ml-1 flex-shrink-0" title="Hard Reset">
@@ -420,6 +420,18 @@
         </div>
     </div>
 
+    <div id="modal-senha-estoque" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative transition-colors duration-200">
+            <button onclick="document.getElementById('modal-senha-estoque').classList.add('hidden')" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-base font-extrabold text-blue-600 dark:text-blue-400 mb-1">🔒 Acesso ao Estoque</h3>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Digite a senha para gerenciar o estoque:</p>
+            <div class="mb-4">
+                <input type="password" id="input-senha-estoque" maxlength="4" placeholder="••••" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 text-center tracking-widest text-xl text-zinc-800 dark:text-zinc-100 outline-none focus:border-blue-500">
+            </div>
+            <button onclick="confirmarSenhaEstoque()" class="tap-scale w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-3 rounded-2xl text-xs transition shadow">Desbloquear Estoque</button>
+        </div>
+    </div>
+    
     <div id="modal-config-pix" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative transition-colors duration-200">
             <button onclick="fecharConfigPix()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
@@ -522,6 +534,28 @@
 
         const SENHA_HARD_RESET = "1901";
         const SENHA_CARDAPIO = "1234";
+        const SENHA_ESTOQUE = "1234";
+        let estoqueDesbloqueado = false; 
+
+        window.verificarAcessoEstoque = function() {
+            if (estoqueDesbloqueado) {
+                mudarAba('estoque'); 
+            } else {
+                document.getElementById('input-senha-estoque').value = '';
+                document.getElementById('modal-senha-estoque').classList.remove('hidden');
+            }
+        }
+
+        window.confirmarSenhaEstoque = function() {
+            const senhaDigitada = document.getElementById('input-senha-estoque').value.trim();
+            if (senhaDigitada === SENHA_ESTOQUE) {
+                estoqueDesbloqueado = true;
+                document.getElementById('modal-senha-estoque').classList.add('hidden');
+                mudarAba('estoque');
+            } else {
+                alert("Senha incorreta!");
+            }
+        }
 
         const audioAlert = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         let somAtivado = false;
