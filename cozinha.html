@@ -1707,7 +1707,7 @@
                     }
                     if (p.itensBrutos && Array.isArray(p.itensBrutos)) p.itensBrutos.forEach(i => qtdRefDia += (Number(i.qtd) || 0));
                 });
-                document.getElementById('valor-refeicao-dia').innerText = `R$ ${valRefMes.toFixed(2).replace('.', ',')}`.replace(valRefMes, valRefDia);
+                document.getElementById('valor-refeicao-dia').innerText = `R$ ${valRefDia.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-refeicao-dia').innerText = `${qtdRefDia} itens consumidos`;
 
                 const rankingDia = document.getElementById('ranking-produtos-dia');
@@ -1781,6 +1781,7 @@
                     }
                 }
             }
+        }    
 
         window.exportarPdfMensal = function() {
             let mesVal = document.getElementById('filtro-mes').value;
