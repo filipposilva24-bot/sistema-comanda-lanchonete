@@ -1268,142 +1268,149 @@
                 const msgVazia = document.getElementById('mensagem-vazia');
                 const contadorTxt = document.getElementById('contador');
                 
-                if (!container || !msgVazia || !contadorTxt) return;
+                if (!container || !contadorTxt) return;
 
                 if (abaAtual === 'estoque') {
                     container.innerHTML = '';
-                    msgVazia.classList.add('hidden');
+                    if (msgVazia) msgVazia.classList.add('hidden');
                     contadorTxt.innerText = `Gestão de Estoque e Insumos`;
-                    renderizarEstoqueVisual();
+                    if (typeof renderizarEstoqueVisual === 'function') renderizarEstoqueVisual();
                     return;
                 }
 
                 if (abaAtual === 'relatorio') {
                     container.innerHTML = '';
-                    msgVazia.classList.add('hidden');
+                    if (msgVazia) msgVazia.classList.add('hidden');
                 } else {
                     container.innerHTML = '';
                 }
                 
                 /* ======================================================== */
-                /* ABA COZINHA (Preparo e Entrega) */
+                /* ABA COZINHA */
                 /* ======================================================== */
                 if (abaAtual === 'cozinha') {
                     let filtrados = todosPedidos.filter(p => p.status === 'Pendente' || p.status === 'Preparando');
                     contadorTxt.innerText = `${filtrados.length} pedido(s) na cozinha`;
-                    document.getElementById('icone-vazio').innerText = "🍽️";
-                    document.getElementById('texto-vazio').innerText = "Cozinha Tranquila!";
+                    
+                    if (document.getElementById('icone-vazio')) document.getElementById('icone-vazio').innerText = "🍽️";
+                    if (document.getElementById('texto-vazio')) document.getElementById('texto-vazio').innerText = "Cozinha Tranquila!";
 
-                    if (filtrados.length === 0) { msgVazia.classList.remove('hidden'); return; }
-                    else { msgVazia.classList.add('hidden'); }
+                    if (filtrados.length === 0) { 
+                        if (msgVazia) msgVazia.classList.remove('hidden'); 
+                        return; 
+                    } else { 
+                        if (msgVazia) msgVazia.classList.add('hidden'); 
+                    }
 
                     filtrados.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
 
                     filtrados.forEach((pedido) => {
-                        let itensTexto = String(pedido.pedido || "");
-                        let obsTexto = "";
-                        if (itensTexto.includes("\nObs:")) {
-                            const partes = itensTexto.split("\nObs:");
-                            itensTexto = partes[0].trim();
-                            obsTexto = partes.slice(1).join("\nObs:").trim();
-                        }
+                        try {
+                            let itensTexto = String(pedido.pedido || "");
+                            let obsTexto = "";
+                            if (itensTexto.includes("\nObs:")) {
+                                const partes = itensTexto.split("\nObs:");
+                                itensTexto = partes[0].trim();
+                                obsTexto = partes.slice(1).join("\nObs:").trim();
+                            }
 
-                        let respInterno = "";
-                        if (itensTexto.includes("\nResp:")) {
-                            const partes = itensTexto.split("\nResp:");
-                            itensTexto = partes[0].trim();
-                            respInterno = partes.slice(1).join("\nResp:").trim();
-                        }
+                            let respInterno = "";
+                            if (itensTexto.includes("\nResp:")) {
+                                const partes = itensTexto.split("\nResp:");
+                                itensTexto = partes[0].trim();
+                                respInterno = partes.slice(1).join("\nResp:").trim();
+                            }
 
-                        let isConsumo = (pedido.tipoPedido === 'Consumo');
-                        let totalNum = parseFloat(String(pedido.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
-                        let pagoParcial = Number(pedido.valorPagoParcial) || 0;
-                        if (pedido.pagoNaHora) { pagoParcial += totalNum; }
-                        let restante = totalNum - pagoParcial;
-                        if (restante < 0) restante = 0;
-                        let classeRestante = restante === 0 ? "text-emerald-500 font-black" : "text-amber-500";
+                            let isConsumo = (pedido.tipoPedido === 'Consumo');
+                            let totalNum = parseFloat(String(pedido.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
+                            let pagoParcial = Number(pedido.valorPagoParcial) || 0;
+                            if (pedido.pagoNaHora) { pagoParcial += totalNum; }
+                            let restante = totalNum - pagoParcial;
+                            if (restante < 0) restante = 0;
+                            let classeRestante = restante === 0 ? "text-emerald-500 font-black" : "text-amber-500";
 
-                        let blocoAbatimento = `
-                            <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                                <div class="flex justify-between text-zinc-400">
-                                    <span>Total Original:</span>
-                                    <span>${pedido.total || 'R$ 0,00'}</span>
+                            let blocoAbatimento = `
+                                <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                                    <div class="flex justify-between text-zinc-400">
+                                        <span>Total Original:</span>
+                                        <span>${pedido.total || 'R$ 0,00'}</span>
+                                    </div>
+                                    ${pagoParcial > 0 ? `
+                                    <div class="flex justify-between text-emerald-500 font-bold">
+                                        <span>Já Pago / Abatido:</span>
+                                        <span>- R$ ${pagoParcial.toFixed(2).replace('.',',')}</span>
+                                    </div>` : ''}
+                                    <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-200 dark:border-zinc-800">
+                                        <span>VALOR RESTANTE:</span>
+                                        <span class="${classeRestante}">R$ ${restante.toFixed(2).replace('.',',')}</span>
+                                    </div>
                                 </div>
-                                ${pagoParcial > 0 ? `
-                                <div class="flex justify-between text-emerald-500 font-bold">
-                                    <span>Já Pago / Abatido:</span>
-                                    <span>- R$ ${pagoParcial.toFixed(2).replace('.',',')}</span>
-                                </div>` : ''}
-                                <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-200 dark:border-zinc-800">
-                                    <span>VALOR RESTANTE:</span>
-                                    <span class="${classeRestante}">R$ ${restante.toFixed(2).replace('.',',')}</span>
+                            `;
+
+                            let tipoPedidoStr = String(pedido.tipoPedido || 'Normal');
+                            let botoesHtml = "";
+                            let textoBotaoEntregar = isConsumo ? "👩‍🍳 Finalizar Consumo" : "🛎️ Entregar";
+
+                            if (pedido.status === 'Pendente') {
+                                botoesHtml = `
+                                <div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">
+                                    <button onclick="mudarStatus('${pedido.id}', 'Preparando', '${tipoPedidoStr}')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex items-center justify-center gap-1">👨‍🍳 Aceitar / Preparar</button>
+                                    <button onclick="mudarStatus('${pedido.id}', 'Entregue', '${tipoPedidoStr}')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">${textoBotaoEntregar}</button>
+                                    <button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition shadow">🗑️</button>
+                                </div>`;
+                            } else { 
+                                botoesHtml = `
+                                <div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">
+                                    <button onclick="mudarStatus('${pedido.id}', 'Entregue', '${tipoPedidoStr}')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">${textoBotaoEntregar}</button>
+                                    <button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition shadow">🗑️</button>
+                                </div>`;
+                            }
+
+                            let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO NO PIX ONLINE</span></div>` : '';
+                            let atendenteNome = String(pedido.atendente || 'Geral');
+                            let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${atendenteNome}</span>` : '';
+                            if (isConsumo) badgeAtendente = `<span class="bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👩‍🍳 Consumo Interno</span>`;
+
+                            let ts = typeof obterTimestampMs === 'function' ? obterTimestampMs(pedido.timestampCriacao) : 0;
+                            let badgeCronometro = `<span class="cronometro-card bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs px-2.5 py-1 rounded-xl font-mono font-bold shadow-inner" data-timestamp="${ts}">⏱️ 0m 00s</span>`;
+
+                            let corFaixa = pedido.status === 'Pendente' ? 'bg-amber-500' : 'bg-blue-500';
+                            let estiloFundoCard = pedido.status === 'Pendente' 
+                                ? 'bg-amber-50/40 dark:bg-amber-950/10 border-amber-200/80 dark:border-amber-900/30' 
+                                : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800';
+                            if (isConsumo) estiloFundoCard = 'bg-blue-50/40 dark:bg-blue-950/10 border-blue-200/80 dark:border-blue-900/30';
+
+                            let badgeStatusCozinha = '';
+                            if (pedido.status === 'Pendente') {
+                                badgeStatusCozinha = `<div class="mb-2"><span class="bg-amber-100 dark:bg-amber-950 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">🔔 Novo Pedido - Aguardando Aceite</span></div>`;
+                            } else if (pedido.status === 'Preparando') {
+                                badgeStatusCozinha = `<div class="mb-2"><span class="bg-blue-100 dark:bg-amber-950 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">👨‍🍳 Em Preparo na Cozinha</span></div>`;
+                            }
+
+                            const card = document.createElement('div');
+                            card.className = `${estiloFundoCard} border rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200`;
+                            card.innerHTML = `
+                                <div class="absolute left-0 top-0 bottom-0 w-1.5 ${corFaixa}"></div>
+                                <div>
+                                    <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
+                                        <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${String(pedido.mesa || 'Mesa')}</h2><div class="mt-1">${badgeAtendente}</div></div>
+                                        <div class="flex flex-col items-end gap-1.5">${badgeCronometro}<span class="text-zinc-400 text-[11px] font-mono">${String(pedido.horario || '--:--')}</span></div>
+                                    </div>
+                                    <div class="pl-2">${avisoPagoNaHora}</div>
+                                    <div class="pl-2">${badgeStatusCozinha}</div>
+                                    <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${itensTexto.replace(/\n/g, '<br>')}</div>
+                                    ${!isConsumo ? `<div class="pl-2">${blocoAbatimento}</div>` : ''}
+                                    ${obsTexto ? `<div class="mb-2 pl-2"><span class="bg-red-100 dark:bg-red-950/80 border border-red-300 dark:border-red-900/60 text-red-800 dark:text-red-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg uppercase tracking-wider">Atenção</span><p class="text-red-700 dark:text-red-300 text-xs font-semibold mt-1 bg-red-50 dark:bg-red-950/30 p-2 rounded-xl border border-red-200 dark:border-red-900/40">"${obsTexto}"</p></div>` : ''}
+                                    ${respInterno ? `<div class="mb-2 pl-2"><p class="text-blue-700 dark:text-blue-300 text-xs font-semibold mt-1 bg-blue-50 dark:bg-blue-950/30 p-2 rounded-xl border border-blue-200 dark:border-blue-900/40">Responsável: ${respInterno}</p></div>` : ''}
                                 </div>
-                            </div>
-                        `;
-
-                        let tipoPedidoStr = String(pedido.tipoPedido || 'Normal');
-                        let botoesHtml = "";
-                        let textoBotaoEntregar = isConsumo ? "👩‍🍳 Finalizar Consumo" : "🛎️ Entregar";
-
-                        if (pedido.status === 'Pendente') {
-                            botoesHtml = `
-                            <div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">
-                                <button onclick="mudarStatus('${pedido.id}', 'Preparando', '${tipoPedidoStr}')" class="tap-scale flex-1 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex items-center justify-center gap-1">👨‍🍳 Aceitar / Preparar</button>
-                                <button onclick="mudarStatus('${pedido.id}', 'Entregue', '${tipoPedidoStr}')" class="tap-scale bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">${textoBotaoEntregar}</button>
-                                <button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition shadow">🗑️</button>
-                            </div>`;
-                        } else { 
-                            botoesHtml = `
-                            <div class="flex gap-2 mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex-wrap">
-                                <button onclick="mudarStatus('${pedido.id}', 'Entregue', '${tipoPedidoStr}')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow">${textoBotaoEntregar}</button>
-                                <button onclick="excluirPedido('${pedido.id}')" class="tap-scale bg-red-100 dark:bg-red-950/60 border border-red-300 dark:border-red-900/60 text-red-700 dark:text-red-300 px-3 py-2.5 rounded-2xl text-xs transition shadow">🗑️</button>
-                            </div>`;
-                        }
-
-                        let avisoPagoNaHora = pedido.pagoNaHora ? `<div class="mb-2"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO NO PIX ONLINE</span></div>` : '';
-                        let atendenteNome = String(pedido.atendente || 'Geral');
-                        let badgeAtendente = pedido.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${atendenteNome}</span>` : '';
-                        if (isConsumo) badgeAtendente = `<span class="bg-blue-100 dark:bg-blue-900 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👩‍🍳 Consumo Interno</span>`;
-
-                        let ts = obterTimestampMs(pedido.timestampCriacao);
-                        let badgeCronometro = `<span class="cronometro-card bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs px-2.5 py-1 rounded-xl font-mono font-bold shadow-inner" data-timestamp="${ts}">⏱️ 0m 00s</span>`;
-
-                        let corFaixa = pedido.status === 'Pendente' ? 'bg-amber-500' : 'bg-blue-500';
-                        let estiloFundoCard = pedido.status === 'Pendente' 
-                            ? 'bg-amber-50/40 dark:bg-amber-950/10 border-amber-200/80 dark:border-amber-900/30' 
-                            : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800';
-                        if (isConsumo) estiloFundoCard = 'bg-blue-50/40 dark:bg-blue-950/10 border-blue-200/80 dark:border-blue-900/30';
-
-                        let badgeStatusCozinha = '';
-                        if (pedido.status === 'Pendente') {
-                            badgeStatusCozinha = `<div class="mb-2"><span class="bg-amber-100 dark:bg-amber-950 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">🔔 Novo Pedido - Aguardando Aceite</span></div>`;
-                        } else if (pedido.status === 'Preparando') {
-                            badgeStatusCozinha = `<div class="mb-2"><span class="bg-blue-100 dark:bg-amber-950 border border-blue-300 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">👨‍🍳 Em Preparo na Cozinha</span></div>`;
-                        }
-
-                        const card = document.createElement('div');
-                        card.className = `${estiloFundoCard} border rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200`;
-                        card.innerHTML = `
-                            <div class="absolute left-0 top-0 bottom-0 w-1.5 ${corFaixa}"></div>
-                            <div>
-                                <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
-                                    <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${String(pedido.mesa || 'Mesa')}</h2><div class="mt-1">${badgeAtendente}</div></div>
-                                    <div class="flex flex-col items-end gap-1.5">${badgeCronometro}<span class="text-zinc-400 text-[11px] font-mono">${String(pedido.horario || '--:--')}</span></div>
-                                </div>
-                                <div class="pl-2">${avisoPagoNaHora}</div>
-                                <div class="pl-2">${badgeStatusCozinha}</div>
-                                <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${itensTexto.replace(/\n/g, '<br>')}</div>
-                                ${!isConsumo ? `<div class="pl-2">${blocoAbatimento}</div>` : ''}
-                                ${obsTexto ? `<div class="mb-2 pl-2"><span class="bg-red-100 dark:bg-red-950/80 border border-red-300 dark:border-red-900/60 text-red-800 dark:text-red-300 text-[10px] font-extrabold px-2 py-0.5 rounded-lg uppercase tracking-wider">Atenção</span><p class="text-red-700 dark:text-red-300 text-xs font-semibold mt-1 bg-red-50 dark:bg-red-950/30 p-2 rounded-xl border border-red-200 dark:border-red-900/40">"${obsTexto}"</p></div>` : ''}
-                                ${respInterno ? `<div class="mb-2 pl-2"><p class="text-blue-700 dark:text-blue-300 text-xs font-semibold mt-1 bg-blue-50 dark:bg-blue-950/30 p-2 rounded-xl border border-blue-200 dark:border-blue-900/40">Responsável: ${respInterno}</p></div>` : ''}
-                            </div>
-                            ${botoesHtml}
-                        `;
-                        container.appendChild(card);
+                                ${botoesHtml}
+                            `;
+                            container.appendChild(card);
+                        } catch (errPedido) { console.error("Erro num pedido de cozinha:", errPedido); }
                     });
                 } 
                 /* ======================================================== */
-                /* ABA CAIXA (Fechamento da Mesa) */
+                /* ABA CAIXA */
                 /* ======================================================== */
                 else if (abaAtual === 'caixa') {
                     let caixaMap = {};
@@ -1432,78 +1439,85 @@
                     });
 
                     let mesasOcupadas = Object.keys(caixaMap);
-                    contadorTxt.innerText = `${mesasOcupadas.length} mesa(s) aguardando atendimento / saída`;
-                    document.getElementById('icone-vazio').innerText = "💲";
-                    document.getElementById('texto-vazio').innerText = "Nenhuma comanda pendente no caixa!";
+                    contadorTxt.innerText = `${mesasOcupadas.length} mesa(s) aguardando saída`;
+                    
+                    if (document.getElementById('icone-vazio')) document.getElementById('icone-vazio').innerText = "💲";
+                    if (document.getElementById('texto-vazio')) document.getElementById('texto-vazio').innerText = "Nenhuma comanda pendente no caixa!";
 
-                    if (mesasOcupadas.length === 0) { msgVazia.classList.remove('hidden'); return; }
-                    else { msgVazia.classList.add('hidden'); }
+                    if (mesasOcupadas.length === 0) { 
+                        if (msgVazia) msgVazia.classList.remove('hidden'); 
+                        return; 
+                    } else { 
+                        if (msgVazia) msgVazia.classList.add('hidden'); 
+                    }
 
                     mesasOcupadas.forEach(mesaKey => {
-                        let info = caixaMap[mesaKey];
-                        let restante = info.totalNum - info.pagoParcial;
-                        if (restante < 0) restante = 0;
+                        try {
+                            let info = caixaMap[mesaKey];
+                            let restante = info.totalNum - info.pagoParcial;
+                            if (restante < 0) restante = 0;
 
-                        let extratoCombinado = info.pedidosLista.join('<br>--<br>');
-                        let idsStr = encodeURIComponent(JSON.stringify(info.ids));
+                            let extratoCombinado = info.pedidosLista.join('<br>--<br>');
+                            let idsStr = encodeURIComponent(JSON.stringify(info.ids));
 
-                        let classeRestante = restante === 0 ? "text-emerald-500 font-black" : "text-amber-500";
-                        let blocoAbatimento = `
-                            <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                                <div class="flex justify-between text-zinc-400">
-                                    <span>Total Original:</span>
-                                    <span>R$ ${info.totalNum.toFixed(2).replace('.',',')}</span>
+                            let classeRestante = restante === 0 ? "text-emerald-500 font-black" : "text-amber-500";
+                            let blocoAbatimento = `
+                                <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                                    <div class="flex justify-between text-zinc-400">
+                                        <span>Total Original:</span>
+                                        <span>R$ ${info.totalNum.toFixed(2).replace('.',',')}</span>
+                                    </div>
+                                    ${info.pagoParcial > 0 ? `
+                                    <div class="flex justify-between text-emerald-500 font-bold">
+                                        <span>Já Pago / Abatido:</span>
+                                        <span>- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}</span>
+                                    </div>` : ''}
+                                    <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-200 dark:border-zinc-800">
+                                        <span>VALOR RESTANTE:</span>
+                                        <span class="${classeRestante}">R$ ${restante.toFixed(2).replace('.',',')}</span>
+                                    </div>
                                 </div>
-                                ${info.pagoParcial > 0 ? `
-                                <div class="flex justify-between text-emerald-500 font-bold">
-                                    <span>Já Pago / Abatido:</span>
-                                    <span>- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}</span>
-                                </div>` : ''}
-                                <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-200 dark:border-zinc-800">
-                                    <span>VALOR RESTANTE:</span>
-                                    <span class="${classeRestante}">R$ ${restante.toFixed(2).replace('.',',')}</span>
+                            `;
+
+                            let atendenteNome = String(info.atendente || 'Geral');
+                            let badgeAtendente = info.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${atendenteNome}</span>` : '';
+                            let avisoQuitado = restante === 0 ? `<div class="mt-1"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO ONLINE (PIX)</span></div>` : '';
+
+                            let botoesHtml = "";
+                            if (restante <= 0) {
+                                botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2 flex-wrap">
+                                    <button onclick="jogarParaFiado('${idsStr}', '${String(info.mesa || '')}')" class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📓 Fiado</button>
+                                    <button onclick="fecharMesaMulti('${idsStr}', '${String(info.mesa || '')}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Fechar Mesa</button>
+                                </div>`;
+                            } else {
+                                botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2 flex-wrap">
+                                    <button onclick="abrirModalPixMulti('${idsStr}', '${String(info.mesa || '')}', 'R$ ${restante.toFixed(2).replace('.',',')}', '${encodeURIComponent(extratoCombinado)}')" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix</button>
+                                    <button onclick="abrirAbaterMulti('${idsStr}')" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button>
+                                    <button onclick="jogarParaFiado('${idsStr}', '${String(info.mesa || '')}')" class="tap-scale bg-indigo-700 hover:bg-indigo-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs transition shadow">📓 Fiado</button>
+                                    <button onclick="fecharMesaMulti('${idsStr}', '${String(info.mesa || '')}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Fechar</button>
+                                </div>`;
+                            }
+
+                            const card = document.createElement('div');
+                            card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
+                            card.innerHTML = `
+                                <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
+                                <div>
+                                    <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
+                                        <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${String(info.mesa || 'Mesa')}</h2><div class="mt-1">${badgeAtendente}</div>${avisoQuitado}</div>
+                                        <div class="flex flex-col items-end gap-1.5"><span class="text-zinc-400 text-[11px] font-mono">${String(info.horario || '--:--')}</span></div>
+                                    </div>
+                                    <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${extratoCombinado.replace(/\n/g, '<br>')}</div>
+                                    <div class="pl-2">${blocoAbatimento}</div>
                                 </div>
-                            </div>
-                        `;
-
-                        let atendenteNome = String(info.atendente || 'Geral');
-                        let badgeAtendente = info.atendente ? `<span class="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-amber-600 dark:text-amber-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">👤 ${atendenteNome}</span>` : '';
-                        let avisoQuitado = restante === 0 ? `<div class="mt-1"><span class="bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-xl uppercase tracking-wider">⚡ JÁ PAGO ONLINE (PIX)</span></div>` : '';
-
-                        let botoesHtml = "";
-                        if (restante <= 0) {
-                            botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2 flex-wrap">
-                                <button onclick="jogarParaFiado('${idsStr}', '${String(info.mesa || '')}')" class="tap-scale flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📓 Fiado</button>
-                                <button onclick="fecharMesaMulti('${idsStr}', '${String(info.mesa || '')}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Fechar Mesa</button>
-                            </div>`;
-                        } else {
-                            botoesHtml = `<div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2 flex-wrap">
-                                <button onclick="abrirModalPixMulti('${idsStr}', '${String(info.mesa || '')}', 'R$ ${restante.toFixed(2).replace('.',',')}', '${encodeURIComponent(extratoCombinado)}')" class="tap-scale bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">📱 Pix</button>
-                                <button onclick="abrirAbaterMulti('${idsStr}')" class="tap-scale bg-blue-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs shadow">💸 Abater</button>
-                                <button onclick="jogarParaFiado('${idsStr}', '${String(info.mesa || '')}')" class="tap-scale bg-indigo-700 hover:bg-indigo-600 text-white font-extrabold py-2.5 px-3 rounded-2xl text-xs transition shadow">📓 Fiado</button>
-                                <button onclick="fecharMesaMulti('${idsStr}', '${String(info.mesa || '')}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Fechar</button>
-                            </div>`;
-                        }
-
-                        const card = document.createElement('div');
-                        card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
-                        card.innerHTML = `
-                            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
-                            <div>
-                                <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
-                                    <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${String(info.mesa || 'Mesa')}</h2><div class="mt-1">${badgeAtendente}</div>${avisoQuitado}</div>
-                                    <div class="flex flex-col items-end gap-1.5"><span class="text-zinc-400 text-[11px] font-mono">${String(info.horario || '--:--')}</span></div>
-                                </div>
-                                <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner">${extratoCombinado.replace(/\n/g, '<br>')}</div>
-                                <div class="pl-2">${blocoAbatimento}</div>
-                            </div>
-                            ${botoesHtml}
-                        `;
-                        container.appendChild(card);
+                                ${botoesHtml}
+                            `;
+                            container.appendChild(card);
+                        } catch (errCaixa) { console.error("Erro num pedido de caixa:", errCaixa); }
                     });
                 } 
                 /* ======================================================== */
-                /* ABA FIADOS (Contas Penduradas) */
+                /* ABA FIADOS */
                 /* ======================================================== */
                 else if (abaAtual === 'fiado') {
                     let fiadosMap = {};
@@ -1532,67 +1546,74 @@
 
                     let clientesFiados = Object.keys(fiadosMap);
                     contadorTxt.innerText = `${clientesFiados.length} clientes com pendências`;
-                    document.getElementById('icone-vazio').innerText = "📓";
-                    document.getElementById('texto-vazio').innerText = "Nenhuma conta pendente!";
+                    
+                    if (document.getElementById('icone-vazio')) document.getElementById('icone-vazio').innerText = "📓";
+                    if (document.getElementById('texto-vazio')) document.getElementById('texto-vazio').innerText = "Nenhuma conta pendente!";
 
-                    if (clientesFiados.length === 0) { msgVazia.classList.remove('hidden'); return; }
-                    else { msgVazia.classList.add('hidden'); }
+                    if (clientesFiados.length === 0) { 
+                        if (msgVazia) msgVazia.classList.remove('hidden'); 
+                        return; 
+                    } else { 
+                        if (msgVazia) msgVazia.classList.add('hidden'); 
+                    }
 
                     clientesFiados.forEach(cliente => {
-                        let info = fiadosMap[cliente];
-                        let restante = info.totalNum - info.pagoParcial;
-                        if (restante <= 0) restante = 0;
+                        try {
+                            let info = fiadosMap[cliente];
+                            let restante = info.totalNum - info.pagoParcial;
+                            if (restante <= 0) restante = 0;
 
-                        let extratoCombinado = info.pedidosLista.join('<br>--<br>');
-                        let idsStr = encodeURIComponent(JSON.stringify(info.ids));
+                            let extratoCombinado = info.pedidosLista.join('<br>--<br>');
+                            let idsStr = encodeURIComponent(JSON.stringify(info.ids));
 
-                        let blocoAbatimento = `
-                            <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                                <div class="flex justify-between text-zinc-400">
-                                    <span>Dívida Original Total:</span>
-                                    <span>R$ ${info.totalNum.toFixed(2).replace('.',',')}</span>
+                            let blocoAbatimento = `
+                                <div class="space-y-1 my-2 text-xs bg-zinc-50 dark:bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                                    <div class="flex justify-between text-zinc-400">
+                                        <span>Dívida Original Total:</span>
+                                        <span>R$ ${info.totalNum.toFixed(2).replace('.',',')}</span>
+                                    </div>
+                                    ${info.pagoParcial > 0 ? `
+                                    <div class="flex justify-between text-emerald-500 font-bold">
+                                        <span>Já Pago / Abatido:</span>
+                                        <span>- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}</span>
+                                    </div>` : ''}
+                                    <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-200 dark:border-zinc-800">
+                                        <span>RESTA A PAGAR:</span>
+                                        <span class="text-indigo-500">R$ ${restante.toFixed(2).replace('.',',')}</span>
+                                    </div>
                                 </div>
-                                ${info.pagoParcial > 0 ? `
-                                <div class="flex justify-between text-emerald-500 font-bold">
-                                    <span>Já Pago / Abatido:</span>
-                                    <span>- R$ ${info.pagoParcial.toFixed(2).replace('.',',')}</span>
-                                </div>` : ''}
-                                <div class="flex justify-between font-black text-sm text-zinc-800 dark:text-zinc-100 pt-1 border-t border-zinc-200 dark:border-zinc-800">
-                                    <span>RESTA A PAGAR:</span>
-                                    <span class="text-indigo-500">R$ ${restante.toFixed(2).replace('.',',')}</span>
-                                </div>
-                            </div>
-                        `;
+                            `;
 
-                        let botoesHtml = `
-                            <div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
-                                <button onclick="abaterFiado('${idsStr}')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">💸 Abater Pagamento</button>
-                                <button onclick="quitarFiado('${idsStr}', '${String(info.cliente || '').replace(/'/g, "\\'")}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Quitar Tudo</button>
-                            </div>`;
+                            let botoesHtml = `
+                                <div class="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex gap-2">
+                                    <button onclick="abaterFiado('${idsStr}')" class="tap-scale flex-1 bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">💸 Abater Pagamento</button>
+                                    <button onclick="quitarFiado('${idsStr}', '${String(info.cliente || '').replace(/'/g, "\\'")}')" class="tap-scale flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-2 rounded-2xl text-xs transition shadow flex justify-center items-center gap-1">✅ Quitar Tudo</button>
+                                </div>`;
 
-                        const card = document.createElement('div');
-                        card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
-                        card.innerHTML = `
-                            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500"></div>
-                            <div>
-                                <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
-                                    <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${String(info.cliente)}</h2><div class="mt-1"><span class="bg-indigo-100 dark:bg-indigo-900 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">📓 Pendura</span></div></div>
-                                    <div class="flex flex-col items-end gap-1.5"><span class="text-zinc-400 text-[10px] font-mono text-right max-w-[80px] break-words">${info.datas[0]}</span></div>
+                            const card = document.createElement('div');
+                            card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 flex flex-col justify-between shadow-xl relative overflow-hidden transition-colors duration-200";
+                            card.innerHTML = `
+                                <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500"></div>
+                                <div>
+                                    <div class="flex justify-between items-start mb-3 border-b border-zinc-200 dark:border-zinc-800 pb-2.5 pl-2">
+                                        <div><h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100">${String(info.cliente)}</h2><div class="mt-1"><span class="bg-indigo-100 dark:bg-indigo-900 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wider">📓 Pendura</span></div></div>
+                                        <div class="flex flex-col items-end gap-1.5"><span class="text-zinc-400 text-[10px] font-mono text-right max-w-[80px] break-words">${info.datas[0]}</span></div>
+                                    </div>
+                                    <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner max-h-32 overflow-y-auto">${extratoCombinado.replace(/\n/g, '<br>')}</div>
+                                    <div class="pl-2">${blocoAbatimento}</div>
                                 </div>
-                                <div class="pl-2 text-zinc-800 dark:text-zinc-200 text-xs leading-relaxed mb-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800/80 font-mono shadow-inner max-h-32 overflow-y-auto">${extratoCombinado.replace(/\n/g, '<br>')}</div>
-                                <div class="pl-2">${blocoAbatimento}</div>
-                            </div>
-                            ${botoesHtml}
-                        `;
-                        container.appendChild(card);
+                                ${botoesHtml}
+                            `;
+                            container.appendChild(card);
+                        } catch (errFiado) { console.error("Erro num pedido fiado:", errFiado); }
                     });
                 }
                 /* ======================================================== */
-                /* ABA RELATÓRIO (BLINDADA CONTRA ERROS DE TIPO) */
+                /* ABA RELATÓRIO */
                 /* ======================================================== */
                 else if (abaAtual === 'relatorio') {
                     contadorTxt.innerText = `Painel de Faturamento`;
-                    msgVazia.classList.add('hidden');
+                    if (msgVazia) msgVazia.classList.add('hidden');
 
                     const valData = document.getElementById('filtro-data')?.value || '';
                     const valMes = document.getElementById('filtro-mes')?.value || '';
@@ -1724,7 +1745,7 @@
                         if (filtradosDia.length === 0) {
                             listaComandasDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma comanda paga neste dia.</p>';
                         } else {
-                            filtradosDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
+                            filtradosDia.sort((a, b) => (typeof obterTimestampMs === 'function' ? obterTimestampMs(b.timestampCriacao) : 0) - (typeof obterTimestampMs === 'function' ? obterTimestampMs(a.timestampCriacao) : 0));
                             filtradosDia.forEach(p => {
                                 let div = document.createElement('div');
                                 div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[11px]";
@@ -1733,42 +1754,6 @@
                                     <span class="text-emerald-600 font-bold ml-2 whitespace-nowrap">${String(p.total || 'R$ 0,00')}</span>
                                 `;
                                 listaComandasDiv.appendChild(div);
-                            });
-                        }
-                    }
-
-                    const listaDespDiv = document.getElementById('lista-desperdicio-dia');
-                    if (listaDespDiv) {
-                        listaDespDiv.innerHTML = '';
-                        if (despDia.length === 0) {
-                            listaDespDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhum desperdício registrado.</p>';
-                        } else {
-                            despDia.forEach(p => {
-                                let div = document.createElement('div');
-                                div.className = "flex justify-between items-center bg-red-50 dark:bg-red-950/20 p-2 rounded-xl border border-red-200 dark:border-red-900/40 text-[11px]";
-                                div.innerHTML = `
-                                    <div><strong class="text-red-600 dark:text-red-400">${String(p.mesa || 'Mesa')}</strong> (${String(p.horario || '--:--')}) - <span class="text-zinc-600 dark:text-zinc-300">${String(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
-                                    <span class="text-red-600 font-bold ml-2 whitespace-nowrap">${String(p.total || 'R$ 0,00')}</span>
-                                `;
-                                listaDespDiv.appendChild(div);
-                            });
-                        }
-                    }
-
-                    const listaRefDiv = document.getElementById('lista-refeicao-dia');
-                    if (listaRefDiv) {
-                        listaRefDiv.innerHTML = '';
-                        if (refDia.length === 0) {
-                            listaRefDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma refeição registrada.</p>';
-                        } else {
-                            refDia.forEach(p => {
-                                let div = document.createElement('div');
-                                div.className = "flex justify-between items-center bg-blue-50 dark:bg-blue-950/20 p-2 rounded-xl border border-blue-200 dark:border-blue-900/40 text-[11px]";
-                                div.innerHTML = `
-                                    <div><strong class="text-blue-600 dark:text-blue-400">${String(p.mesa || 'Mesa')}</strong> (${String(p.horario || '--:--')}) - <span class="text-zinc-600 dark:text-zinc-300">${String(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
-                                    <span class="text-blue-600 font-bold ml-2 whitespace-nowrap">${String(p.total || 'R$ 0,00')}</span>
-                                `;
-                                listaRefDiv.appendChild(div);
                             });
                         }
                     }
