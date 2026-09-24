@@ -22,7 +22,6 @@ module.exports = async (req, res) => {
         let contents = [];
 
         if (base64Image) {
-            // Caso 1: Leitura de nota fiscal (Imagem Base64)
             const base64Data = Array.isArray(base64Image) ? base64Image[0] : base64Image;
             contents = [{
                 parts: [
@@ -38,7 +37,6 @@ module.exports = async (req, res) => {
                 ]
             }];
         } else if (prompt) {
-            // Caso 2: Assistente de compras (Texto/Prompt)
             contents = [{
                 parts: [{ text: prompt }]
             }];
@@ -46,12 +44,29 @@ module.exports = async (req, res) => {
             return res.status(400).json({ error: 'Payload inválido: nem imagem nem prompt fornecidos.' });
         }
 
-        // Utilizando o modelo gemini-3.6-flash que você confirmou funcionar
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents })
-        });
+        // URL com o SEU modelo exato
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+        
+        let tentativas = 3; // O servidor vai tentar 3 vezes antes de desistir
+        let response;
+        
+        while (tentativas > 0) {
+            response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents })
+            });
+
+            // Se for erro 503, espera 2.5 segundos e tenta novamente
+            if (response.status === 503) {
+                tentativas--;
+                if (tentativas === 0) break; // Acabaram as tentativas
+                await new Promise(resolve => setTimeout(resolve, 2500)); 
+            } else {
+                // Se for sucesso (200) ou outro erro diferente de 503, sai do loop e continua
+                break; 
+            }
+        }
 
         if (!response.ok) {
             const errText = await response.text();
