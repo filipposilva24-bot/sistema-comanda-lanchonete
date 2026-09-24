@@ -112,6 +112,7 @@
                             🤖 Compras IA
                         </button>
                     </div>
+                </div>
                 <p class="text-[10px] text-zinc-500 dark:text-zinc-400">Insumos (pão/carne) usam receita. Bebidas/revenda do cardápio espelham direto no estoque real.</p>
             </div>
 
@@ -626,11 +627,9 @@
             if(!nome) return alert("Informe o nome do insumo!");
             
             if (idInsumoEditando) {
-                // Atualiza o item existente
                 await updateDoc(doc(db, "estoque", idInsumoEditando), { nome, qtd, un, min });
                 idInsumoEditando = null;
             } else {
-                // Cria um novo item
                 await addDoc(collection(db, "estoque"), { nome, qtd, un, min, ativo: true });
             }
 
@@ -662,10 +661,8 @@
             for (let itemCard of cardapioCache) {
                 let cat = (itemCard.categoria || "").toLowerCase();
                 let nome = itemCard.nome.trim();
-                // Considera revenda direta se estiver em categoria de bebida/alcoólica ou se não tiver receita e parecer produto pronto/bebida
                 let isBebidaOuRevenda = cat.includes('bebida') || cat.includes('alcoólica') || cat.includes('copo') || (!itemCard.receita || itemCard.receita.length === 0);
                 
-                // Evita duplicata exata no estoque
                 let jaExiste = estoqueCache.some(e => e.nome.toLowerCase() === nome.toLowerCase());
                 if (isBebidaOuRevenda && !jaExiste) {
                     await addDoc(collection(db, "estoque"), {
@@ -733,7 +730,7 @@
             }
         }
 
-        // --- DESCONTO AUTOMÁTICO INTELIGENTE POR VENDA/CONSUMO ---
+        // --- CORREÇÃO DO DESCONTO AUTOMÁTICO (CORRIGIDO ERRO DE ARRAY TRIM) ---
         async function descontarEstoquePorVenda(textoPedido) {
             if(!textoPedido) return;
             let linhas = textoPedido.split('\n');
@@ -741,10 +738,9 @@
                 let limpa = linha.trim();
                 if(!limpa || limpa.includes('Obs:') || limpa.includes('Resp:')) continue;
                 let match = limpa.match(/^(\d+)x\s+(.+)$/i);
-                let qtdVenda = match ? parseInt(match) : 1;
-                let nomeProdVendido = match ? match.trim() : limpa;
+                let qtdVenda = match ? parseInt(match[1]) : 1;
+                let nomeProdVendido = match ? match[2].trim() : limpa;
 
-                // 1. Verificar se bate direto no estoque (Revenda direta ou item espelhado do cardápio)
                 let itemEstoqueDireto = estoqueCache.find(e => e.nome.toLowerCase() === nomeProdVendido.toLowerCase());
                 if(itemEstoqueDireto) {
                     let novaQtd = (Number(itemEstoqueDireto.qtd) || 0) - qtdVenda;
@@ -752,7 +748,6 @@
                     continue;
                 }
 
-                // 2. Procurar se o item do cardápio tem Receita vinculada (Lanches montados)
                 let itemCardapio = cardapioCache.find(c => c.nome.toLowerCase() === nomeProdVendido.toLowerCase());
                 if(itemCardapio && itemCardapio.receita && Array.isArray(itemCardapio.receita)) {
                     for(let ing of itemCardapio.receita) {
@@ -833,7 +828,7 @@
             carregarAdminCardapio();
         }
 
-        // --- IA LEITURA DE NOTA (MÉTODO REAL VIA VERCEL COM COMPRESSÃO) ---
+        // --- IA LEITURA DE NOTA ---
         window.abrirModalNotaIa = function() {
             resetarModalIa();
             document.getElementById('modal-nota-ia').classList.remove('hidden');
@@ -848,88 +843,86 @@
         }
 
         window.iniciarLeituraIaReal = async function(input) {
-        if (!input.files || !input.files[0]) return;
+            if (!input.files || !input.files[0]) return;
+            const arquivo = input.files[0];
+        
+            document.getElementById('ia-etapa-1').classList.add('hidden');
+            document.getElementById('ia-etapa-2').classList.remove('hidden');
 
-        const arquivo = input.files[0];
-    
-        document.getElementById('ia-etapa-1').classList.add('hidden');
-        document.getElementById('ia-etapa-2').classList.remove('hidden');
+            try {
+                const img = new Image();
+                img.src = URL.createObjectURL(arquivo);
 
-        try {
-            const img = new Image();
-            img.src = URL.createObjectURL(arquivo);
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    let width = img.width;
+                    let height = img.height;
 
-            img.onload = async function() {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 1200;
-                const MAX_HEIGHT = 1200;
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-
-                const base64Completo = canvas.toDataURL('image/jpeg', 0.7);
-                const base64Image = base64Completo.split(',');
-                const mimeType = 'image/jpeg';
-
-                try {
-                    const resposta = await fetch('/api/comprasIA', {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ base64Image, mimeType })
-                    });
-
-                    if (!resposta.ok) {
-                        const errText = await resposta.text();
-                        try {
-                            const errJson = JSON.parse(errText);
-                            throw new Error(errJson.error || "Erro no servidor Vercel");
-                        } catch(e) {
-                            throw new Error(errText || "Erro no servidor Vercel");
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
                         }
                     }
 
-                    const dados = await resposta.json();
-                    let textoResposta = dados.candidates[0].content.parts[0].text;
-                
-                    textoResposta = textoResposta.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const itensIdentificados = JSON.parse(textoResposta);
-                
-                    renderizarItensIA(itensIdentificados);
-  
-                } catch (erro) {
-                    console.error("Erro na leitura da IA (Fetch):", erro);
-                    alert("Erro de comunicação com o servidor. Verifique os logs no painel do Vercel.");
-                    resetarModalIa();
-                }
-            };
-        
-            img.onerror = function() {
-                alert("Não foi possível carregar a imagem selecionada.");
-                resetarModalIa();
-            };
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
 
-        } catch (erro) {
-            console.error("Erro geral na IA:", erro);
-            alert("Erro ao processar a nota fiscal. Tente novamente.");
-            resetarModalIa();
+                    const base64Completo = canvas.toDataURL('image/jpeg', 0.7);
+                    const base64Image = base64Completo.split(',');
+                    const mimeType = 'image/jpeg';
+
+                    try {
+                        const resposta = await fetch('/api/comprasIA', {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ base64Image, mimeType })
+                        });
+
+                        if (!resposta.ok) {
+                            const errText = await resposta.text();
+                            try {
+                                const errJson = JSON.parse(errText);
+                                throw new Error(errJson.error || "Erro no servidor Vercel");
+                            } catch(e) {
+                                throw new Error(errText || "Erro no servidor Vercel");
+                            }
+                        }
+
+                        const dados = await resposta.json();
+                        let textoResposta = dados.candidates[0].content.parts[0].text;
+                    
+                        textoResposta = textoResposta.replace(/```json/g, '').replace(/```/g, '').trim();
+                        const itensIdentificados = JSON.parse(textoResposta);
+                    
+                        renderizarItensIA(itensIdentificados);
+                
+                    } catch (erro) {
+                        console.error("Erro na leitura da IA (Fetch):", erro);
+                        alert("Erro de comunicação com o servidor. Verifique os logs no painel do Vercel.");
+                        resetarModalIa();
+                    }
+                };
+        
+                img.onerror = function() {
+                    alert("Não foi possível carregar a imagem selecionada.");
+                    resetarModalIa();
+                };
+            } catch (erro) {
+                console.error("Erro geral na IA:", erro);
+                alert("Erro ao processar a nota fiscal. Tente novamente.");
+                resetarModalIa();
+            }
         }
-    }
 
         function renderizarItensIA(itens) {
             document.getElementById('ia-etapa-2').classList.add('hidden');
@@ -953,7 +946,6 @@
             const div = document.createElement('div');
             div.className = "ia-item-row flex gap-2 items-center bg-white dark:bg-zinc-900 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800";
             
-            // Tenta achar se o nome já existe no estoque para sugerir
             let estiloNome = "text-zinc-800 dark:text-zinc-200";
             let jaExiste = estoqueCache.find(e => e.nome.toLowerCase() === nome.toLowerCase());
             if (jaExiste) estiloNome = "text-emerald-600 font-bold";
@@ -981,7 +973,6 @@
 
                 if (!nomeInput || qtdInput <= 0) continue;
 
-                // Checa se o insumo já existe no estoque (ignorando maiúsculas/minúsculas)
                 let itemExistente = estoqueCache.find(e => e.nome.toLowerCase() === nomeInput.toLowerCase());
 
                 if (itemExistente) {
@@ -989,7 +980,6 @@
                     await updateDoc(doc(db, "estoque", itemExistente.id), { qtd: novaQtd });
                     atualizados++;
                 } else {
-                    // Se não existe, cria um novo item no estoque com a quantidade da nota
                     await addDoc(collection(db, "estoque"), {
                         nome: nomeInput,
                         qtd: qtdInput,
@@ -1290,9 +1280,9 @@
                 /* ======================================================== */
                 if (abaAtual === 'cozinha') {
                     let filtrados = todosPedidos.filter(p => {
-    let s = (p.status || '').toLowerCase();
-    return s === 'pendente' || s === 'preparando';
-});
+                        let s = (p.status || '').toLowerCase();
+                        return s === 'pendente' || s === 'preparando';
+                    });
                     contadorTxt.innerText = `${filtrados.length} pedido(s) na cozinha`;
                     
                     if (document.getElementById('icone-vazio')) document.getElementById('icone-vazio').innerText = "🍽️";
@@ -1610,7 +1600,7 @@
                             container.appendChild(card);
                         } catch (errFiado) { console.error("Erro num pedido fiado:", errFiado); }
                     });
-                }
+                } 
                 /* ======================================================== */
                 /* ABA RELATÓRIO */
                 /* ======================================================== */
@@ -1625,7 +1615,6 @@
                     let pedidosDesperdicio = todosPedidos.filter(p => (p.status || '').toLowerCase() === 'desperdicio');
                     let pedidosRefeicao = todosPedidos.filter(p => (p.status || '').toLowerCase() === 'consumofinalizado');
 
-                    // Relatório Mensal
                     let filtradosMes = pedidosPago.filter(p => valMes && typeof p.dataCriacao === 'string' ? p.dataCriacao.startsWith(valMes) : false);
                     let totalMes = 0;
                     let prodMes = {};
@@ -1684,7 +1673,6 @@
                         }
                     }
 
-                    // Relatório Diário
                     let filtradosDia = pedidosPago.filter(p => valData ? p.dataCriacao === valData : false);
                     let totalDia = 0;
                     let prodDia = {};
@@ -1864,7 +1852,7 @@
             if(isNaN(val) || val <= 0) return alert("Valor inválido!");
             try {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
-                let primaryId = ids[0];
+                let primaryId = ids;
                 let targetDoc = todosPedidos.find(p => p.id === primaryId);
                 let atualPago = targetDoc ? (targetDoc.valorPagoParcial || 0) : 0;
                 await updateDoc(doc(db, "pedidos", primaryId), { valorPagoParcial: atualPago + val });
@@ -1879,7 +1867,7 @@
             if(isNaN(val) || val <= 0) return alert("Valor inválido!");
             try {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
-                let primaryId = ids[0];
+                let primaryId = ids;
                 let targetDoc = todosPedidos.find(p => p.id === primaryId);
                 let atualPago = targetDoc ? (targetDoc.valorPagoParcial || 0) : 0;
                 await updateDoc(doc(db, "pedidos", primaryId), { valorPagoParcial: atualPago + val });
@@ -2000,24 +1988,24 @@
         }
 
         window.abrirAssistenteComprasIA = async function() {
-        alert("🔍 A analisar o teu stock crítico e histórico de vendas dos últimos 7 dias...");
+            alert("🔍 A analisar o teu stock crítico e histórico de vendas dos últimos 7 dias...");
 
-        const estoqueInfo = estoqueCache.map(e => `- ${e.nome}: ${e.qtd} ${e.un} (mínimo: ${e.min})`).join('\n') || "Estoque vazio";
-        
-        const hoje = new Date();
-        const seteDiasAtras = new Date();
-        seteDiasAtras.setDate(hoje.getDate() - 7);
-        const str7d = seteDiasAtras.toISOString().split('T')[0];
-        
-        let vendasRecentes = todosPedidos.filter(p => (p.status === 'Pago' || p.status === 'ConsumoFinalizado') && (!p.dataCriacao || p.dataCriacao >= str7d));
-        let resumoVendas = {};
-        vendasRecentes.forEach(p => {
-            if(p.pedido) resumoVendas[p.pedido] = (resumoVendas[p.pedido] || 0) + 1;
-        });
-        let vendasInfo = Object.entries(resumoVendas).map(([k,v]) => `${v}x vendas de: ${k}`).join('\n') || "Sem histórico detalhado recente";
+            const estoqueInfo = estoqueCache.map(e => `- ${e.nome}: ${e.qtd} ${e.un} (mínimo: ${e.min})`).join('\n') || "Estoque vazio";
+            
+            const hoje = new Date();
+            const seteDiasAtras = new Date();
+            seteDiasAtras.setDate(hoje.getDate() - 7);
+            const str7d = seteDiasAtras.toISOString().split('T')[0];
+            
+            let vendasRecentes = todosPedidos.filter(p => (p.status === 'Pago' || p.status === 'ConsumoFinalizado') && (!p.dataCriacao || p.dataCriacao >= str7d));
+            let resumoVendas = {};
+            vendasRecentes.forEach(p => {
+                if(p.pedido) resumoVendas[p.pedido] = (resumoVendas[p.pedido] || 0) + 1;
+            });
+            let vendasInfo = Object.entries(resumoVendas).map(([k,v]) => `${v}x vendas de: ${k}`).join('\n') || "Sem histórico detalhado recente";
 
-        const diaSemana = hoje.toLocaleDateString('pt-PT', {weekday: 'long'});
-        const promptTexto = `És o assistente inteligente de gestão do Point Derico (lanchonete/bar). Hoje é ${diaSemana}. Analisa os dados abaixo e gera uma lista de compras inteligente e direta (estilo: "Vende muito X ao fim de semana, faltam poucos dias, tens Y, sugiro comprar Z").
+            const diaSemana = hoje.toLocaleDateString('pt-PT', {weekday: 'long'});
+            const promptTexto = `És o assistente inteligente de gestão do Point Derico (lanchonete/bar). Hoje é ${diaSemana}. Analisa os dados abaixo e gera uma lista de compras inteligente e direta (estilo: "Vende muito X ao fim de semana, faltam poucos dias, tens Y, sugiro comprar Z").
 
 ESTOQUE ATUAL:
 ${estoqueInfo}
@@ -2027,25 +2015,25 @@ ${vendasInfo}
 
 Responde de forma direta, curta e objetiva em português.`;
 
-        try {
-            const res = await fetch('/api/comprasIA', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: promptTexto, type: 'assistente_compras' })
-            });
+            try {
+                const res = await fetch('/api/comprasIA', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptTexto, type: 'assistente_compras' })
+                });
 
-            if (!res.ok) throw new Error("Erro no servidor da IA");
+                if (!res.ok) throw new Error("Erro no servidor da IA");
 
-            const data = await res.json();
-            const respostaIa = data.candidates?.[0]?.content?.parts?.[0]?.text || data.resposta || JSON.stringify(data);
+                const data = await res.json();
+                const respostaIa = data.candidates?.[0]?.content?.parts?.[0]?.text || data.resposta || JSON.stringify(data);
 
-            alert("🔮 SUGESTÃO DA IA PARA HOJE:\n\n" + respostaIa);
+                alert("🔮 SUGESTÃO DA IA PARA HOJE:\n\n" + respostaIa);
 
-        } catch (e) {
-            console.error("Erro no assistente de compras:", e);
-            alert("Não foi possível gerar a sugestão. Verifica se o teu endpoint /api/comprasIA aceita o payload de texto (prompt).");
+            } catch (e) {
+                console.error("Erro no assistente de compras:", e);
+                alert("Não foi possível gerar a sugestão. Verifica se o teu endpoint /api/comprasIA aceita o payload de texto (prompt).");
+            }
         }
-    }
         
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible") {
