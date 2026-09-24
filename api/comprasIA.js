@@ -46,8 +46,8 @@ module.exports = async (req, res) => {
             return res.status(400).json({ error: 'Payload inválido: nem imagem nem prompt fornecidos.' });
         }
 
-        // CORRIGIDO: Alterado para gemini-3.6-flash
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+        // CORRIGIDO: Alterado para gemini-1.5-flash
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents })
