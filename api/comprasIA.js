@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
 
         if (base64Image) {
             // Caso 1: Leitura de nota fiscal (Imagem Base64)
-            const base64Data = Array.isArray(base64Image) ? base64Image : base64Image;
+            const base64Data = Array.isArray(base64Image) ? base64Image[0] : base64Image;
             contents = [{
                 parts: [
                     {
@@ -46,6 +46,7 @@ module.exports = async (req, res) => {
             return res.status(400).json({ error: 'Payload inválido: nem imagem nem prompt fornecidos.' });
         }
 
+        // CORRIGIDO: Alterado para gemini-3.6-flash
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
