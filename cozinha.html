@@ -1169,7 +1169,7 @@
         }
 
         function verificarEAtivarAlarmeContínuo() {
-            const qtdPendentes = todosPedidos.filter(p => p.status === 'Pendente').length;
+            const qtdPendentes = todosPedidos.filter(p => (p.status || '').toLowerCase() === 'pendente').length;
             if (somAtivado && qtdPendentes > 0) {
                 if (!intervaloAlarme) {
                     audioAlert.play().catch(()=>{});
@@ -1289,7 +1289,10 @@
                 /* ABA COZINHA */
                 /* ======================================================== */
                 if (abaAtual === 'cozinha') {
-                    let filtrados = todosPedidos.filter(p => p.status === 'Pendente' || p.status === 'Preparando');
+                    let filtrados = todosPedidos.filter(p => {
+    let s = (p.status || '').toLowerCase();
+    return s === 'pendente' || s === 'preparando';
+});
                     contadorTxt.innerText = `${filtrados.length} pedido(s) na cozinha`;
                     
                     if (document.getElementById('icone-vazio')) document.getElementById('icone-vazio').innerText = "🍽️";
@@ -1414,7 +1417,7 @@
                 /* ======================================================== */
                 else if (abaAtual === 'caixa') {
                     let caixaMap = {};
-                    todosPedidos.filter(p => p.status === 'Entregue').forEach(p => {
+                    todosPedidos.filter(p => (p.status || '').toLowerCase() === 'entregue').forEach(p => {
                         let mesaKey = String(p.mesa || "Mesa").trim();
                         let val = parseFloat(String(p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
                         let pagoPart = Number(p.valorPagoParcial) || 0;
@@ -1521,7 +1524,7 @@
                 /* ======================================================== */
                 else if (abaAtual === 'fiado') {
                     let fiadosMap = {};
-                    todosPedidos.filter(p => p.status === 'Fiado').forEach(p => {
+                    todosPedidos.filter(p => (p.status || '').toLowerCase() === 'fiado').forEach(p => {
                         let clienteKey = String(p.clienteFiado || "Cliente Desconhecido").trim();
                         let val = parseFloat(String(p.total || "0").replace('R$', '').replace(/\s/g, '').replace('.','').replace(',','.')) || 0;
                         let pagoPart = Number(p.valorPagoParcial) || 0;
@@ -1618,9 +1621,9 @@
                     const valData = document.getElementById('filtro-data')?.value || '';
                     const valMes = document.getElementById('filtro-mes')?.value || '';
 
-                    let pedidosPago = todosPedidos.filter(p => p.status === 'Pago' && p.dataCriacao);
-                    let pedidosDesperdicio = todosPedidos.filter(p => p.status === 'Desperdicio');
-                    let pedidosRefeicao = todosPedidos.filter(p => p.status === 'ConsumoFinalizado');
+                    let pedidosPago = todosPedidos.filter(p => (p.status || '').toLowerCase() === 'pago' && p.dataCriacao);
+                    let pedidosDesperdicio = todosPedidos.filter(p => (p.status || '').toLowerCase() === 'desperdicio');
+                    let pedidosRefeicao = todosPedidos.filter(p => (p.status || '').toLowerCase() === 'consumofinalizado');
 
                     // Relatório Mensal
                     let filtradosMes = pedidosPago.filter(p => valMes && typeof p.dataCriacao === 'string' ? p.dataCriacao.startsWith(valMes) : false);
