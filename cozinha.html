@@ -1585,29 +1585,36 @@
                 });
             }
             /* ======================================================== */
-            /* ABA RELATÓRIO */
+            /* ABA RELATÓRIO (BLINDADA CONTRA ERROS) */
             /* ======================================================== */
             else if (abaAtual === 'relatorio') {
                 contadorTxt.innerText = `Painel de Faturamento`;
                 msgVazia.classList.add('hidden');
 
-                const valData = document.getElementById('filtro-data').value;
-                const valMes = document.getElementById('filtro-mes').value;
+                const valData = document.getElementById('filtro-data').value || '';
+                const valMes = document.getElementById('filtro-mes').value || '';
 
                 let pedidosPago = todosPedidos.filter(p => p.status === 'Pago' && p.dataCriacao);
                 let pedidosDesperdicio = todosPedidos.filter(p => p.status === 'Desperdicio');
                 let pedidosRefeicao = todosPedidos.filter(p => p.status === 'ConsumoFinalizado');
 
-                let filtradosMes = pedidosPago.filter(p => valMes ? p.dataCriacao.startsWith(valMes) : false);
+                // Relatório Mensal
+                let filtradosMes = pedidosPago.filter(p => valMes && typeof p.dataCriacao === 'string' ? p.dataCriacao.startsWith(valMes) : false);
                 let totalMes = 0;
                 let prodMes = {};
                 filtradosMes.forEach(p => {
-                    if (p.total) totalMes += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
+                    if (p.total) {
+                        let tStr = String(p.total).replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+                        totalMes += parseFloat(tStr) || 0;
+                    }
                     if (p.itensBrutos && Array.isArray(p.itensBrutos)) {
                         p.itensBrutos.forEach(i => {
-                            if (!prodMes[i.nome]) prodMes[i.nome] = { qtd: 0, faturamento: 0 };
-                            prodMes[i.nome].qtd += i.qtd;
-                            prodMes[i.nome].faturamento += (i.preco * i.qtd);
+                            let nomeI = i.nome || 'Item';
+                            let qtdI = Number(i.qtd) || 0;
+                            let precoI = Number(i.preco) || 0;
+                            if (!prodMes[nomeI]) prodMes[nomeI] = { qtd: 0, faturamento: 0 };
+                            prodMes[nomeI].qtd += qtdI;
+                            prodMes[nomeI].faturamento += (precoI * qtdI);
                         });
                     }
                 });
@@ -1615,48 +1622,63 @@
                 document.getElementById('valor-total-mes').innerText = `R$ ${totalMes.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-mes').innerText = `${filtradosMes.length} comanda(s) finalizada(s)`;
 
-                let despMes = pedidosDesperdicio.filter(p => valMes && p.dataCriacao ? p.dataCriacao.startsWith(valMes) : false);
+                let despMes = pedidosDesperdicio.filter(p => valMes && typeof p.dataCriacao === 'string' ? p.dataCriacao.startsWith(valMes) : false);
                 let valDespMes = 0, qtdDespMes = 0;
                 despMes.forEach(p => {
-                    if (p.total) valDespMes += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
-                    if (p.itensBrutos) p.itensBrutos.forEach(i => qtdDespMes += i.qtd);
+                    if (p.total) {
+                        let tStr = String(p.total).replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+                        valDespMes += parseFloat(tStr) || 0;
+                    }
+                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) p.itensBrutos.forEach(i => qtdDespMes += (Number(i.qtd) || 0));
                 });
                 document.getElementById('valor-desperdicio-mes').innerText = `R$ ${valDespMes.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-desperdicio-mes').innerText = `${qtdDespMes} itens perdidos`;
 
-                let refMes = pedidosRefeicao.filter(p => valMes && p.dataCriacao ? p.dataCriacao.startsWith(valMes) : false);
+                let refMes = pedidosRefeicao.filter(p => valMes && typeof p.dataCriacao === 'string' ? p.dataCriacao.startsWith(valMes) : false);
                 let valRefMes = 0, qtdRefMes = 0;
                 refMes.forEach(p => {
-                    if (p.total) valRefMes += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
-                    if (p.itensBrutos) p.itensBrutos.forEach(i => qtdRefMes += i.qtd);
+                    if (p.total) {
+                        let tStr = String(p.total).replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+                        valRefMes += parseFloat(tStr) || 0;
+                    }
+                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) p.itensBrutos.forEach(i => qtdRefMes += (Number(i.qtd) || 0));
                 });
                 document.getElementById('valor-refeicao-mes').innerText = `R$ ${valRefMes.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-refeicao-mes').innerText = `${qtdRefMes} itens consumidos`;
 
                 const rankingMes = document.getElementById('ranking-produtos-mes');
-                rankingMes.innerHTML = '';
-                let arrayRankMes = Object.keys(prodMes).map(nome => ({ nome, ...prodMes[nome] })).sort((a, b) => b.qtd - a.qtd);
-                if (arrayRankMes.length === 0) {
-                    rankingMes.innerHTML = '<p class="text-zinc-400 italic">Nenhuma venda registrada neste mês.</p>';
-                } else {
-                    arrayRankMes.forEach((prod, index) => {
-                        let div = document.createElement('div');
-                        div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800";
-                        div.innerHTML = `<span><strong class="text-amber-600 dark:text-amber-400">#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span><span class="text-blue-600 dark:text-blue-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>`;
-                        rankingMes.appendChild(div);
-                    });
+                if (rankingMes) {
+                    rankingMes.innerHTML = '';
+                    let arrayRankMes = Object.keys(prodMes).map(nome => ({ nome, ...prodMes[nome] })).sort((a, b) => b.qtd - a.qtd);
+                    if (arrayRankMes.length === 0) {
+                        rankingMes.innerHTML = '<p class="text-zinc-400 italic">Nenhuma venda registrada neste mês.</p>';
+                    } else {
+                        arrayRankMes.forEach((prod, index) => {
+                            let div = document.createElement('div');
+                            div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800";
+                            div.innerHTML = `<span><strong class="text-amber-600 dark:text-amber-400">#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span><span class="text-blue-600 dark:text-blue-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>`;
+                            rankingMes.appendChild(div);
+                        });
+                    }
                 }
 
+                // Relatório Diário
                 let filtradosDia = pedidosPago.filter(p => valData ? p.dataCriacao === valData : false);
                 let totalDia = 0;
                 let prodDia = {};
                 filtradosDia.forEach(p => {
-                    if (p.total) totalDia += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
+                    if (p.total) {
+                        let tStr = String(p.total).replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+                        totalDia += parseFloat(tStr) || 0;
+                    }
                     if (p.itensBrutos && Array.isArray(p.itensBrutos)) {
                         p.itensBrutos.forEach(i => {
-                            if (!prodDia[i.nome]) prodDia[i.nome] = { qtd: 0, faturamento: 0 };
-                            prodDia[i.nome].qtd += i.qtd;
-                            prodDia[i.nome].faturamento += (i.preco * i.qtd);
+                            let nomeI = i.nome || 'Item';
+                            let qtdI = Number(i.qtd) || 0;
+                            let precoI = Number(i.preco) || 0;
+                            if (!prodDia[nomeI]) prodDia[nomeI] = { qtd: 0, faturamento: 0 };
+                            prodDia[nomeI].qtd += qtdI;
+                            prodDia[nomeI].faturamento += (precoI * qtdI);
                         });
                     }
                 });
@@ -1664,90 +1686,101 @@
                 document.getElementById('valor-total-dia').innerText = `R$ ${totalDia.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-pedidos-dia').innerText = `${filtradosDia.length} comanda(s) finalizada(s)`;
 
-                let despDia = pedidosDesperdicio.filter(p => valData && p.dataCriacao ? p.dataCriacao === valData : false);
+                let despDia = pedidosDesperdicio.filter(p => valData && p.dataCriacao === valData);
                 let valDespDia = 0, qtdDespDia = 0;
                 despDia.forEach(p => {
-                    if (p.total) valDespDia += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
-                    if (p.itensBrutos) p.itensBrutos.forEach(i => qtdDespDia += i.qtd);
+                    if (p.total) {
+                        let tStr = String(p.total).replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+                        valDespDia += parseFloat(tStr) || 0;
+                    }
+                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) p.itensBrutos.forEach(i => qtdDespDia += (Number(i.qtd) || 0));
                 });
                 document.getElementById('valor-desperdicio-dia').innerText = `R$ ${valDespDia.toFixed(2).replace('.', ',')}`;
                 document.getElementById('qtd-desperdicio-dia').innerText = `${qtdDespDia} itens perdidos`;
 
-                let refDia = pedidosRefeicao.filter(p => valData && p.dataCriacao ? p.dataCriacao === valData : false);
+                let refDia = pedidosRefeicao.filter(p => valData && p.dataCriacao === valData);
                 let valRefDia = 0, qtdRefDia = 0;
                 refDia.forEach(p => {
-                    if (p.total) valRefDia += parseFloat(p.total.replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.')) || 0;
-                    if (p.itensBrutos) p.itensBrutos.forEach(i => qtdRefDia += i.qtd);
+                    if (p.total) {
+                        let tStr = String(p.total).replace('R$', '').replace(/\s/g, '').replace('.', '').replace(',', '.');
+                        valRefDia += parseFloat(tStr) || 0;
+                    }
+                    if (p.itensBrutos && Array.isArray(p.itensBrutos)) p.itensBrutos.forEach(i => qtdRefDia += (Number(i.qtd) || 0));
                 });
-                document.getElementById('valor-refeicao-dia').innerText = `R$ ${valRefDia.toFixed(2).replace('.', ',')}`;
+                document.getElementById('valor-refeicao-dia').innerText = `R$ ${valRefMes.toFixed(2).replace('.', ',')}`.replace(valRefMes, valRefDia);
                 document.getElementById('qtd-refeicao-dia').innerText = `${qtdRefDia} itens consumidos`;
 
                 const rankingDia = document.getElementById('ranking-produtos-dia');
-                rankingDia.innerHTML = '';
-                let arrayRankDia = Object.keys(prodDia).map(nome => ({ nome, ...prodDia[nome] })).sort((a, b) => b.qtd - a.qtd);
-                if (arrayRankDia.length === 0) {
-                    rankingDia.innerHTML = '<p class="text-zinc-400 italic">Nenhuma venda registrada neste dia.</p>';
-                } else {
-                    arrayRankDia.forEach((prod, index) => {
-                        let div = document.createElement('div');
-                        div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800";
-                        div.innerHTML = `<span><strong class="text-amber-600 dark:text-amber-400">#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span><span class="text-emerald-600 dark:text-emerald-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>`;
-                        rankingDia.appendChild(div);
-                    });
+                if (rankingDia) {
+                    rankingDia.innerHTML = '';
+                    let arrayRankDia = Object.keys(prodDia).map(nome => ({ nome, ...prodDia[nome] })).sort((a, b) => b.qtd - a.qtd);
+                    if (arrayRankDia.length === 0) {
+                        rankingDia.innerHTML = '<p class="text-zinc-400 italic">Nenhuma venda registrada neste dia.</p>';
+                    } else {
+                        arrayRankDia.forEach((prod, index) => {
+                            let div = document.createElement('div');
+                            div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800";
+                            div.innerHTML = `<span><strong class="text-amber-600 dark:text-amber-400">#${index+1}</strong> ${prod.nome} (${prod.qtd}x un)</span><span class="text-emerald-600 dark:text-emerald-400 font-bold">R$ ${prod.faturamento.toFixed(2).replace('.', ',')}</span>`;
+                            rankingDia.appendChild(div);
+                        });
+                    }
                 }
 
                 const listaComandasDiv = document.getElementById('lista-comandas-compacta');
-                listaComandasDiv.innerHTML = '';
-                if (filtradosDia.length === 0) {
-                    listaComandasDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma comanda paga neste dia.</p>';
-                } else {
-                    filtradosDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
-                    filtradosDia.forEach(p => {
-                        let div = document.createElement('div');
-                        div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[11px]";
-                        div.innerHTML = `
-                            <div><strong class="text-amber-600 dark:text-amber-400">${p.mesa}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
-                            <span class="text-emerald-600 font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
-                        `;
-                        listaComandasDiv.appendChild(div);
-                    });
+                if (listaComandasDiv) {
+                    listaComandasDiv.innerHTML = '';
+                    if (filtradosDia.length === 0) {
+                        listaComandasDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma comanda paga neste dia.</p>';
+                    } else {
+                        filtradosDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
+                        filtradosDia.forEach(p => {
+                            let div = document.createElement('div');
+                            div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[11px]";
+                            div.innerHTML = `
+                                <div><strong class="text-amber-600 dark:text-amber-400">${p.mesa || 'Mesa'}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
+                                <span class="text-emerald-600 font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
+                            `;
+                            listaComandasDiv.appendChild(div);
+                        });
+                    }
                 }
 
                 const listaDespDiv = document.getElementById('lista-desperdicio-dia');
-                listaDespDiv.innerHTML = '';
-                if (despDia.length === 0) {
-                    listaDespDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhum desperdício registrado.</p>';
-                } else {
-                    despDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
-                    despDia.forEach(p => {
-                        let div = document.createElement('div');
-                        div.className = "flex justify-between items-center bg-red-50 dark:bg-red-950/20 p-2 rounded-xl border border-red-200 dark:border-red-900/40 text-[11px]";
-                        div.innerHTML = `
-                            <div><strong class="text-red-600 dark:text-red-400">${p.mesa}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
-                            <span class="text-red-600 font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
-                        `;
-                        listaDespDiv.appendChild(div);
-                    });
+                if (listaDespDiv) {
+                    listaDespDiv.innerHTML = '';
+                    if (despDia.length === 0) {
+                        listaDespDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhum desperdício registrado.</p>';
+                    } else {
+                        despDia.forEach(p => {
+                            let div = document.createElement('div');
+                            div.className = "flex justify-between items-center bg-red-50 dark:bg-red-950/20 p-2 rounded-xl border border-red-200 dark:border-red-900/40 text-[11px]";
+                            div.innerHTML = `
+                                <div><strong class="text-red-600 dark:text-red-400">${p.mesa || 'Mesa'}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
+                                <span class="text-red-600 font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
+                            `;
+                            listaDespDiv.appendChild(div);
+                        });
+                    }
                 }
 
                 const listaRefDiv = document.getElementById('lista-refeicao-dia');
-                listaRefDiv.innerHTML = '';
-                if (refDia.length === 0) {
-                    listaRefDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma refeição registrada.</p>';
-                } else {
-                    refDia.sort((a, b) => (obterTimestampMs(b.timestampCriacao) || 0) - (obterTimestampMs(a.timestampCriacao) || 0));
-                    refDia.forEach(p => {
-                        let div = document.createElement('div');
-                        div.className = "flex justify-between items-center bg-blue-50 dark:bg-blue-950/20 p-2 rounded-xl border border-blue-200 dark:border-blue-900/40 text-[11px]";
-                        div.innerHTML = `
-                            <div><strong class="text-blue-600 dark:text-blue-400">${p.mesa}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
-                            <span class="text-blue-600 font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
-                        `;
-                        listaRefDiv.appendChild(div);
-                    });
+                if (listaRefDiv) {
+                    listaRefDiv.innerHTML = '';
+                    if (refDia.length === 0) {
+                        listaRefDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma refeição registrada.</p>';
+                    } else {
+                        refDia.forEach(p => {
+                            let div = document.createElement('div');
+                            div.className = "flex justify-between items-center bg-blue-50 dark:bg-blue-950/20 p-2 rounded-xl border border-blue-200 dark:border-blue-900/40 text-[11px]";
+                            div.innerHTML = `
+                                <div><strong class="text-blue-600 dark:text-blue-400">${p.mesa || 'Mesa'}</strong> (${p.horario || '--:--'}) - <span class="text-zinc-600 dark:text-zinc-300">${(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
+                                <span class="text-blue-600 font-bold ml-2 whitespace-nowrap">${p.total || 'R$ 0,00'}</span>
+                            `;
+                            listaRefDiv.appendChild(div);
+                        });
+                    }
                 }
             }
-        }
 
         window.exportarPdfMensal = function() {
             let mesVal = document.getElementById('filtro-mes').value;
