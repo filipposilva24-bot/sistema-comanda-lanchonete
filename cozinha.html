@@ -774,13 +774,17 @@
             }
         }
 
-        // --- CORREÇÃO DO DESCONTO AUTOMÁTICO (CORRIGIDO ERRO DE ARRAY TRIM) ---
+        // --- CORREÇÃO DO DESCONTO AUTOMÁTICO (IGNORANDO O PREÇO NA BUSCA) ---
         async function descontarEstoquePorVenda(textoPedido) {
             if(!textoPedido) return;
             let linhas = textoPedido.split('\n');
             for(let linha of linhas) {
                 let limpa = linha.trim();
                 if(!limpa || limpa.includes('Obs:') || limpa.includes('Resp:')) continue;
+                
+                // NOVIDADE: Limpa o formato de preço "(R$ X,XX)" do texto antes de procurar
+                limpa = limpa.replace(/\s*\(\s*R\$[^\)]+\)/ig, '').trim();
+
                 let match = limpa.match(/^(\d+)x\s+(.+)$/i);
                 let qtdVenda = match ? parseInt(match[1]) : 1;
                 let nomeProdVendido = match ? match[2].trim() : limpa;
