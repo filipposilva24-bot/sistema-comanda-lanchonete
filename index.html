@@ -513,9 +513,19 @@
         }
 
         onSnapshot(collection(db, "cardapio"), (snapshot) => {
+            console.log("Total de documentos encontrados no cardapio:", snapshot.size);
             cardapioLista = [];
-            snapshot.forEach(docSnap => cardapioLista.push({ id: docSnap.id, ...docSnap.data() }));
+            snapshot.forEach(docSnap => {
+                console.log("Item carregado:", docSnap.id, docSnap.data());
+                cardapioLista.push({ id: docSnap.id, ...docSnap.data() });
+            });
             renderizarCardapio();
+        }, (error) => {
+            console.error("ERRO CRÍTICO NO FIRESTORE (Cardápio):", error);
+            const container = document.getElementById('cardapio-dinamico-container');
+            if(container) {
+                container.innerHTML = `<p class="text-center text-xs text-red-500 mt-10 font-bold">Erro ao ler Firebase: ${error.message}</p>`;
+            }
         });
 
         onSnapshot(collection(db, "estoque"), (snapshot) => {
