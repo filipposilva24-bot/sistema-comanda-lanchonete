@@ -1247,6 +1247,13 @@
                 snapshot.forEach(docSnap => {
                     const dados = docSnap.data();
                     if(!dados.dataCriacao) dados.dataCriacao = obterDataCaixa();
+                    
+                    // NOVA LÓGICA: Desconta o estoque de Desperdícios/Consumos que vieram do Atendente
+                    if ((dados.status === 'Desperdicio' || dados.status === 'ConsumoFinalizado') && !dados.estoqueDescontado) {
+                        descontarEstoquePorVenda(dados.pedido);
+                        updateDoc(docSnap.ref, { estoqueDescontado: true });
+                    }
+                    
                     todosPedidos.push({ id: docSnap.id, ...dados });
                 });
 
