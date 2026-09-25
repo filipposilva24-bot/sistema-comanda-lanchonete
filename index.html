@@ -77,6 +77,7 @@
                 <div class="flex gap-2 mt-3 max-w-md mx-auto" id="container-abas-navegacao">
                     <button onclick="mudarAba('salao')" id="aba-salao" class="tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow">🏠 Salão / Cardápio</button>
                     <button onclick="mudarAba('caixa')" id="aba-caixa" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow">💰 Caixa / Mesas</button>
+                    <button onclick="verificarAcessoEstoque()" id="aba-estoque" class="tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow">📦 Estoque</button>
                 </div>
 
                 <div class="flex justify-between items-center mt-2 px-1">
@@ -147,6 +148,17 @@
 
                 <div id="lista-caixa-mesas" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[55vh] overflow-y-auto pr-1"></div>
             </div>
+
+            <!-- VIEW ESTOQUE -->
+            <div id="view-estoque" class="hidden">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-extrabold text-amber-500 uppercase tracking-wider">📦 Controle de Estoque</h3>
+                    <button onclick="adicionarItemEstoquePrompt()" class="tap-scale bg-amber-500 text-zinc-950 text-xs font-black px-3 py-2 rounded-xl shadow">＋ Novo Item</button>
+                </div>
+                <div id="lista-estoque-container" class="grid grid-cols-1 md:grid-cols-2 gap-2.5 max-h-[60vh] overflow-y-auto pr-1">
+                    <p class="text-center text-xs text-zinc-400 mt-10">A carregar estoque...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -173,6 +185,19 @@
             </button>
         </div>
         <p id="status" class="text-center text-xs mt-1 text-emerald-600 dark:text-emerald-400 font-bold h-4"></p>
+    </div>
+
+    <!-- MODAL SENHA ESTOQUE -->
+    <div id="modal-senha-estoque" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative transition-colors duration-200">
+            <button onclick="document.getElementById('modal-senha-estoque').classList.add('hidden')" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 dark:hover:text-white font-bold text-base">✕</button>
+            <h3 class="text-base font-extrabold text-blue-600 dark:text-blue-400 mb-1">🔒 Acesso ao Estoque</h3>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">Digite a senha para gerenciar o estoque:</p>
+            <div class="mb-4">
+                <input type="password" id="input-senha-estoque" maxlength="4" placeholder="••••" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3 text-center tracking-widest text-xl text-zinc-800 dark:text-zinc-100 outline-none focus:border-blue-500">
+            </div>
+            <button onclick="confirmarSenhaEstoque()" class="tap-scale w-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold py-3 rounded-2xl text-xs transition shadow">Desbloquear Estoque</button>
+        </div>
     </div>
 
     <!-- MODAL CARRINHO COM LANÇAMENTOS INTERNOS -->
@@ -209,13 +234,11 @@
         </div>
     </div>
 
-    <!-- MODAIS RESTANTES MANTIDOS -->
     <!-- MODAL DE AJUDA -->
     <div id="modal-ajuda" class="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-md z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
             <button onclick="fecharModalAjuda()" class="absolute top-4 right-4 text-zinc-400 hover:text-white font-bold text-base">✕</button>
             <h3 id="ajuda-titulo" class="text-base font-extrabold text-amber-500 mb-3 flex items-center gap-2">📖 Ajuda</h3>
-            <!-- (O conteúdo da ajuda permanece o mesmo) -->
             <button onclick="fecharModalAjuda()" class="tap-scale w-full bg-amber-500 text-zinc-950 font-black py-3 rounded-2xl text-xs mt-4 shadow">Entendi</button>
         </div>
     </div>
@@ -303,7 +326,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { firebaseConfig } from "./firebase-config.js";
 
         const app = initializeApp(firebaseConfig);
@@ -311,6 +334,8 @@
 
         const CHAVE_PIX_FIXA = "thiagoderico15@gmail.com"; 
         const NOME_PIX_FIXO = "Point Derico";
+        const SENHA_ESTOQUE = "1234";
+        let estoqueDesbloqueado = false;
 
         let operadorAtual = localStorage.getItem('point_derico_operador') || "";
         let mesaSelecionada = "";
@@ -319,6 +344,7 @@
         let mesasExtras = JSON.parse(localStorage.getItem('point_derico_mesas_extras') || "[]");
         let mesasDetalhesMap = {};
         let cardapioLista = [];
+        let estoqueLista = [];
         let itensCarrinho = [];
         let numpadCallbackIndex = null;
         let pedidosAlertados = new Set();
@@ -430,28 +456,59 @@
         window.abrirModalAjuda = function() { document.getElementById('modal-ajuda').classList.remove('hidden'); }
         window.fecharModalAjuda = function() { document.getElementById('modal-ajuda').classList.add('hidden'); }
 
+        window.verificarAcessoEstoque = function() {
+            if (estoqueDesbloqueado) {
+                mudarAba('estoque');
+            } else {
+                document.getElementById('input-senha-estoque').value = '';
+                document.getElementById('modal-senha-estoque').classList.remove('hidden');
+            }
+        }
+
+        window.confirmarSenhaEstoque = function() {
+            const senhaDigitada = document.getElementById('input-senha-estoque').value.trim();
+            if (senhaDigitada === SENHA_ESTOQUE) {
+                estoqueDesbloqueado = true;
+                document.getElementById('modal-senha-estoque').classList.add('hidden');
+                mudarAba('estoque');
+            } else {
+                alert("Senha incorreta!");
+            }
+        }
+
         window.mudarAba = function(aba) {
             abaAtiva = aba;
             const btnSalao = document.getElementById('aba-salao');
             const btnCaixa = document.getElementById('aba-caixa');
+            const btnEstoque = document.getElementById('aba-estoque');
             const viewSalao = document.getElementById('view-salao');
             const viewCaixa = document.getElementById('view-caixa');
+            const viewEstoque = document.getElementById('view-estoque');
             const painelAcao = document.getElementById('painel-botoes-acao');
+
+            btnSalao.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
+            btnCaixa.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
+            if(btnEstoque) btnEstoque.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
+            
+            viewSalao.classList.add('hidden');
+            viewCaixa.classList.add('hidden');
+            if(viewEstoque) viewEstoque.classList.add('hidden');
 
             if (aba === 'salao') {
                 btnSalao.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
-                btnCaixa.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
                 viewSalao.classList.remove('hidden');
-                viewCaixa.classList.add('hidden');
                 painelAcao.classList.remove('hidden');
                 renderizarMesas();
-            } else {
+            } else if (aba === 'caixa') {
                 btnCaixa.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
-                btnSalao.className = "tap-scale flex-1 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
                 viewCaixa.classList.remove('hidden');
-                viewSalao.classList.add('hidden');
                 painelAcao.classList.add('hidden');
                 renderizarCaixaMesas();
+            } else if (aba === 'estoque') {
+                if(btnEstoque) btnEstoque.className = "tap-scale flex-1 bg-amber-500 text-zinc-950 font-extrabold py-2.5 rounded-xl text-xs md:text-sm shadow";
+                if(viewEstoque) viewEstoque.classList.remove('hidden');
+                painelAcao.classList.add('hidden');
+                renderizarEstoqueVisual();
             }
         }
 
@@ -461,9 +518,66 @@
             renderizarCardapio();
         });
 
+        onSnapshot(collection(db, "estoque"), (snapshot) => {
+            estoqueLista = [];
+            snapshot.forEach(docSnap => estoqueLista.push({ id: docSnap.id, ...docSnap.data() }));
+            if(abaAtiva === 'estoque') renderizarEstoqueVisual();
+        });
+
         onSnapshot(collection(db, "pedidos"), (snapshot) => {
             processarDadosSnapshot(snapshot);
         });
+
+        window.renderizarEstoqueVisual = function() {
+            const container = document.getElementById('lista-estoque-container');
+            if(!container) return;
+            container.innerHTML = '';
+
+            if(estoqueLista.length === 0) {
+                container.innerHTML = '<p class="text-center text-xs text-zinc-400 py-10 col-span-2">Nenhum item cadastrado no estoque.</p>';
+                return;
+            }
+
+            estoqueLista.forEach(item => {
+                let card = document.createElement('div');
+                card.className = "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-3.5 rounded-2xl flex justify-between items-center shadow-sm";
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-xs md:text-sm text-zinc-800 dark:text-zinc-100">${item.nome}</p>
+                        <p class="text-[11px] text-zinc-500">Qtd: <span class="font-black text-amber-500">${item.quantidade}</span> ${item.unidade || 'un'}</p>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="alterarQtdEstoque('${item.id}', -1)" class="tap-scale bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 px-2.5 py-1.5 rounded-xl font-bold text-xs">－</button>
+                        <button onclick="alterarQtdEstoque('${item.id}', 1)" class="tap-scale bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 px-2.5 py-1.5 rounded-xl font-bold text-xs">＋</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.adicionarItemEstoquePrompt = async function() {
+            let nome = prompt("Nome do item de estoque:");
+            if(!nome || nome.trim() === '') return;
+            let qtdStr = prompt("Quantidade inicial:", "10");
+            let qtd = parseInt(qtdStr) || 0;
+            try {
+                await addDoc(collection(db, "estoque"), { nome: nome.trim(), quantidade: qtd, unidade: 'un' });
+                mostrarToast("Item adicionado ao estoque!");
+            } catch(e) { alert("Erro ao adicionar item."); }
+        }
+
+        window.alterarQtdEstoque = async function(id, delta) {
+            try {
+                let itemRef = doc(db, "estoque", id);
+                let itemSnap = await getDoc(itemRef);
+                if(itemSnap.exists()) {
+                    let atual = itemSnap.data().quantidade || 0;
+                    let novaQtd = atual + delta;
+                    if(novaQtd < 0) novaQtd = 0;
+                    await updateDoc(itemRef, { quantidade: novaQtd });
+                }
+            } catch(e) {}
+        }
 
         function processarDadosSnapshot(snapshot) {
             try {
@@ -477,7 +591,6 @@
                 snapshot.forEach(docSnap => {
                     let p = { id: docSnap.id, ...docSnap.data() };
 
-                    // Oculta Fiado, ConsumoFinalizado e Desperdicio das telas normais
                     if(p.status === 'Fiado' || p.status === 'Desperdicio' || p.status === 'ConsumoFinalizado' || p.tipoPedido === 'Desperdicio') return;
 
                     if(mesaUrl && p.mesa && normalizarNomeMesa(p.mesa) === normalizarNomeMesa(mesaUrl) && (p.status === 'Pendente' || p.status === 'Preparando' || p.status === 'Entregue' || p.status === 'Pronto')) {
@@ -486,7 +599,6 @@
 
                     let estaPronto = (p.status === 'Entregue' || p.status === 'Pronto');
 
-                    // Alertas só para pedidos normais (ConsumoFinalizado já foi filtrado no if acima)
                     if(!mesaUrl && estaPronto && !p.alertaVisto) {
                         alertasProntosAtendente.push(p);
                         if(!pedidosAlertados.has(p.id)) {
@@ -830,9 +942,6 @@
             } catch(e) {}
         }
 
-        // ===============================================
-        // LÓGICA DE FIADO E ABATIMENTO (NO CAIXA)
-        // ===============================================
         window.pendurarConta = async function() {
             if(!mesaAtualDetalhe || !mesasDetalhesMap[mesaAtualDetalhe]) return;
             let info = mesasDetalhesMap[mesaAtualDetalhe];
@@ -1058,9 +1167,6 @@
             fecharNumpad();
         }
 
-        // ==========================================
-        // CALCULADORA INTELIGENTE (RACHAR CONTA)
-        // ==========================================
         window.abrirRacha = function() {
             let total = 0;
             let origem = "";
@@ -1177,9 +1283,6 @@
             } catch (e) { alert("Erro ao enviar pedido."); }
         }
 
-        // ==========================================
-        // LANÇAMENTOS ESPECIAIS (DESPERDÍCIO E CONSUMO)
-        // ==========================================
         window.enviarLoteEspecial = async function(tipo) {
             if (itensCarrinho.length === 0) return alert('Adicione os itens no carrinho primeiro!');
             let obsTxt = document.getElementById('obs').value.trim();
@@ -1191,7 +1294,7 @@
             if (nomeResp) textoPedidoFormatado += `\nResp: ${nomeResp}`;
 
             let total = document.getElementById('valor-total').innerText;
-            let statusItem = tipo === 'Desperdicio' ? 'Desperdicio' : 'ConsumoFinalizado'; // Consumo vai direto para o custo de refeição
+            let statusItem = tipo === 'Desperdicio' ? 'Desperdicio' : 'ConsumoFinalizado';
             let labelMesa = tipo === 'Desperdicio' ? '[LIXEIRA] Desperdício' : `[CONSUMO] ${nomeResp || 'Funcionário'}`;
 
             try {
