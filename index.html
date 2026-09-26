@@ -781,7 +781,11 @@
                         nomeExibicao = `Pastel de ${prod.nome}`;
                     }
                     
-                    if(prod.ativo === false) {
+                    // --- TRAVA DE ESTOQUE CRÍTICO ---
+                    let insumoEstoque = estoqueLista.find(e => e.nome.toLowerCase() === prod.nome.toLowerCase());
+                    let estaEsgotadoNoEstoque = insumoEstoque && (Number(insumoEstoque.quantidade) || 0) <= 0;
+
+                    if(prod.ativo === false || estaEsgotadoNoEstoque) {
                         btn.className = "tap-scale bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 p-3 rounded-2xl text-left flex flex-col opacity-50 grayscale cursor-not-allowed";
                         btn.innerHTML = `<span class="text-xs md:text-sm font-bold text-zinc-600 line-through">${nomeExibicao}</span><span class="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded mt-1 w-max">ESGOTADO</span>`;
                     } else {
