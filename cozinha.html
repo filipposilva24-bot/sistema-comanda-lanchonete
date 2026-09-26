@@ -1919,7 +1919,7 @@
             if(isNaN(val) || val <= 0) return alert("Valor inválido!");
             try {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
-                let primaryId = ids;
+                let primaryId = ids[0]; // <-- CORREÇÃO: Aplica o valor no primeiro pedido da mesa
                 let targetDoc = todosPedidos.find(p => p.id === primaryId);
                 let atualPago = targetDoc ? (targetDoc.valorPagoParcial || 0) : 0;
                 await updateDoc(doc(db, "pedidos", primaryId), { valorPagoParcial: atualPago + val });
@@ -1934,7 +1934,7 @@
             if(isNaN(val) || val <= 0) return alert("Valor inválido!");
             try {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
-                let primaryId = ids;
+                let primaryId = ids[0]; // <-- CORREÇÃO AQUI TAMBÉM
                 let targetDoc = todosPedidos.find(p => p.id === primaryId);
                 let atualPago = targetDoc ? (targetDoc.valorPagoParcial || 0) : 0;
                 await updateDoc(doc(db, "pedidos", primaryId), { valorPagoParcial: atualPago + val });
