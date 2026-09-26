@@ -1806,6 +1806,46 @@
                             });
                         }
                     }
+
+                    // --- LISTA DE DESPERDÍCIOS ---
+                    const listaDespDiv = document.getElementById('lista-desperdicio-dia');
+                    if (listaDespDiv) {
+                        listaDespDiv.innerHTML = '';
+                        if (despDia.length === 0) {
+                            listaDespDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhum desperdício.</p>';
+                        } else {
+                            despDia.sort((a, b) => (typeof obterTimestampMs === 'function' ? obterTimestampMs(b.timestampCriacao) : 0) - (typeof obterTimestampMs === 'function' ? obterTimestampMs(a.timestampCriacao) : 0));
+                            despDia.forEach(p => {
+                                let div = document.createElement('div');
+                                div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-red-200 dark:border-red-900/40 text-[11px] mb-1.5";
+                                div.innerHTML = `
+                                    <div><strong class="text-red-600 dark:text-red-400">${String(p.mesa || 'Desperdício')}</strong> (${String(p.horario || '--:--')}) - <span class="text-zinc-600 dark:text-zinc-300">${String(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
+                                    <span class="text-red-600 font-bold ml-2 whitespace-nowrap">${String(p.total || 'R$ 0,00')}</span>
+                                `;
+                                listaDespDiv.appendChild(div);
+                            });
+                        }
+                    }
+
+                    // --- LISTA DE REFEIÇÕES ---
+                    const listaRefDiv = document.getElementById('lista-refeicao-dia');
+                    if (listaRefDiv) {
+                        listaRefDiv.innerHTML = '';
+                        if (refDia.length === 0) {
+                            listaRefDiv.innerHTML = '<p class="text-zinc-400 italic">Nenhuma refeição registrada.</p>';
+                        } else {
+                            refDia.sort((a, b) => (typeof obterTimestampMs === 'function' ? obterTimestampMs(b.timestampCriacao) : 0) - (typeof obterTimestampMs === 'function' ? obterTimestampMs(a.timestampCriacao) : 0));
+                            refDia.forEach(p => {
+                                let div = document.createElement('div');
+                                div.className = "flex justify-between items-center bg-white dark:bg-zinc-900 p-2 rounded-xl border border-blue-200 dark:border-blue-900/40 text-[11px] mb-1.5";
+                                div.innerHTML = `
+                                    <div><strong class="text-blue-600 dark:text-blue-400">${String(p.mesa || 'Consumo')}</strong> (${String(p.horario || '--:--')}) - <span class="text-zinc-600 dark:text-zinc-300">${String(p.pedido || '').replace(/\n/g, ' | ')}</span></div>
+                                    <span class="text-blue-600 font-bold ml-2 whitespace-nowrap">${String(p.total || 'R$ 0,00')}</span>
+                                `;
+                                listaRefDiv.appendChild(div);
+                            });
+                        }
+                    }
                 }
             } catch (erroFatal) {
                 console.error("ERRO CRÍTICO NA RENDERIZAÇÃO DAS ABAS:", erroFatal);
