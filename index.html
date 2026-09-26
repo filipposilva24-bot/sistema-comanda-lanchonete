@@ -781,9 +781,25 @@
                         nomeExibicao = `Pastel de ${prod.nome}`;
                     }
                     
-                    // --- TRAVA DE ESTOQUE CRÍTICO ---
-                    let insumoEstoque = estoqueLista.find(e => e.nome.toLowerCase() === prod.nome.toLowerCase());
-                    let estaEsgotadoNoEstoque = insumoEstoque && (Number(insumoEstoque.quantidade) || 0) <= 0;
+                   // --- TRAVA DE ESTOQUE PRECISA (EVITA CONFUNDIR VARIANTES) ---
+                    let nomeProdLimpo = prod.nome.toLowerCase().trim();
+                    let insumoEstoque = estoqueLista.find(e => {
+                        let nomeEstoqueLimpo = e.nome.toLowerCase().trim();
+                        // 1. Tenta correspondência exata primeiro
+                        if (nomeEstoqueLimpo === nomeProdLimpo) return true;
+                        // 2. Se não for exata, verifica se um contém o outro mas COM CUIDADO para não misturar Heineken 0.0 com Heineken normal
+                        // (só aceita se o nome do estoque for exatamente igual ao do cardápio ignorando acentos/pontuação)
+                        let limpaAcentos = str => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                        return limpaAcentos(nomeEstoqueLimpo) === limpaAcentos(nomeProdLimpo);
+                    });
+                    
+                    let qtdEstoqueReal = 999; // Se não estiver cadastrado no estoque, assume liberado
+                    if (insumoEstoque) {
+                        let valBruto = insumoEstoque.quantidade !== undefined ? insumoEstoque.quantidade : insumoEstoque.qtd;
+                        qtdEstoqueReal = Number(valBruto);
+                        if (isNaN(qtdEstoqueReal)) qtdEstoqueReal = 0;
+                    }
+                    let estaEsgotadoNoEstoque = insumoEstoque && qtdEstoqueReal <= 0;
 
                     if(prod.ativo === false || estaEsgotadoNoEstoque) {
                         btn.className = "tap-scale bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 p-3 rounded-2xl text-left flex flex-col opacity-50 grayscale cursor-not-allowed";
