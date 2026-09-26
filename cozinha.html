@@ -774,7 +774,7 @@
             }
         }
 
-        // --- CORREÇÃO DO DESCONTO AUTOMÁTICO (IGNORANDO O PREÇO NA BUSCA) ---
+        // --- CORREÇÃO DO DESCONTO AUTOMÁTICO (PRIORIZANDO A RECEITA) ---
         async function descontarEstoquePorVenda(textoPedido) {
             if(!textoPedido) return;
             let linhas = textoPedido.split('\n');
@@ -782,22 +782,18 @@
                 let limpa = linha.trim();
                 if(!limpa || limpa.includes('Obs:') || limpa.includes('Resp:')) continue;
                 
-                // NOVIDADE: Limpa o formato de preço "(R$ X,XX)" do texto antes de procurar
+                // Limpa o formato de preço "(R$ X,XX)" do texto antes de procurar
                 limpa = limpa.replace(/\s*\(\s*R\$[^\)]+\)/ig, '').trim();
 
                 let match = limpa.match(/^(\d+)x\s+(.+)$/i);
                 let qtdVenda = match ? parseInt(match[1]) : 1;
                 let nomeProdVendido = match ? match[2].trim() : limpa;
 
-                let itemEstoqueDireto = estoqueCache.find(e => e.nome.toLowerCase() === nomeProdVendido.toLowerCase());
-                if(itemEstoqueDireto) {
-                    let novaQtd = (Number(itemEstoqueDireto.qtd) || 0) - qtdVenda;
-                    await updateDoc(doc(db, "estoque", itemEstoqueDireto.id), { qtd: novaQtd });
-                    continue;
-                }
-
+                // 1º PASSO: Tenta achar no Cardápio para ver se tem RECEITA (Prioridade máxima)
                 let itemCardapio = cardapioCache.find(c => c.nome.toLowerCase() === nomeProdVendido.toLowerCase());
-                if(itemCardapio && itemCardapio.receita && Array.isArray(itemCardapio.receita)) {
+                
+                if (itemCardapio && itemCardapio.receita && Array.isArray(itemCardapio.receita) && itemCardapio.receita.length > 0) {
+                    // TEM RECEITA: Desconta os insumos exatos (ml, g, un) definidos na receita
                     for(let ing of itemCardapio.receita) {
                         let ins = estoqueCache.find(e => e.id === ing.insumoId || e.nome.toLowerCase() === ing.insumoNome.toLowerCase());
                         if(ins) {
@@ -805,6 +801,13 @@
                             let novaQtd = (Number(ins.qtd) || 0) - qtdConsumida;
                             await updateDoc(doc(db, "estoque", ins.id), { qtd: novaQtd });
                         }
+                    }
+                } else {
+                    // NÃO TEM RECEITA: É venda direta (ex: lata de cerveja, garrafa de água). Desconta unidade direta.
+                    let itemEstoqueDireto = estoqueCache.find(e => e.nome.toLowerCase() === nomeProdVendido.toLowerCase());
+                    if(itemEstoqueDireto) {
+                        let novaQtd = (Number(itemEstoqueDireto.qtd) || 0) - qtdVenda;
+                        await updateDoc(doc(db, "estoque", itemEstoqueDireto.id), { qtd: novaQtd });
                     }
                 }
             }
