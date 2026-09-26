@@ -1897,7 +1897,16 @@
             nomeCliente = nomeCliente.trim();
             try {
                 let ids = JSON.parse(decodeURIComponent(idsStr));
-                let promessas = ids.map(id => updateDoc(doc(db, "pedidos", id), { status: 'Fiado', clienteFiado: nomeCliente }));
+                let promessas = ids.map(async id => {
+                    let p = todosPedidos.find(x => x.id === id);
+                    // TRAVA 4: Abate o estoque na hora que o produto sai da loja (vai pro Fiado)
+                    if(p && (p.status || '').toLowerCase() !== 'fiado' && !p.estoqueDescontado) {
+                        await updateDoc(doc(db, "pedidos", id), { status: 'Fiado', clienteFiado: nomeCliente, estoqueDescontado: true });
+                        descontarEstoquePorVenda(p.pedido);
+                    } else if (p) {
+                        await updateDoc(doc(db, "pedidos", id), { status: 'Fiado', clienteFiado: nomeCliente });
+                    }
+                });
                 await Promise.all(promessas);
                 alert(`Conta enviada para Fiados no nome de "${nomeCliente}"!`);
             } catch (e) { alert("Erro ao jogar para fiado."); }
@@ -1968,18 +1977,27 @@
         window.mudarStatus = async function(id, novoStatus, tipoPedido = 'Normal') {
             try {
                 const pedidoRef = doc(db, "pedidos", id);
-                let statusFinal = novoStatus;
-                if (novoStatus === 'Entregue' && tipoPedido === 'Consumo') {
-                    statusFinal = 'ConsumoFinalizado';
-                }
-                let dados = { status: statusFinal };
-                if (statusFinal === 'Pago') dados.dataCriacao = obterDataCaixa();
-                await updateDoc(pedidoRef, dados);
-                
                 let targetDoc = todosPedidos.find(p => p.id === id);
-                if(targetDoc && (statusFinal === 'Pago' || statusFinal === 'ConsumoFinalizado')) {
-                    descontarEstoquePorVenda(targetDoc.pedido);
+                if(!targetDoc) return;
+
+                let statusFinal = novoStatus;
+                if (novoStatus === 'Entregue' && tipoPedido === 'Consumo') statusFinal = 'ConsumoFinalizado';
+                
+                let dados = { status: statusFinal };
+                let precisaDescontar = false;
+
+                if (statusFinal === 'Pago') {
+                    dados.dataCriacao = obterDataCaixa();
                 }
+
+                // TRAVA 1: Só desconta se for Pago ou ConsumoFinalizado E se ainda não tiver sido descontado
+                if ((statusFinal === 'Pago' || statusFinal === 'ConsumoFinalizado') && !targetDoc.estoqueDescontado) {
+                    dados.estoqueDescontado = true;
+                    precisaDescontar = true;
+                }
+
+                await updateDoc(pedidoRef, dados);
+                if(precisaDescontar) descontarEstoquePorVenda(targetDoc.pedido);
                 fecharModalPix();
             } catch (e) { alert("Erro ao atualizar."); }
         }
@@ -2008,9 +2026,15 @@
             if (pedidoSelecionadoIds && pedidoSelecionadoIds.length > 0) {
                 let hoje = obterDataCaixa();
                 let promessas = pedidoSelecionadoIds.map(async id => {
-                    await updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje });
                     let p = todosPedidos.find(x => x.id === id);
-                    if(p) descontarEstoquePorVenda(p.pedido);
+                    // TRAVA 2: Evita duplo-clique no Pix
+                    if(p && (p.status || '').toLowerCase() !== 'pago' && !p.estoqueDescontado) {
+                        await updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje, estoqueDescontado: true });
+                        descontarEstoquePorVenda(p.pedido);
+                    } else if(p && (p.status || '').toLowerCase() !== 'pago') {
+                        // Apenas muda o status se já tiver descontado
+                        await updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje });
+                    }
                 });
                 await Promise.all(promessas);
                 fecharModalPix();
@@ -2022,9 +2046,14 @@
                 let ids = JSON.parse(decodeURIComponent(idsStr));
                 let hoje = obterDataCaixa();
                 let promessas = ids.map(async id => {
-                    await updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje });
                     let p = todosPedidos.find(x => x.id === id);
-                    if(p) descontarEstoquePorVenda(p.pedido);
+                    // TRAVA 3: Evita duplo-clique no Fechar Mesa
+                    if(p && (p.status || '').toLowerCase() !== 'pago' && !p.estoqueDescontado) {
+                        await updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje, estoqueDescontado: true });
+                        descontarEstoquePorVenda(p.pedido);
+                    } else if(p && (p.status || '').toLowerCase() !== 'pago') {
+                        await updateDoc(doc(db, "pedidos", id), { status: 'Pago', dataCriacao: hoje });
+                    }
                 });
                 await Promise.all(promessas);
             }
